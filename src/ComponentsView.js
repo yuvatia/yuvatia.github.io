@@ -3,10 +3,8 @@ import { Transform } from './engine/src/transform';
 import { Tag, DirectionalLight, Material, MeshFilter, MeshRenderer } from './engine/src/components';
 import { gEditorSystem } from './EngineCanvas';
 import { ComponentView } from './ComponentView';
-import { GlobalState } from './GlobalState';
 import { Dropdown } from 'react-bootstrap';
 import { FollowConstraint, Rigidbody } from './engine/src/kinematics';
-import { IoAddCircle } from 'react-icons/io5';
 
 export const ComponentSpecification = {
   Tag: {
@@ -31,7 +29,7 @@ export const ComponentSpecification = {
   },
   MeshFilter: {
     type: MeshFilter,
-    fields: []  // For now
+    fields: ["meshRef"]  // For now
   },
   Rigidbody: {
     type: Rigidbody,
@@ -105,8 +103,9 @@ export const ComponentsView = ({ entity, activeScene }) => {
       <Dropdown onSelect={(type) => {
         doAdd(ComponentSpecification[type].type)
       }}>
-        <Dropdown.Toggle variant="success" id="dropdown-basic">
-          <IoAddCircle />
+        <Dropdown.Toggle
+          style={{ width: '100%', backgroundColor: 'green', borderColor: 'green', marginTop: '5%', color: 'white' }} variant="success" id="dropdown-basic">
+          Add component
         </Dropdown.Toggle>
 
         <Dropdown.Menu>

@@ -73,7 +73,7 @@ const SettingsView = () => {
     return (
         settings && selectedSystem &&
         <React.Fragment>
-            <IoSettings size={20} onClick={handleShow} />
+            <IoSettings className='controlIcon' size={20} onClick={handleShow} />
             <Modal dialogAs={DraggableModalDialog} show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Settings</Modal.Title>
@@ -118,9 +118,6 @@ const SettingsView = () => {
                     </Container>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                    </Button>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

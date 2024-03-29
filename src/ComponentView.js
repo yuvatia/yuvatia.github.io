@@ -85,10 +85,37 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
   }
 
   return (
-    <Accordion>
+    <Accordion
+      style={{ borderBottom: '1px solid #dee2e6', position: 'relative', transition: 'transform 200ms' }}
+      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+    >
       <Accordion.Header>
         {getHeader()}
-        {isRemovable() ? <CloseButton onClick={removeMe}></CloseButton> : null}
+        {isRemovable() ?
+          <button
+            className='bi bi-trash-fill color-state-override'
+            style={{
+              position: 'absolute',
+              right: '40px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              border: 'none',
+              backgroundColor: 'transparent',
+              transition: 'transform 200ms',
+            }}
+            onClick={(e) => {
+              const target = e.currentTarget;
+              target.style.transform = 'translateY(-50%) scale(1.2)';
+              setTimeout(() => {
+                target.style.transform = 'translateY(-50%) scale(1)';
+              }, 200);
+              removeMe();
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.2)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
+          ></button>
+          : null}
       </Accordion.Header>
       <Accordion.Body>
         {fields.map((fieldEntry) => {

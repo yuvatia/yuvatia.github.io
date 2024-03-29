@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { FaPause, FaPlay, FaStop, FaSave, FaUpload } from "react-icons/fa";
 import { FaMaximize, FaMinimize } from "react-icons/fa6";
@@ -112,26 +113,27 @@ const App = () => {
           <div className="controls">
             {activeScene ? (<>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
-                <SettingsView></SettingsView>
-                <FaPlay t size={20} onClick={onPlay} />
-                <FaPause size={20} onClick={onPause} />
-                {backupScene ? (<FaStop onClick={onStop} />) : (<FaStop />)}
-                <FaSave size={20} onClick={onSave} />
+                <SettingsView />
+                {gDirector.getSystemState(PhysicsSystem.name) ?
+                  <FaPause onClick={onPause} size={20} className='controlIcon' /> :
+                  <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
+                {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
+                <FaSave size={20} onClick={onSave} className='controlIcon' />
                 <input
                   type='file'
                   id='scene_upload'
                   accept='.json'
                   onChange={onUploadChange}
                   style={{ display: 'none' }} />
-                <FaUpload size={20} onClick={() => { document.getElementById('scene_upload').click(); }} />
+                <FaUpload size={20} className='controlIcon' onClick={() => { document.getElementById('scene_upload').click(); }} />
                 {
-                  maximizedState ? <FaMinimize size={20} onClick={() => {
+                  maximizedState ? <FaMinimize className='controlIcon' size={20} onClick={() => {
                     document.getElementById('grid-container').classList.remove('maximized');
                     // Remove display changes of left, right
                     document.getElementById('left').style.display = 'block';
                     document.getElementById('right').style.display = 'block';
                     setMaximizedState(false);
-                  }} /> : <FaMaximize size={20} onClick={() => {
+                  }} /> : <FaMaximize className='controlIcon' size={20} onClick={() => {
                     document.getElementById('grid-container').classList.add('maximized');
                     // Set display of left, right to none
                     document.getElementById('left').style.display = 'none';
