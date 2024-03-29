@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { gEditorSystem } from './EngineCanvas';
-import { Tag } from './engine/src/components';
+import { MeshRenderer, Tag } from './engine/src/components';
 import { GetActiveScene } from './App';
 import { GlobalState } from './GlobalState';
 import { ListGroup, Table } from 'react-bootstrap';
@@ -34,6 +34,23 @@ export const SceneView = () => {
     refreshEntities();
   }
 
+  const doSetSelected = (entity) => {
+    // First, set outline of currently selected to false, if valid
+    if (GetActiveScene().isEntityValid(selectedEntity)) {
+      GetActiveScene().forceGetComponent(selectedEntity, MeshRenderer).outline = false;
+    }
+    // Outline selected entity
+    GetActiveScene().forceGetComponent(entity, MeshRenderer).outline = true;
+    setSelectedEntity(entity);
+  }
+
+  const doDeselect = () => {
+    if (GetActiveScene().isEntityValid(selectedEntity)) {
+      GetActiveScene().forceGetComponent(selectedEntity, MeshRenderer).outline = false;
+    }
+    setSelectedEntity(-1);
+  }
+
   useEffect(() => {
     const onEngineEvent = (event) => {
       if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
@@ -63,7 +80,7 @@ export const SceneView = () => {
               key={`${entity}`}
               style={{ cursor: 'pointer', transition: 'transform 200ms' }}
               className={selectedEntity === entity ? "selectedEntity" : ""}
-              onClick={() => setSelectedEntity(entity)}
+              onClick={() => selectedEntity === entity ? doDeselect() : doSetSelected(entity)}
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >

@@ -17,7 +17,8 @@ export const ComponentSpecification = {
   },
   MeshRenderer: {
     type: MeshRenderer,
-    fields: ["shading", "writeIdToStencil"]
+    // TODO missing wireframe
+    fields: ["shading", "outline", "writeIdToStencil"]
   },
   Material: {
     type: Material,

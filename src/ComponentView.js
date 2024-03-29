@@ -32,8 +32,6 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
   }
 
   const refreshComponent = () => {
-    // The issue seems to be that componentview refreshes only when selectedEntity changes, need to solve  
-    // Sync from global state
     const entComponent = activeScene.getComponent(entity, type);
     if (!entComponent) return;
     setComponent({ ...entComponent });
