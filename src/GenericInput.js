@@ -1,10 +1,11 @@
 import { VectorView } from './VectorView';
+import { Point, Vector } from './engine/src/math';
 
 
 export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange }) => {
   switch (fieldType) {
-    case 'Vector':
-    case 'Point':
+    case Vector.name:
+    case Point.name:
       return (
         <VectorView
           key={name}
@@ -14,7 +15,7 @@ export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange 
             onVectorChange(name, axis, value);
           }}></VectorView>
       );
-    case 'String':
+    case String.name:
       return (
         <div key={name}>
           <p>{name}</p>
@@ -25,7 +26,7 @@ export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange 
             onChange={({ currentTarget }) => onChange(name, currentTarget.value)} />
         </div>
       );
-    case 'Number':
+    case Number.name:
       return (
         <div key={name}>
           <p>{name}</p>
@@ -36,7 +37,7 @@ export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange 
             onChange={({ currentTarget }) => onChange(name, Number(currentTarget.value))} />
         </div>
       );
-    case 'Boolean':
+    case Boolean.name:
       return (
         <div key={name}>
           <p>{name}</p>

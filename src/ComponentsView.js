@@ -93,6 +93,7 @@ export const ComponentsView = ({ entity, activeScene }) => {
             <ComponentView
               key={type}
               activeScene={activeScene}
+              typename={name}
               type={type}
               entity={entity}
               fields={fields}

@@ -13,6 +13,8 @@ import { SceneView } from './SceneView';
 import SettingsView from './SettingsView';
 import { GlobalState } from './GlobalState';
 import { Reviever } from './engine/src/reviver';
+import { Scene } from './engine/src/scene';
+import { PhysicsSystem } from './engine/src/physics';
 
 
 export const GetActiveScene = () => {
@@ -53,17 +55,17 @@ const App = () => {
     clone.name = 'workingScene';
     setActiveScene(clone);
     gDirector.setActiveScene(clone);
-    gDirector.setSystemState('PhysicsSystem', true);
+    gDirector.setSystemState(PhysicsSystem.name, true);
   }
 
   const onStop = () => {
     setActiveScene(backupScene);
-    gDirector.setSystemState('PhysicsSystem', false);
+    gDirector.setSystemState(PhysicsSystem.name, false);
     gDirector.setActiveScene(backupScene);
   }
 
   const onPause = () => {
-    gDirector.toggleSystemState('PhysicsSystem');
+    gDirector.toggleSystemState(PhysicsSystem.name);
   }
 
   const onSave = () => {
@@ -95,7 +97,7 @@ const App = () => {
     reader.onload = function (e) {
       const content = e.target.result;
       const scene = JSON.parse(content, Reviever.parse);
-      if (scene.constructor.name === 'Scene') {
+      if (scene.constructor.name === Scene.name) {
         setActiveScene(scene);
         gDirector.setActiveScene(scene);
       }

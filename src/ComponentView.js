@@ -3,8 +3,9 @@ import { gEditorSystem } from './EngineCanvas';
 import { GlobalState } from './GlobalState';
 import { Accordion, CloseButton } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
+import { Tag } from './engine/src/components';
 
-export const ComponentView = ({ type, entity, activeScene, fields, removeMe }) => {
+export const ComponentView = ({ type, typename, entity, activeScene, fields, removeMe }) => {
   const [component, setComponent] = useState(null);
 
   const updateVectorField = (name, axis, value) => {
@@ -71,16 +72,16 @@ export const ComponentView = ({ type, entity, activeScene, fields, removeMe }) =
   if (!component) return null;
 
   const isRemovable = () => {
-    return type.name !== 'Tag';
+    return type.name !== Tag.name;
   }
 
   const getHeader = () => {
-    if (type.name === 'Tag') {
+    if (type.name === Tag.name) {
       // Header is the name of the entity
       return `Tag (${activeScene.getComponent(entity, type).name})`;
     }
     // Header is the name of the component
-    return type.name;
+    return typename;
   }
 
   return (
@@ -91,9 +92,9 @@ export const ComponentView = ({ type, entity, activeScene, fields, removeMe }) =
       </Accordion.Header>
       <Accordion.Body>
         {fields.map((fieldEntry) => {
-          const name = (fieldEntry.constructor.name === 'String') ? fieldEntry : fieldEntry.name;
+          const name = (fieldEntry.constructor.name === String.name) ? fieldEntry : fieldEntry.name;
           if (!component.hasOwnProperty(name)) return;
-          const fieldType = fieldEntry.constructor.name === 'String' ? component[name].constructor.name : fieldEntry.type;
+          const fieldType = fieldEntry.constructor.name === String.name ? component[name].constructor.name : fieldEntry.type;
           return (
             <GenericInput
               fieldType={fieldType}
