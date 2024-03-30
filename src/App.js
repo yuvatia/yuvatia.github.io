@@ -6,7 +6,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { FaPause, FaPlay, FaStop, FaSave, FaUpload } from "react-icons/fa";
 import { FaMaximize, FaMinimize } from "react-icons/fa6";
-
+import { LuClapperboard } from "react-icons/lu";
 
 import { EngineCanvas, gDirector, gEditorSystem } from './EngineCanvas';
 import { ComponentsView } from './ComponentsView';
@@ -16,6 +16,7 @@ import { GlobalState } from './GlobalState';
 import { Reviever } from './engine/src/reviver';
 import { Scene } from './engine/src/scene';
 import { PhysicsSystem } from './engine/src/physics';
+import SceneManager from './SceneManager';
 
 
 export const GetActiveScene = () => {
@@ -107,14 +108,15 @@ const App = () => {
   }
 
   return (
-    <GlobalState.Provider value={{ activeScene, selectedEntity, setSelectedEntity }}>
+    <GlobalState.Provider value={{ activeScene, selectedEntity, setSelectedEntity, setActiveScene }}>
       <div id="grid-wrapper">
         <div className="grid-container" id="grid-container">
           <div className="controls">
             {activeScene ? (<>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
-                <SettingsView />
-                {gDirector.getSystemState(PhysicsSystem.name) ?
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>                
+                <SceneManager/>
+                {gDirector ? <SettingsView /> : null}
+                {gDirector && gDirector.getSystemState(PhysicsSystem.name) ?
                   <FaPause onClick={onPause} size={20} className='controlIcon' /> :
                   <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}

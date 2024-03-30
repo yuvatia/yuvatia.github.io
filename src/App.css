@@ -65,6 +65,7 @@ body,
 .left {
   grid-area: left;
   border-top: none;
+  overflow: auto;
 }
 
 .middle {

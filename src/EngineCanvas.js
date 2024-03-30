@@ -51,14 +51,20 @@ export let gDirector = null;
 export const EngineCanvas = () => {
     const [activeBuffer, setActiveBuffer] = useState('color');
     useEffect(() => {
-        gDirector = SimpleDirector(
-            document.getElementById("color"),
-            document.getElementById("depth"),
-            document.getElementById("stencil"),
-            false
-        );
+        if (gDirector) {
+            console.log("Director already initialized, skipping...");
+            return;
+        }
+
+        const buffers = ["color", "depth", "stencil"].map(name => document.getElementById(name)).filter(e => e !== null);
+        if (!buffers || buffers.length != 3) {
+            console.log("Buffers not available yet, postponing initialization");
+            return;
+        }
+        const [color, depth, stencil] = buffers;
+        gDirector = SimpleDirector(color, depth, stencil, false);
         gDirector.registerSystem(gEditorSystem);
-        setupScene(gDirector.getScene(), 4, document.getElementById("color"));
+        setupScene(gDirector.getScene(), 4, color);
         // Optimization: remove grid
         gDirector.getScene().destroyEntity(gDirector.getScene().getFirstByName("Grid"));
         // /*
@@ -88,6 +94,12 @@ export const EngineCanvas = () => {
 
         gDirector.setFpsTarget(60);
         gDirector.start();
+
+        // return () => {
+        //     gDirector.stop();
+        //     gDirector.unsubscribeFromEvents();
+        //     gDirector = null;
+        // };
     }, []);
 
     return (
