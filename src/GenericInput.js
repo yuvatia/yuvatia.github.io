@@ -59,8 +59,13 @@ export const EntitySelector = ({ value, onChange }) => {
 }
 
 
-export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange }) => {
-  switch (fieldType) {
+export const GenericInput = ({
+  fieldType,
+  name,
+  value,
+  onChange,
+  onVectorChange }) => {
+  switch (fieldType || value.type) {
     case Vector.name:
     case Point.name:
       return (
@@ -93,10 +98,10 @@ export const GenericInput = ({ fieldType, name, value, onChange, onVectorChange 
     case Number.name:
       return (
         <Form.Group as={Row} key={name} className="mb-3">
-          <Form.Label column sm="3">
+          <Form.Label column sm="6">
             {name}
           </Form.Label>
-          <Col sm="9">
+          <Col sm="6">
             <Form.Control
               type="number"
               value={value}

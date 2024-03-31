@@ -10,7 +10,7 @@ import ModalDialog from 'react-bootstrap/ModalDialog';
 
 import { IoSettings } from 'react-icons/io5'
 
-const DraggableModalDialog = (props) => {
+export const DraggableModalDialog = (props) => {
     return (
         <Draggable handle=".modal-title"><ModalDialog {...props} />
         </Draggable>

@@ -64,9 +64,6 @@ export const EngineCanvas = () => {
         const [color, depth, stencil] = buffers;
         gDirector = SimpleDirector(color, depth, stencil, false);
         gDirector.registerSystem(gEditorSystem);
-        setupScene(gDirector.getScene(), 4, color);
-        // Optimization: remove grid
-        gDirector.getScene().destroyEntity(gDirector.getScene().getFirstByName("Grid"));
         // /*
         // Setup scene
         // */

@@ -33,7 +33,18 @@ export const NiceButton = ({ value, className, style, onClick }) => {
     ></button>);
 }
 
-export const ListItem = ({ value, selectedValue, selectedClass, doSetSelected, doDeselect, onDelete, onLookup, onCopy, children }) => {
+export const ListItem = ({
+  value,
+  iconOverrides,
+  selectedValue,
+  selectedClass,
+  doSetSelected,
+  doDeselect,
+  onDelete,
+  onLookup,
+  onCopy,
+  children }) => {
+  const iconValues = { delete: 'bi-trash-fill', copy: 'bi-copy', lookup: 'bi-search', ...iconOverrides };
   return (
     <ListGroup.Item
       as='li'
@@ -46,15 +57,26 @@ export const ListItem = ({ value, selectedValue, selectedClass, doSetSelected, d
     >
       {children}
       <div className='color-state-override' style={{ float: 'right', border: 'none', backgroundColor: 'transparent' }}>
-        {onDelete ? <NiceButton value={value} className='bi-trash-fill' style={{ color: 'red' }} onClick={onDelete} /> : null}
-        {onCopy ? <NiceButton value={value} className='bi-copy' style={{ color: 'blue' }} onClick={onCopy} /> : null}
-        {onLookup ? <NiceButton value={value} className='bi-search' style={{ color: 'black' }} onClick={onLookup} /> : null}
+        {onDelete ? <NiceButton value={value} className={iconValues.delete} style={{ color: 'red' }} onClick={onDelete} /> : null}
+        {onCopy ? <NiceButton value={value} className={iconValues.copy} style={{ color: 'blue' }} onClick={onCopy} /> : null}
+        {onLookup ? <NiceButton value={value} className={iconValues.lookup} style={{ color: 'black' }} onClick={onLookup} /> : null}
       </div>
     </ListGroup.Item>
   );
 }
 
-export const NiceList = ({ values, selectedValue, doSetSelected, doDeselect, doRemove, doFocus, doClone, doAdd, doClear, children }) => {
+export const NiceList = ({
+  values,
+  iconOverrides,
+  selectedValue,
+  doSetSelected,
+  doDeselect,
+  doRemove,
+  doFocus,
+  doClone,
+  doAdd,
+  doClear,
+  children }) => {
   const [search, setSearch] = useState('');
   const filteredValues = values.filter(value => {
     const iSearch = search.toLowerCase();
@@ -76,6 +98,7 @@ export const NiceList = ({ values, selectedValue, doSetSelected, doDeselect, doR
         {filteredValues.map(value => (
           <ListItem
             value={value}
+            iconOverrides={iconOverrides}
             selectedValue={selectedValue}
             selectedClass="selectedEntity"
             doSetSelected={doSetSelected}

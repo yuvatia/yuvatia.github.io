@@ -4,7 +4,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-import { FaPause, FaPlay, FaStop, FaSave, FaUpload } from "react-icons/fa";
+import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-icons/fa";
 import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { LuClapperboard } from "react-icons/lu";
 
@@ -13,10 +13,11 @@ import { ComponentsView } from './ComponentsView';
 import { SceneView } from './SceneView';
 import SettingsView from './SettingsView';
 import { GlobalState } from './GlobalState';
-import { Reviever } from './engine/src/reviver';
+import { Reviver } from './engine/src/reviver';
 import { Scene } from './engine/src/scene';
 import { PhysicsSystem } from './engine/src/physics';
 import SceneManager from './SceneManager';
+import { DownloadScene, UploadScene } from './SceneUtils';
 
 
 export const GetActiveScene = () => {
@@ -52,16 +53,14 @@ const App = () => {
 
   const onPlay = () => {
     setBackupScene(activeScene);
-    activeScene.name = 'backupScene';
-    const clone = activeScene.deepCopy();
-    clone.name = 'workingScene';
-    setActiveScene(clone);
+    const clone = activeScene.deepCopy('workingScene');
+    // setActiveScene(clone);
     gDirector.setActiveScene(clone);
     gDirector.setSystemState(PhysicsSystem.name, true);
   }
 
   const onStop = () => {
-    setActiveScene(backupScene);
+    // setActiveScene(backupScene);
     gDirector.setSystemState(PhysicsSystem.name, false);
     gDirector.setActiveScene(backupScene);
   }
@@ -70,62 +69,25 @@ const App = () => {
     gDirector.toggleSystemState(PhysicsSystem.name);
   }
 
-  const onSave = () => {
-    const serializedScene = JSON.stringify(activeScene);
-    // Save scene to file, file is a JSON file, we save by:
-    const blob = new Blob([serializedScene], { type: 'application/json' });
-
-    // Create an invisible link
-    const link = document.createElement('a');
-    link.style.display = 'none';
-
-    // Set the download attribute and href
-    link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', `${activeScene.name}.json`);
-
-    // Append the link to the body and trigger a click event
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up
-    document.body.removeChild(link);
-  }
-
-  const onUploadChange = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      const content = e.target.result;
-      const scene = JSON.parse(content, Reviever.parse);
-      if (scene.constructor.name === Scene.name) {
-        setActiveScene(scene);
-        gDirector.setActiveScene(scene);
-      }
-    };
-    reader.readAsText(file);
-  }
-
   return (
     <GlobalState.Provider value={{ activeScene, selectedEntity, setSelectedEntity, setActiveScene }}>
       <div id="grid-wrapper">
         <div className="grid-container" id="grid-container">
           <div className="controls">
             {activeScene ? (<>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>                
-                <SceneManager/>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
+                <SceneManager />
                 {gDirector ? <SettingsView /> : null}
                 {gDirector && gDirector.getSystemState(PhysicsSystem.name) ?
                   <FaPause onClick={onPause} size={20} className='controlIcon' /> :
                   <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
-                <FaSave size={20} onClick={onSave} className='controlIcon' />
+                <FaDownload size={20} onClick={() => DownloadScene(activeScene)} className='controlIcon' />
                 <input
                   type='file'
                   id='scene_upload'
                   accept='.json'
-                  onChange={onUploadChange}
+                  onChange={UploadScene}
                   style={{ display: 'none' }} />
                 <FaUpload size={20} className='controlIcon' onClick={() => { document.getElementById('scene_upload').click(); }} />
                 {
