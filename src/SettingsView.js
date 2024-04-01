@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { gDirector, gEditorSystem } from './EngineCanvas';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
 import { Table } from 'react-bootstrap';
 
@@ -9,6 +9,8 @@ import Draggable from 'react-draggable';
 import ModalDialog from 'react-bootstrap/ModalDialog';
 
 import { IoSettings } from 'react-icons/io5'
+import { GenericObjectForm } from './ComponentView';
+import { NiceList } from './SceneView';
 
 export const DraggableModalDialog = (props) => {
     return (
@@ -84,34 +86,25 @@ const SettingsView = () => {
                             <Col xs={4} style={{
                                 "border-right": "1px solid #dee2e6"
                             }}>
-                                <Table striped bordered hover>
-                                    <tbody>
-                                        {Object.keys(settings).map((settingKey) => (
-                                            <tr onClick={() => setselectedSystem(settingKey)}>
-                                                <td>{settingKey}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                                <NiceList values={Object.keys(settings)} selectedValue={selectedSystem} doDeselect={() => { }} doSetSelected={(entity) => setselectedSystem(entity)} notSearchable hoverScale={1.05}>
+                                    {(setting) => setting}
+                                </NiceList>
                             </Col>
                             <Col xs={8}>
                                 <div>
-                                    <GenericInput
-                                        fieldType='Boolean'
-                                        name='Enabled'
-                                        value={systemStates[selectedSystem]}
-                                        onChange={(key, value) => setSystemState(selectedSystem, value)} />
-                                    {Object.keys(settings[selectedSystem]).map((key) => {
-                                        const value = settings[selectedSystem][key];
-                                        const fieldType = value.constructor.name;
-                                        return (
-                                            <GenericInput
-                                                fieldType={fieldType}
-                                                name={key}
-                                                value={value}
-                                                onChange={(key, value) => setSettingValue(selectedSystem, key, value)} />
-                                        )
-                                    })}
+                                    <Form.Check
+                                        type="checkbox"
+                                        label="Enabled"
+                                        id={systemStates[selectedSystem]}
+                                        checked={systemStates[selectedSystem]}
+                                        onChange={({ currentTarget }) => setSystemState(selectedSystem, currentTarget.checked)}
+                                        style={{ display: 'flex', flexDirection: 'row', gap: '1vw', paddingBottom: 'min(1vw, 1vh)', marginBottom: 'min(1vw, 1vh)', borderBottom: '2px solid #dee2e6' }}
+                                    />
+                                    <GenericObjectForm
+                                        fields={Object.keys(settings[selectedSystem])}
+                                        component={settings[selectedSystem]}
+                                        UpdateField={(name, value) => setSettingValue(selectedSystem, name, value)}
+                                    />
                                 </div>
                             </Col>
                         </Row>

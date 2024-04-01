@@ -5,6 +5,7 @@ import { gEditorSystem } from './EngineCanvas';
 import { ComponentView } from './ComponentView';
 import { Dropdown } from 'react-bootstrap';
 import { FollowConstraint, Rigidbody } from './engine/src/kinematics';
+import { NiceButton } from './SceneView';
 
 export const ComponentSpecification = {
   Tag: {
@@ -22,7 +23,7 @@ export const ComponentSpecification = {
   },
   Material: {
     type: Material,
-    fields: ["diffuseColor", "faceColoring"]
+    fields: ["diffuse", "faceColoring"]
   },
   DirectionalLight: {
     type: DirectionalLight,
@@ -85,6 +86,11 @@ export const ComponentsView = ({ entity, activeScene }) => {
 
   return (
     <React.Fragment>
+      <div className='InspectorHeader'>
+        <NiceButton className='bi bi-search controlIcon' color='green' style={{ cursor: 'default' }} noEffects disabled />
+        {activeScene.getComponent(entity, Tag) ? activeScene.getComponent(entity, Tag).name : 'Entity'}
+      </div>
+
       {availableTypes.map(name => {
         const { type, fields } = ComponentSpecification[name];
         return (
@@ -104,11 +110,21 @@ export const ComponentsView = ({ entity, activeScene }) => {
       <Dropdown onSelect={(type) => {
         doAdd(ComponentSpecification[type].type)
       }}>
-        <Dropdown.Toggle
-          style={{ width: '100%', backgroundColor: 'green', borderColor: 'green', marginTop: '5%', color: 'white' }} variant="success" id="dropdown-basic">
-          Add component
-        </Dropdown.Toggle>
-
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Dropdown.Toggle
+            style={{
+              width: '80%',
+              backgroundColor: 'green',
+              borderColor: 'green',
+              marginTop: '5%',
+              color: 'white'
+            }}
+            variant="success"
+            id="dropdown-basic"
+          >
+            Add component
+          </Dropdown.Toggle>
+        </div>
         <Dropdown.Menu>
           {getUnavailableComponents().map(name => {
             return (

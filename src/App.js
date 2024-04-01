@@ -76,46 +76,36 @@ const App = () => {
           <div className="controls">
             {activeScene ? (<>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
-                <SceneManager />
                 {gDirector ? <SettingsView /> : null}
                 {gDirector && gDirector.getSystemState(PhysicsSystem.name) ?
                   <FaPause onClick={onPause} size={20} className='controlIcon' /> :
                   <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
-                <FaDownload size={20} onClick={() => DownloadScene(activeScene)} className='controlIcon' />
-                <input
-                  type='file'
-                  id='scene_upload'
-                  accept='.json'
-                  onChange={UploadScene}
-                  style={{ display: 'none' }} />
-                <FaUpload size={20} className='controlIcon' onClick={() => { document.getElementById('scene_upload').click(); }} />
                 {
                   maximizedState ? <FaMinimize className='controlIcon' size={20} onClick={() => {
-                    document.getElementById('grid-container').classList.remove('maximized');
-                    // Remove display changes of left, right
-                    document.getElementById('left').style.display = 'block';
-                    document.getElementById('right').style.display = 'block';
-                    setMaximizedState(false);
+                    document.getElementById('grid-container').classList.toggle('maximized');
+                    setMaximizedState(!maximizedState);
                   }} /> : <FaMaximize className='controlIcon' size={20} onClick={() => {
-                    document.getElementById('grid-container').classList.add('maximized');
-                    // Set display of left, right to none
-                    document.getElementById('left').style.display = 'none';
-                    document.getElementById('right').style.display = 'none';
-                    setMaximizedState(true);
+                    document.getElementById('grid-container').classList.toggle('maximized');
+                    setMaximizedState(!maximizedState);
                   }} />
                 }
               </div>
             </>) : null}
           </div>
           <div className="left" id="left">
-            {activeScene ? (<SceneView></SceneView>) : <div>Loading</div>}
+            {activeScene && !maximizedState ? (
+              <>
+                <SceneManager />
+                <SceneView />
+              </>
+            ) : <div>Loading</div>}
           </div>
           <div className="middle" id="middle">
             <EngineCanvas></EngineCanvas>
           </div>
           <div className="right" id="right">
-            {activeScene && activeScene.isEntityValid(selectedEntity) ?
+            {activeScene && activeScene.isEntityValid(selectedEntity) && !maximizedState ?
               <ComponentsView activeScene={activeScene} entity={selectedEntity} />
               :
               null

@@ -64,30 +64,6 @@ export const EngineCanvas = () => {
         const [color, depth, stencil] = buffers;
         gDirector = SimpleDirector(color, depth, stencil, false);
         gDirector.registerSystem(gEditorSystem);
-        // /*
-        // Setup scene
-        // */
-        // const scene = gDirector.getScene();
-        // const entityId = scene.newEntity("Bluh");
-        // const BoxDCEL = DCELRepresentation.fromSimpleMesh(new Cube());
-        // // // Add mesh component
-        // const realT = scene.getComponent(entityId, Transform);
-        // realT.position = new Vector(-380, 320, 150);
-        // realT.scale = new Vector(100, 100, 100);
-
-        // scene.addComponent(entityId, MeshFilter).meshRef = BoxDCEL;
-        // // // Add material component
-        // scene.addComponent(entityId, Material).diffuseColor = new Point(255, 70, 0, 1); // Red
-        // scene.addComponent(entityId, MeshRenderer).shading = false;
-
-        // setTimeout(() => {
-        //     scene.getComponent(entityId, Tag).name = "Holy";
-        // }, 1000);
-
-        // // Add 20 to Transform.rotation.z every 30ms
-        // setInterval(() => {
-        //     realT.rotation.z += 1;
-        // }, 30);
 
         gDirector.setFpsTarget(60);
         gDirector.start();
@@ -100,7 +76,7 @@ export const EngineCanvas = () => {
     }, []);
 
     return (
-        <div style={{ width: "100%", height: "100%" }}>
+        <div style={{ width: "100%", height: "100%", touchAction: "none" }}>
             <canvas id="color"></canvas>
             <canvas id="depth" hidden></canvas>
             <canvas id="stencil" hidden></canvas>

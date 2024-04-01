@@ -79,45 +79,28 @@ export const GenericInput = ({
       );
     case String.name:
       return (
-        <Form.Group key={name}>
-          <Row>
-            <Col>
-              <Form.Label>{name}</Form.Label>
-            </Col>
-            <Col>
-              <Form.Control
-                key={`${fieldType}.${name}`}
-                type="text"
-                value={value}
-                onChange={({ currentTarget }) => onChange(name, currentTarget.value)}
-              />
-            </Col>
-          </Row>
-        </Form.Group>
+        <Form.Control
+          key={`${fieldType}.${name}`}
+          type="text"
+          value={value}
+          onChange={({ currentTarget }) => onChange(name, currentTarget.value)}
+        />
       );
     case Number.name:
       return (
-        <Form.Group as={Row} key={name} className="mb-3">
-          <Form.Label column sm="6">
-            {name}
-          </Form.Label>
-          <Col sm="6">
-            <Form.Control
-              type="number"
-              value={value}
-              onChange={({ currentTarget }) =>
-                onChange(name, Number(currentTarget.value))
-              }
-            />
-          </Col>
-        </Form.Group>
+        <Form.Control
+          type="number"
+          value={value}
+          onChange={({ currentTarget }) =>
+            onChange(name, Number(currentTarget.value))
+          }
+        />
       );
     case Boolean.name:
       return (
         <Form.Check
           type="checkbox"
           id={name}
-          label={name + '?'}
           checked={value}
           onChange={({ currentTarget }) => onChange(name, currentTarget.checked)}
           style={{ display: 'flex', flexDirection: 'row', gap: '1vw' }}
@@ -130,7 +113,6 @@ export const GenericInput = ({
     default:
       return (
         <div key={name}>
-          <p>{name}</p>
           <p>No specialized input for {fieldType}</p>
         </div>
       );

@@ -1,9 +1,35 @@
 import { useContext, useEffect, useState } from 'react';
 import { gEditorSystem } from './EngineCanvas';
 import { GlobalState } from './GlobalState';
-import { Accordion, CloseButton } from 'react-bootstrap';
+import { Accordion, Button, CloseButton, Table } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
 import { Tag } from './engine/src/components';
+
+export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => (
+  <Table hover>
+    <tbody>
+      {fields.map((fieldEntry) => {
+        const name = (fieldEntry.constructor.name === String.name) ? fieldEntry : fieldEntry.name;
+        if (!component.hasOwnProperty(name)) return null;
+        const fieldType = fieldEntry.constructor.name === String.name ? component[name].constructor.name : fieldEntry.type;
+        return (
+          <tr key={name}>
+            <td>{name}</td>
+            <td>
+              <GenericInput
+                fieldType={fieldType}
+                name={name}
+                value={component[name]}
+                onVectorChange={updateVectorField}
+                onChange={UpdateField}
+              />
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </Table>
+);
 
 export const ComponentView = ({ type, typename, entity, activeScene, fields, removeMe }) => {
   const [component, setComponent] = useState(null);
@@ -84,11 +110,13 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
 
   return (
     <Accordion
-      style={{ borderBottom: '1px solid #dee2e6', position: 'relative', transition: 'transform 200ms' }}
-      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      style={{ borderBottom: '1px solid #dee2e6', position: 'relative' }}
     >
-      <Accordion.Header>
+      <Accordion.Header
+        style={{ transition: 'transform 200ms' }}
+        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      >
         {getHeader()}
         {isRemovable() ?
           <button
@@ -116,20 +144,12 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
           : null}
       </Accordion.Header>
       <Accordion.Body>
-        {fields.map((fieldEntry) => {
-          const name = (fieldEntry.constructor.name === String.name) ? fieldEntry : fieldEntry.name;
-          if (!component.hasOwnProperty(name)) return;
-          const fieldType = fieldEntry.constructor.name === String.name ? component[name].constructor.name : fieldEntry.type;
-          return (
-            <GenericInput
-              fieldType={fieldType}
-              name={name}
-              value={component[name]}
-              onVectorChange={updateVectorField}
-              onChange={UpdateField}>
-            </GenericInput>
-          )
-        })}
+        <GenericObjectForm
+          fields={fields}
+          component={component}
+          updateVectorField={updateVectorField}
+          UpdateField={UpdateField}
+        />
       </Accordion.Body>
     </Accordion>
   );

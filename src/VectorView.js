@@ -1,29 +1,24 @@
-import { Form, Card, Row, Col } from 'react-bootstrap';
+import { Row, Col, Form } from 'react-bootstrap';
 
 export const VectorView = ({ name, vector, onChange }) => {
   return (
-    <Card>
-      <Card.Header as="h5">{name}</Card.Header>
-      <Card.Body>
-        {Object.keys(vector).map((axis) => {
-          return (
-            <Form.Group as={Row} key={`${name}.${axis}`} className="mb-3">
-              <Form.Label column sm="3">
-                {axis}
-              </Form.Label>
-              <Col sm="9">
-                <Form.Control
-                  type="number"
-                  value={vector[axis]}
-                  onChange={({ currentTarget }) =>
-                    onChange(axis, Number(currentTarget.value))
-                  }
-                />
-              </Col>
-            </Form.Group>
-          );
-        })}
-      </Card.Body>
-    </Card>
-  );
+    <div style={{ display: 'flex', marginBottom: '1rem' }}>
+      {Object.keys(vector).map((axis, index) => (
+        <div key={`${name}.${axis}`} style={{ flex: 1, paddingLeft: index !== 0 ? '0.25rem' : '0' }}>
+          <input
+            style={{
+              fontSize: '0.8rem',
+              padding: '0.25rem 0.5rem',
+              width: '100%',
+              appearance: 'textfield'
+            }}
+            type="number"
+            value={vector[axis]}
+            onChange={({ currentTarget }) =>
+              onChange(axis, Number(currentTarget.value))
+            }
+          />
+        </div>
+      ))}
+    </div>);
 };

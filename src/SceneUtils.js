@@ -23,19 +23,55 @@ export const DownloadScene = (scene) => {
     document.body.removeChild(link);
 }
 
-export const UploadScene = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
+export const UploadScene = () => {
+    return new Promise((resolve, reject) => {
+        // Create a new button element
+        const button = document.createElement('button');
+        button.textContent = 'Upload Scene';
 
-    reader.onload = function (e) {
-        const content = e.target.result;
-        const scene = JSON.parse(content, Reviver.parse);
-        if (scene.constructor.name === Scene.name) {
-            // Used to be not commented out, shouldn't be needed though?
-            // setActiveScene(scene);
-            gDirector.setActiveScene(scene);
-        }
-    };
-    reader.readAsText(file);
+        // Create a hidden file input element
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.style.display = 'none';
+
+        // Attach an event listener to the file input
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const content = e.target.result;
+                try {
+                    const scene = JSON.parse(content, Reviver.parse);
+                    if (scene.constructor.name === Scene.name) {
+                        // Resolve the promise with the scene
+                        resolve(scene);
+                    } else {
+                        reject('Invalid scene');
+                    }
+                } catch (error) {
+                    reject(`${error}`);
+                } finally {
+                    // Remove the button and file input
+                    document.body.removeChild(button);
+                    document.body.removeChild(fileInput);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Attach an event listener to the button
+        button.addEventListener('click', () => {
+            // Trigger the file input when the button is clicked
+            fileInput.click();
+        });
+
+        // Append the button and file input to the body
+        document.body.appendChild(button);
+        document.body.appendChild(fileInput);
+
+        // Trigger
+        button.click();
+    });
 }

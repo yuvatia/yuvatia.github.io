@@ -7,9 +7,10 @@ import { Form, InputGroup, ListGroup, Table } from 'react-bootstrap';
 import { IoAdd, IoAddCircle, IoTrashBin } from 'react-icons/io5';
 import { Camera } from './engine/src/camera';
 import { Transform } from './engine/src/transform';
-import { FaSearch } from 'react-icons/fa';
+import { FaDownload, FaSave, FaSearch, FaUpload } from 'react-icons/fa';
+import { DownloadScene, UploadScene } from './SceneUtils';
 
-export const NiceButton = ({ value, className, style, onClick }) => {
+export const NiceButton = ({ value, className, color, style, onClick, noEffects, ...props }) => {
   return (
     <button
       className={`bi ${className} color-state-override`}
@@ -17,9 +18,10 @@ export const NiceButton = ({ value, className, style, onClick }) => {
         border: 'none',
         backgroundColor: 'transparent',
         transition: 'transform 200ms',
+        color,
         ...style
       }}
-      onClick={(e) => {
+      onClick={onClick ? (e) => {
         e.stopPropagation();
         const target = e.currentTarget;
         target.style.transform = 'scale(1.2)';
@@ -27,10 +29,24 @@ export const NiceButton = ({ value, className, style, onClick }) => {
           target.style.transform = 'scale(1)';
         }, 200);
         onClick(value);
-      }}
-      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
-      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      } : () => { }}
+      onMouseOver={noEffects ? () => { } : (e) => e.currentTarget.style.transform = 'scale(1.2)'}
+      onMouseOut={noEffects ? () => { } : (e) => e.currentTarget.style.transform = 'scale(1)'}
+      {...props}
     ></button>);
+}
+
+export const BigIcon = ({ AsIcon, onClick, ...props }) => {
+  if (!onClick) return null;
+  return (<AsIcon
+    color="green"
+    size={30}
+    style={{ margin: '5% 2%', transition: 'transform 200ms', cursor: 'pointer' }}
+    {...props}
+    onClick={() => onClick()}
+    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+  />);
 }
 
 export const ListItem = ({
@@ -40,11 +56,19 @@ export const ListItem = ({
   selectedClass,
   doSetSelected,
   doDeselect,
+  actions,
   onDelete,
   onLookup,
   onCopy,
+  noHover,
+  hoverScale,
   children }) => {
   const iconValues = { delete: 'bi-trash-fill', copy: 'bi-copy', lookup: 'bi-search', ...iconOverrides };
+  const actionsFallback = [
+    { className: iconValues.delete, onClick: onDelete, color: 'red' },
+    { className: iconValues.copy, onClick: onCopy, color: 'blue' },
+    { className: iconValues.lookup, onClick: onLookup, color: 'black' }
+  ];
   return (
     <ListGroup.Item
       as='li'
@@ -52,14 +76,12 @@ export const ListItem = ({
       style={{ cursor: 'pointer', transition: 'transform 200ms' }}
       className={selectedValue === value ? selectedClass : ""}
       onClick={() => selectedValue === value ? doDeselect() : doSetSelected(value)}
-      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      onMouseOver={noHover ? () => { } : (e) => e.currentTarget.style.transform = `scale(${hoverScale || 1.1})`}
+      onMouseOut={noHover ? () => { } : (e) => e.currentTarget.style.transform = 'scale(1)'}
     >
       {children}
       <div className='color-state-override' style={{ float: 'right', border: 'none', backgroundColor: 'transparent' }}>
-        {onDelete ? <NiceButton value={value} className={iconValues.delete} style={{ color: 'red' }} onClick={onDelete} /> : null}
-        {onCopy ? <NiceButton value={value} className={iconValues.copy} style={{ color: 'blue' }} onClick={onCopy} /> : null}
-        {onLookup ? <NiceButton value={value} className={iconValues.lookup} style={{ color: 'black' }} onClick={onLookup} /> : null}
+        {(actions || actionsFallback).map(action => action.onClick ? <NiceButton value={value} {...action} /> : null)}
       </div>
     </ListGroup.Item>
   );
@@ -67,16 +89,18 @@ export const ListItem = ({
 
 export const NiceList = ({
   values,
-  iconOverrides,
+  selectedClass,
   selectedValue,
   doSetSelected,
   doDeselect,
-  doRemove,
-  doFocus,
-  doClone,
+  bottomMenu,
   doAdd,
   doClear,
-  children }) => {
+  children,
+  notSearchable,
+  ...props }) => {
+  const bottomMenuFallback = [{ AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
+  { AsIcon: IoTrashBin, onClick: doClear, color: 'red' }];
   const [search, setSearch] = useState('');
   const filteredValues = values.filter(value => {
     const iSearch = search.toLowerCase();
@@ -85,27 +109,25 @@ export const NiceList = ({
 
   return (
     <div>
-      <InputGroup className="mb-3">
-        <InputGroup.Text><FaSearch /></InputGroup.Text>
-        <Form.Control
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </InputGroup>
+      {notSearchable ? null :
+        <InputGroup className="mb-3">
+          <InputGroup.Text><FaSearch /></InputGroup.Text>
+          <Form.Control
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </InputGroup>}
       <ListGroup>
         {filteredValues.map(value => (
           <ListItem
             value={value}
-            iconOverrides={iconOverrides}
             selectedValue={selectedValue}
-            selectedClass="selectedEntity"
+            selectedClass={selectedClass || "selectedEntity"}
             doSetSelected={doSetSelected}
             doDeselect={doDeselect}
-            onDelete={doRemove}
-            onLookup={doFocus}
-            onCopy={doClone}
+            {...props}
           >
             {children(value)}
           </ListItem>
@@ -113,22 +135,7 @@ export const NiceList = ({
         ))}
       </ListGroup>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        {doAdd ? <IoAddCircle
-          color="green"
-          size={30}
-          style={{ margin: '5% 2%', transition: 'transform 200ms', cursor: 'pointer' }}
-          onClick={() => doAdd()}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        /> : null}
-        {doClear ? <IoTrashBin
-          color="red"
-          size={30}
-          style={{ margin: '5% 2%', transition: 'transform 200ms', cursor: 'pointer' }}
-          onClick={() => doClear()}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        /> : null}
+        {(bottomMenu || bottomMenuFallback).map(entry => <BigIcon {...entry} />)}
       </div>
     </div>
   );
@@ -209,11 +216,17 @@ export const SceneView = () => {
       selectedValue={selectedEntity}
       doSetSelected={doSetSelected}
       doDeselect={doDeselect}
-      doRemove={doRemove}
-      doFocus={doFocus}
-      doClone={doClone}
-      doAdd={doAdd}
-      doClear={doClear}
+      actions={[
+        { className: 'bi-trash-fill', onClick: doRemove, color: 'red' },
+        { className: 'bi-copy', onClick: doClone, color: 'blue' },
+        { className: 'bi-search', onClick: doFocus, color: 'black' }
+      ]}
+      bottomMenu={[
+        { AsIcon: FaSave, onClick: () => { }, color: 'black' },
+        { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
+        { AsIcon: IoTrashBin, onClick: doClear, color: 'red' },
+        { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon' },
+      ]}
     >
       {(entity) => {
         // Solves a race when SceneView is rendering while scene is destroyed
