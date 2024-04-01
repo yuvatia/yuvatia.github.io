@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Transform } from './engine/src/transform';
 import { Tag, DirectionalLight, Material, MeshFilter, MeshRenderer } from './engine/src/components';
 import { gEditorSystem } from './EngineCanvas';
-import { ComponentView } from './ComponentView';
-import { Dropdown } from 'react-bootstrap';
+import { ComponentView, ComponentView2, GenericObjectForm } from './ComponentView';
+import { Collapse, Dropdown } from 'react-bootstrap';
 import { FollowConstraint, Rigidbody } from './engine/src/kinematics';
-import { NiceButton } from './SceneView';
+import { NiceButton, NiceList } from './SceneView';
 
 export const ComponentSpecification = {
   Tag: {
@@ -70,6 +70,12 @@ export const ComponentsView = ({ entity, activeScene }) => {
     refreshAvailableComponents();
   };
 
+  const doRemoveByName = (name) => {
+    const component = ComponentSpecification[name].type;
+    activeScene.removeComponent(entity, component);
+    refreshAvailableComponents();
+  }
+
   useEffect(() => {
     const onEngineEvent = (event) => {
       if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
@@ -83,16 +89,16 @@ export const ComponentsView = ({ entity, activeScene }) => {
     };
   }, [entity]);  // See doc in ComponentView
 
-
   return (
     <React.Fragment>
       <div className='InspectorHeader'>
         <NiceButton className='bi bi-search controlIcon' color='green' style={{ cursor: 'default' }} noEffects disabled />
-        {activeScene.getComponent(entity, Tag) ? activeScene.getComponent(entity, Tag).name : 'Entity'}
+        <b>{activeScene.getComponent(entity, Tag) ? activeScene.getComponent(entity, Tag).name : 'Entity'} Inspector</b>
       </div>
 
       {availableTypes.map(name => {
         const { type, fields } = ComponentSpecification[name];
+
         return (
           !!activeScene.getComponent(entity, type) ?
             <ComponentView

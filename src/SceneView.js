@@ -61,7 +61,9 @@ export const ListItem = ({
   onLookup,
   onCopy,
   noHover,
+  noHoverWhenSelected,
   hoverScale,
+  style,
   children }) => {
   const iconValues = { delete: 'bi-trash-fill', copy: 'bi-copy', lookup: 'bi-search', ...iconOverrides };
   const actionsFallback = [
@@ -69,14 +71,29 @@ export const ListItem = ({
     { className: iconValues.copy, onClick: onCopy, color: 'blue' },
     { className: iconValues.lookup, onClick: onLookup, color: 'black' }
   ];
+  const isSelected = (v) => {
+    if (selectedValue && selectedValue.includes) {
+      return selectedValue.includes(value);
+    }
+    return selectedValue === value;
+  }
   return (
     <ListGroup.Item
       as='li'
       key={value}
-      style={{ cursor: 'pointer', transition: 'transform 200ms' }}
-      className={selectedValue === value ? selectedClass : ""}
-      onClick={() => selectedValue === value ? doDeselect() : doSetSelected(value)}
-      onMouseOver={noHover ? () => { } : (e) => e.currentTarget.style.transform = `scale(${hoverScale || 1.1})`}
+      style={{ cursor: 'pointer', transition: 'transform 200ms', ...style }}
+      className={isSelected(value) ? selectedClass : ""}
+      onClick={(e) => {
+        if (isSelected(value)) {
+          doDeselect(value);
+        } else {
+          doSetSelected(value);
+          if (noHoverWhenSelected) {
+            e.currentTarget.style.transform = 'scale(1)';
+          }
+        }
+      }}
+      onMouseOver={noHover || (noHoverWhenSelected && isSelected(value)) ? () => { } : (e) => e.currentTarget.style.transform = `scale(${hoverScale || 1.1})`}
       onMouseOut={noHover ? () => { } : (e) => e.currentTarget.style.transform = 'scale(1)'}
     >
       {children}
@@ -171,7 +188,6 @@ export const SceneView = () => {
   }
 
   const doSetSelected = (entity) => {
-    console.log(entity);
     // First, set outline of currently selected to false, if valid
     if (GetActiveScene().isEntityValid(selectedEntity)) {
       GetActiveScene().forceGetComponent(selectedEntity, MeshRenderer).outline = false;
@@ -211,30 +227,32 @@ export const SceneView = () => {
   }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
 
   return (
-    <NiceList
-      values={entities.filter(entity => GetActiveScene().hasComponent(entity, Tag))}
-      selectedValue={selectedEntity}
-      doSetSelected={doSetSelected}
-      doDeselect={doDeselect}
-      actions={[
-        { className: 'bi-trash-fill', onClick: doRemove, color: 'red' },
-        { className: 'bi-copy', onClick: doClone, color: 'blue' },
-        { className: 'bi-search', onClick: doFocus, color: 'black' }
-      ]}
-      bottomMenu={[
-        { AsIcon: FaSave, onClick: () => { }, color: 'black' },
-        { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
-        { AsIcon: IoTrashBin, onClick: doClear, color: 'red' },
-        { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon' },
-      ]}
-    >
-      {(entity) => {
-        // Solves a race when SceneView is rendering while scene is destroyed
-        if (!activeScene.getComponent(entity, Tag)) {
-          return null;
-        }
-        return (activeScene.getComponent(entity, Tag).name);
-      }}
-    </NiceList>
+    <div style={{ margin: 'min(1vw, 1vh)' }}>
+      <NiceList
+        values={entities.filter(entity => GetActiveScene().hasComponent(entity, Tag))}
+        selectedValue={selectedEntity}
+        doSetSelected={doSetSelected}
+        doDeselect={doDeselect}
+        actions={[
+          { className: 'bi-trash-fill', onClick: doRemove, color: 'red' },
+          { className: 'bi-copy', onClick: doClone, color: 'blue' },
+          { className: 'bi-search', onClick: doFocus, color: 'black' }
+        ]}
+        bottomMenu={[
+          { AsIcon: FaSave, onClick: () => { }, color: 'black' },
+          { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
+          { AsIcon: IoTrashBin, onClick: doClear, color: 'red' },
+          { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon' },
+        ]}
+      >
+        {(entity) => {
+          // Solves a race when SceneView is rendering while scene is destroyed
+          if (!activeScene.getComponent(entity, Tag)) {
+            return null;
+          }
+          return (activeScene.getComponent(entity, Tag).name);
+        }}
+      </NiceList>
+    </div>
   );
 };

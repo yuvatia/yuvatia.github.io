@@ -79,6 +79,10 @@ body,
   background-color: lightblue;
 }
 
+.selectedComponent {
+  /* font-weight: bold; */
+}
+
 .right {
   grid-area: right;
   /* grid-template-columns: 1fr; */
@@ -119,8 +123,7 @@ canvas#color {
 .InspectorHeader {
   display: flex;
   align-items: center;
-  border: 1px solid #dee2e6;
-  border-radius: 3px;
+  border-bottom: 2px solid #dee2e6;
   padding: min(1vw, 1vh);
   margin: min(1vw, 1vh);
 }
@@ -131,10 +134,10 @@ canvas#color {
   cursor: pointer;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin: 0; 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
 }

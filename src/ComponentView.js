@@ -1,9 +1,20 @@
 import { useContext, useEffect, useState } from 'react';
 import { gEditorSystem } from './EngineCanvas';
 import { GlobalState } from './GlobalState';
-import { Accordion, Button, CloseButton, Table } from 'react-bootstrap';
+import { Accordion, AccordionButton, Button, CloseButton, Collapse, Table, useAccordionButton } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
 import { Tag } from './engine/src/components';
+import { ListItem, NiceList } from './SceneView';
+
+const CustomAccordionButton = ({ eventKey, children }) => {
+  const decoratedOnClick = useAccordionButton(eventKey);
+
+  return (
+    <div onClick={decoratedOnClick} style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+      {children}
+    </div>
+  );
+};
 
 export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => (
   <Table hover>
@@ -33,6 +44,7 @@ export const GenericObjectForm = ({ fields, component, updateVectorField, Update
 
 export const ComponentView = ({ type, typename, entity, activeScene, fields, removeMe }) => {
   const [component, setComponent] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const updateVectorField = (name, axis, value) => {
     // setComponent({
@@ -109,49 +121,37 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
   }
 
   return (
-    <Accordion
-      style={{ borderBottom: '1px solid #dee2e6', position: 'relative' }}
-    >
-      <Accordion.Header
-        style={{ transition: 'transform 200ms' }}
-        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+    <>
+      <NiceList
+        notSearchable
+        values={[type]}
+        selectedValue={null}
+        doSetSelected={() => { setOpen(!open) }}
+        doDeselect={() => { setOpen(!open) }}
+        actions={[
+          { className: open ? 'bi-chevron-up' : 'bi-chevron-down', onClick: () => setOpen(!open), color: 'blue' },
+          { className: 'bi-trash-fill', onClick: isRemovable() ? () => removeMe() : null, color: 'red' },
+        ]}
       >
-        {getHeader()}
-        {isRemovable() ?
-          <button
-            className='bi bi-trash-fill color-state-override'
-            style={{
-              position: 'absolute',
-              right: '40px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              border: 'none',
-              backgroundColor: 'transparent',
-              transition: 'transform 200ms',
-            }}
-            onClick={(e) => {
-              const target = e.currentTarget;
-              target.style.transform = 'translateY(-50%) scale(1.2)';
-              setTimeout(() => {
-                target.style.transform = 'translateY(-50%) scale(1)';
-              }, 200);
-              removeMe();
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.2)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
-          ></button>
-          : null}
-      </Accordion.Header>
-      <Accordion.Body>
-        <GenericObjectForm
-          fields={fields}
-          component={component}
-          updateVectorField={updateVectorField}
-          UpdateField={UpdateField}
-        />
-      </Accordion.Body>
-    </Accordion>
+        {value => {
+          return (
+            <>
+              {getHeader()}
+            </>
+          )
+        }}
+      </NiceList>
+      <Collapse in={open}>
+        <div>
+          <GenericObjectForm
+            fields={fields}
+            component={component}
+            updateVectorField={updateVectorField}
+            UpdateField={UpdateField}
+          />
+        </div>
+      </Collapse>
+    </>
   );
 };
 
