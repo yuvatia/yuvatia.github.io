@@ -7,13 +7,29 @@ import { Tag, UUID, UUIDComponent } from './engine/src/components';
 import React, { useContext, useEffect, useState } from 'react';
 import { GlobalState } from './GlobalState';
 import { gEditorSystem } from './EngineCanvas';
+import { Asset, MeshAsset } from './engine/asset';
+
+function GenericSelect({ defaultValue, noneValue, onChange, options }) {
+  return (
+    <Form.Select defaultValue={defaultValue} onChange={(e) => onChange(e.target.value)}>
+      {noneValue ?
+        (<option value={noneValue}>
+          None
+        </option>) : null}
+      {options.map(({ value, display }) => (
+        <option value={value}>
+          {display}
+        </option>
+      ))}
+    </Form.Select>
+  );
+}
 
 
 export const EntitySelector = ({ value, onChange }) => {
   const { activeScene } = useContext(GlobalState);
 
   const [entities, setEntities] = useState([]);
-  const [selectedEntity, setSelectedEntity] = useState(null);
 
   const refreshEntities = () => {
     setEntities(activeScene.getEntities().map(({ id: entity }) => entity));
@@ -32,30 +48,63 @@ export const EntitySelector = ({ value, onChange }) => {
     };
   }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
 
+
+  const options = entities.map(entity => {
+    if (!activeScene || !activeScene.getComponent(entity, Tag)) {
+      return null;
+    }
+    const tag = activeScene.getName(entity);
+    const uuid = activeScene.getComponent(entity, UUIDComponent);
+    return { value: uuid.uuid, display: tag };
+  }).filter(Boolean);
+
+  const defaultValue = value || UUID.empty;
+  const handleOnChange = (value) => {
+    const res = value === "null" ? null : value;
+    const selectedUUID = Object.assign(new UUID(), { value: res });
+    onChange(selectedUUID)
+  };
+
   return (
-    activeScene &&
-    <Form.Select defaultValue={value && value.uuid ? value.uuid : UUID.empty} onChange={(e) => {
-      const res = e.target.value === "null" ? null : e.target.value;
-      const selectedUUID = Object.assign(new UUID(), { value: res });
-      onChange(selectedUUID)
-    }}>
-      <option value={UUID.empty}>
-        None
-      </option>
-      {entities.map(entity => {
-        // There's a race when playing the scene
-        if (!activeScene || !activeScene.getComponent(entity, Tag)) {
-          return null;
-        }
-        const tag = activeScene.getName(entity);
-        const uuid = activeScene.getComponent(entity, UUIDComponent);
-        return (
-          <option value={uuid.uuid}>
-            {tag}
-          </option>
-        )
-      })}
-    </Form.Select>)
+    <GenericSelect defaultValue={defaultValue} noneValue={UUID.empty} onChange={handleOnChange} options={options} />
+  );
+}
+
+export const AssetSelector = ({ AssetType, value, onChange }) => {
+  const { activeScene } = useContext(GlobalState);
+
+  const [assets, setAssets] = useState([]);
+
+  const refreshAssets = () => {
+    setAssets(Asset.filter(v => v instanceof AssetType));
+  };
+
+  useEffect(() => {
+    const onEngineEvent = (event) => {
+      if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
+        refreshAssets();
+      }
+    };
+
+    gEditorSystem.subscribe(onEngineEvent);
+    return () => {
+      gEditorSystem.unsubscribe(onEngineEvent);
+    };
+  }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
+
+
+  const options = assets.map(asset => {
+    return { value: asset.name, display: asset.name };
+  }).filter(Boolean);
+
+  const defaultValue = value.name;
+  const handleOnChange = (value) => {
+    onChange(Asset.get(value) || Asset.empty);
+  };
+
+  return (
+    <GenericSelect defaultValue={defaultValue} noneValue={UUID.empty} onChange={handleOnChange} options={options} />
+  );
 }
 
 
@@ -65,7 +114,13 @@ export const GenericInput = ({
   value,
   onChange,
   onVectorChange }) => {
-  switch (fieldType || value.type) {
+  const type = fieldType || value.type;
+  if (value instanceof Asset) {
+    return (
+      <AssetSelector AssetType={value.constructor} value={value} onChange={(value) => onChange(name, value)} />
+    )
+  }
+  switch (type) {
     case Vector.name:
     case Point.name:
       return (

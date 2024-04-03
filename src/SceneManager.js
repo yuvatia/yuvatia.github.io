@@ -18,6 +18,7 @@ import { Transform } from './engine/src/transform';
 import { Cube } from './engine/src/geometry';
 import { Material, MeshFilter, MeshRenderer } from './engine/src/components';
 import { Point, Vector } from './engine/src/math';
+import { MeshAsset } from './engine/asset';
 
 const CreateDefaultScenes = () => {
     /*
@@ -33,10 +34,9 @@ const CreateDefaultScenes = () => {
 
     scene.name = 'Rotating Cube';
     const box = scene.newEntity('Box');
-    const BoxDCEL = DCELRepresentation.fromSimpleMesh(new Cube());
     const realT = scene.getComponent(box, Transform);
     realT.scale = new Vector(100, 100, 100);
-    scene.addComponent(box, MeshFilter).meshRef = BoxDCEL;
+    scene.addComponent(box, MeshFilter).meshRef = MeshAsset.get('Cube');
     scene.addComponent(box, Material).diffuse = new Point(255, 70, 0, 1); // Red
     scene.addComponent(box, MeshRenderer).shading = false;
     const rbody = scene.addComponent(box, Rigidbody);
@@ -58,7 +58,7 @@ const SceneManager = () => {
         // Load scenes from local storage
         let scenes = null;
         try {
-            scenes = JSON.parse(localStorage.getItem(SceneStorageKey), Reviver.parse);
+            // scenes = JSON.parse(localStorage.getItem(SceneStorageKey), Reviver.parse);
         } catch (e) { }
         const hasSavedState = false && scenes && scenes.scenes && scenes.version === SupportedVersion;
         return hasSavedState ? scenes.scenes : CreateDefaultScenes();
@@ -73,8 +73,8 @@ const SceneManager = () => {
     }, [availableScenes]);
 
     useEffect(() => {
-        if (availableScenes.length > 0) {
-            gDirector.setActiveScene(availableScenes[0]);
+        if (availableScenes.length > 1) {
+            gDirector.setActiveScene(availableScenes[1]);
         }
     }, []);
 
@@ -117,17 +117,14 @@ const SceneManager = () => {
                         values={availableScenes}
                         selectedValue={activeScene}
                         selectedClass='selectedScene'
-                        doSetSelected={() => { }}
+                        doSetSelected={(scene) => {
+                            setPendingScene(scene);
+                            setShowConfirmationDialog(true);
+                        }}
                         doDeselect={() => { }}
                         actions={[
                             { className: 'bi-trash-fill', onClick: (scene) => { setAvailableScenes(availableScenes.filter(v => v != scene)) }, color: 'red' },
                             { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'blue' },
-                            {
-                                className: 'bi-power', onClick: (scene) => {
-                                    setPendingScene(scene);
-                                    setShowConfirmationDialog(true);
-                                }, color: 'black'
-                            },
                             { className: 'bi-save', onClick: DownloadScene }
                         ]}
                         bottomMenu={[

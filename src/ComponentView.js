@@ -16,31 +16,40 @@ const CustomAccordionButton = ({ eventKey, children }) => {
   );
 };
 
-export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => (
-  <Table hover>
-    <tbody>
-      {fields.map((fieldEntry) => {
-        const name = (fieldEntry.constructor.name === String.name) ? fieldEntry : fieldEntry.name;
-        if (!component.hasOwnProperty(name)) return null;
-        const fieldType = fieldEntry.constructor.name === String.name ? component[name].constructor.name : fieldEntry.type;
-        return (
-          <tr key={name}>
-            <td>{name}</td>
-            <td>
-              <GenericInput
-                fieldType={fieldType}
-                name={name}
-                value={component[name]}
-                onVectorChange={updateVectorField}
-                onChange={UpdateField}
-              />
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </Table>
-);
+export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => {
+  if (fields === null) {
+    return null;
+  }
+  return (
+    <Table hover>
+      <tbody>
+        {fields.map((fieldEntry) => {
+          if (fieldEntry === null) {
+            console.log(`Null field entry in ${component.constructor.name}`);
+            return;
+          }
+          const name = (fieldEntry.constructor.name === String.name) ? fieldEntry : fieldEntry.name;
+          if (!component.hasOwnProperty(name)) return null;
+          const fieldType = fieldEntry.constructor.name === String.name ? component[name].constructor.name : fieldEntry.type;
+          return (
+            <tr key={name}>
+              <td>{name}</td>
+              <td>
+                <GenericInput
+                  fieldType={fieldType}
+                  name={name}
+                  value={component[name]}
+                  onVectorChange={updateVectorField}
+                  onChange={UpdateField}
+                />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </Table>
+  )
+};
 
 export const ComponentView = ({ type, typename, entity, activeScene, fields, removeMe }) => {
   const [component, setComponent] = useState(null);

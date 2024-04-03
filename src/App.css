@@ -91,7 +91,10 @@ body,
   overflow: auto;
 }
 
-/* Canvas */
+/* Canvas
+NOTE: see
+https://medium.com/@doomgoober/understanding-html-canvas-scaling-and-sizing-c04925d9a830
+*/
 canvas#color {
   width: 96%;
   height: 96%;
