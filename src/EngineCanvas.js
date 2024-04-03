@@ -14,6 +14,10 @@ class EditorSystem {
     callbacks = [];
     scene = null;
 
+    getName() {
+        return 'Editor';
+    }
+    
     subscribe(callback) {
         this.callbacks.push(callback);
     }

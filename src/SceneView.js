@@ -4,8 +4,8 @@ import { MeshRenderer, Tag } from './engine/src/components';
 import { GetActiveScene } from './App';
 import { GlobalState } from './GlobalState';
 import { Form, InputGroup, ListGroup, Table } from 'react-bootstrap';
-import { IoAdd, IoAddCircle, IoTrashBin } from 'react-icons/io5';
-import { Camera } from './engine/src/camera';
+import { IoAddCircle } from 'react-icons/io5';
+import { FaTrashCan } from "react-icons/fa6";
 import { Transform } from './engine/src/transform';
 import { FaDownload, FaSave, FaSearch, FaUpload } from 'react-icons/fa';
 import { DownloadScene, UploadScene } from './SceneUtils';
@@ -64,6 +64,7 @@ export const ListItem = ({
   noHoverWhenSelected,
   hoverScale,
   style,
+  selectedStyle,
   children }) => {
   const iconValues = { delete: 'bi-trash-fill', copy: 'bi-copy', lookup: 'bi-search', ...iconOverrides };
   const actionsFallback = [
@@ -81,7 +82,7 @@ export const ListItem = ({
     <ListGroup.Item
       as='li'
       key={value}
-      style={{ cursor: 'pointer', transition: 'transform 200ms', ...style }}
+      style={{ cursor: 'pointer', transition: 'transform 200ms', ...(isSelected(value) ? selectedStyle : style) }}
       className={isSelected(value) ? selectedClass : ""}
       onClick={(e) => {
         if (isSelected(value)) {
@@ -115,9 +116,10 @@ export const NiceList = ({
   doClear,
   children,
   notSearchable,
+  searchHint,
   ...props }) => {
   const bottomMenuFallback = [{ AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
-  { AsIcon: IoTrashBin, onClick: doClear, color: 'red' }];
+  { AsIcon: FaTrashCan, onClick: doClear, color: 'red' }];
   const [search, setSearch] = useState('');
   const filteredValues = values.filter(value => {
     const iSearch = search.toLowerCase();
@@ -131,7 +133,7 @@ export const NiceList = ({
           <InputGroup.Text><FaSearch /></InputGroup.Text>
           <Form.Control
             type="text"
-            placeholder="Search..."
+            placeholder={searchHint || "Search..."}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -230,6 +232,7 @@ export const SceneView = () => {
     <div style={{ margin: 'min(1vw, 1vh)' }}>
       <NiceList
         values={entities.filter(entity => GetActiveScene().hasComponent(entity, Tag))}
+        searchHint={"Search for entity..."}
         selectedValue={selectedEntity}
         doSetSelected={doSetSelected}
         doDeselect={doDeselect}
@@ -239,10 +242,10 @@ export const SceneView = () => {
           { className: 'bi-search', onClick: doFocus, color: 'black' }
         ]}
         bottomMenu={[
-          { AsIcon: FaSave, onClick: () => { }, color: 'black' },
           { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
-          { AsIcon: IoTrashBin, onClick: doClear, color: 'red' },
-          { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon' },
+          { AsIcon: FaTrashCan, onClick: doClear, color: 'red' },
+          { AsIcon: FaSave, onClick: () => { }, color: 'black' },
+          { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon', color: 'red' },
         ]}
       >
         {(entity) => {

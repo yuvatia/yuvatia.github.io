@@ -50,7 +50,6 @@ const SupportedVersion = 1;
 const SceneStorageKey = 'AvailableScenes';
 
 const SceneManager = () => {
-    const [show, setShow] = useState(false);
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
     const [pendingScene, setPendingScene] = useState(null);
 
@@ -78,11 +77,6 @@ const SceneManager = () => {
         }
     }, []);
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-    const handleSave = () => {/* Save logic here */ };
-    const handleLoad = () => {/* Load logic here */ };
-
     const doSetActiveScene = (scene) => {
         gDirector.setActiveScene(scene);
     };
@@ -92,12 +86,13 @@ const SceneManager = () => {
         setAvailableScenes([...availableScenes]);
     }
 
+    const isRemovable = (scene) => {
+        // In the future, make demo scenes unremovable
+        return true;
+    }
+
     return (
-        <div id='SceneManager'>
-            <div className='ListHeader' onClick={handleShow}>
-                <LuClapperboard size={20} className='controlIcon' onClick={handleShow} />
-                {activeScene && <b>{activeScene.name}</b>}
-            </div>
+        <div id='SceneManager' style={{ margin: 'min(1vw, 1vh)' }}>
             <ConfirmationDialog
                 // parentSelector={() => document.querySelector('#SceneManager')}
                 onAccept={() => {
@@ -108,59 +103,54 @@ const SceneManager = () => {
                 show={showConfirmationDialog}>
                 Selecting the scene will replace the current scene
             </ConfirmationDialog>
-            <Modal dialogAs={DraggableModalDialog} show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Scene Manager</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <NiceList
-                        values={availableScenes}
-                        selectedValue={activeScene}
-                        selectedClass='selectedScene'
-                        doSetSelected={(scene) => {
-                            setPendingScene(scene);
-                            setShowConfirmationDialog(true);
-                        }}
-                        doDeselect={() => { }}
-                        actions={[
-                            { className: 'bi-trash-fill', onClick: (scene) => { setAvailableScenes(availableScenes.filter(v => v != scene)) }, color: 'red' },
-                            { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'blue' },
-                            { className: 'bi-save', onClick: DownloadScene }
-                        ]}
-                        bottomMenu={[
-                            { AsIcon: IoAddCircle, onClick: () => { setAvailableScenes([...availableScenes, new Scene('Untitled ')]) }, color: 'green' },
-                            {
-                                AsIcon: FaUpload, onClick: async () => {
-                                    try {
-                                        const scene = await UploadScene();
-                                        setAvailableScenes([...availableScenes, scene]);
-                                        // The promise was resolved, continue with your code here
-                                    } catch (error) {
-                                        // The promise was rejected, handle the error here
-                                        console.error('Failed to upload scene:', error);
-                                        // Continue silently
-                                    }
-                                }, className: 'controlIcon'
+            <NiceList
+                values={availableScenes}
+                searchHint="Search for scene..."
+                selectedValue={activeScene}
+                selectedClass='selectedScene'
+                selectedStyle={{ backgroundColor: '#e8edef' }}
+                doSetSelected={(scene) => {
+                    setPendingScene(scene);
+                    setShowConfirmationDialog(true);
+                }}
+                doDeselect={() => { }}
+                actions={[
+                    { className: 'bi-trash-fill', onClick: (scene) => { if (isRemovable(scene)) setAvailableScenes(availableScenes.filter(v => v != scene)) }, color: 'red' },
+                    { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'blue' },
+                    { className: 'bi-save', onClick: DownloadScene }
+                ]}
+                bottomMenu={[
+                    { AsIcon: IoAddCircle, onClick: () => { setAvailableScenes([...availableScenes, new Scene('Untitled ')]) }, color: 'green' },
+                    {
+                        AsIcon: FaUpload, onClick: async () => {
+                            try {
+                                const scene = await UploadScene();
+                                setAvailableScenes([...availableScenes, scene]);
+                                // The promise was resolved, continue with your code here
+                            } catch (error) {
+                                // The promise was rejected, handle the error here
+                                console.error('Failed to upload scene:', error);
+                                // Continue silently
                             }
-                        ]}
-                    >
-                        {(scene) =>
-                            <>
-                                <input
-                                    class="form-control"
-                                    style={{
-                                        display: 'inline', width: 'auto',
-                                        backgroundColor: (activeScene === scene) ? 'lightblue' : 'white'
-                                    }}
-                                    type="text"
-                                    value={scene.name}
-                                    onChange={(e) => doRename(scene, e.target.value)}
-                                />
-                            </>
-                        }
-                    </NiceList>
-                </Modal.Body>
-            </Modal>
+                        }, className: 'controlIcon'
+                    }
+                ]}
+            >
+                {(scene) =>
+                    <>
+                        <input
+                            class="form-control"
+                            style={{
+                                display: 'inline', width: 'auto',
+                                backgroundColor: (activeScene === scene) ? '#e8edef' : 'transparent'
+                            }}
+                            type="text"
+                            value={scene.name}
+                            onChange={(e) => doRename(scene, e.target.value)}
+                        />
+                    </>
+                }
+            </NiceList>
         </div>
     );
 }

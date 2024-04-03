@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
+import { Tabs, Tab } from 'react-bootstrap';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -56,17 +57,17 @@ const App = () => {
     const clone = activeScene.deepCopy('workingScene');
     // setActiveScene(clone);
     gDirector.setActiveScene(clone);
-    gDirector.setSystemState(PhysicsSystem.name, true);
+    gDirector.setSystemState(PhysicsSystem.getName(), true);
   }
 
   const onStop = () => {
     // setActiveScene(backupScene);
-    gDirector.setSystemState(PhysicsSystem.name, false);
+    gDirector.setSystemState(PhysicsSystem.getName(), false);
     gDirector.setActiveScene(backupScene);
   }
 
   const onPause = () => {
-    gDirector.toggleSystemState(PhysicsSystem.name);
+    gDirector.toggleSystemState(PhysicsSystem.getName());
   }
 
   return (
@@ -77,7 +78,7 @@ const App = () => {
             {activeScene ? (<>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
                 {gDirector ? <SettingsView /> : null}
-                {gDirector && gDirector.getSystemState(PhysicsSystem.name) ?
+                {gDirector && gDirector.getSystemState(PhysicsSystem.getName()) ?
                   <FaPause onClick={onPause} size={20} className='controlIcon' /> :
                   <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
@@ -95,10 +96,14 @@ const App = () => {
           </div>
           <div className="left" id="left">
             {activeScene && !maximizedState ? (
-              <>
-                <SceneManager />
-                <SceneView />
-              </>
+              <Tabs defaultActiveKey="sceneView" id="uncontrolled-tab-example">
+                <Tab eventKey="sceneView" title={<><i class="bi bi-box controlIcon" />{GetActiveScene().name}</>}>
+                  <SceneView />
+                </Tab>
+                <Tab eventKey="sceneManager" title={<><LuClapperboard size={20} className='controlIcon' />Manage</>}>
+                  <SceneManager />
+                </Tab>
+              </Tabs>
             ) : <div>Loading</div>}
           </div>
           <div className="middle" id="middle">

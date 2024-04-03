@@ -30,7 +30,7 @@ const SettingsView = () => {
 
     const refreshSettings = () => {
         const nextSettings = gDirector.systems.reduce((acc, system) => {
-            acc[system.constructor.name] = { ...system.preferences } || { ...system.settings } || {};
+            acc[system.getName()] = { ...system.preferences } || { ...system.settings } || {};
             return acc;
         }, {});
 
@@ -41,7 +41,7 @@ const SettingsView = () => {
 
     const setSettingValue = (systemName, prefName, value) => {
         gDirector.systems.forEach(system => {
-            if (system.constructor.name === systemName) {
+            if (system.getName() === systemName) {
                 const target = system.preferences || system.settings;
                 target[prefName] = value;
             }
@@ -56,7 +56,7 @@ const SettingsView = () => {
 
     useEffect(() => {
         refreshSettings();
-        setselectedSystem(gDirector.systems[0].constructor.name);
+        setselectedSystem(gDirector.systems[0].getName());
     }, []);
 
     useEffect(() => {
