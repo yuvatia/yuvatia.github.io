@@ -20,8 +20,12 @@ import { Material, MeshFilter, MeshRenderer } from './engine/src/components';
 import { Point, Vector } from './engine/src/math';
 import { MeshAsset } from './engine/asset';
 import { ExclamationTriangleFill } from 'react-bootstrap-icons';
+import { ExampleScenes } from './ExampleScenes';
+import { SetupSerialization } from './engine/src/Director';
 
 const CreateDefaultScenes = () => {
+    SetupSerialization();
+    return JSON.parse(JSON.stringify(ExampleScenes), Reviver.parse);
     /*
     DEMO LIST:
     0. Rotation Box
@@ -37,6 +41,8 @@ const CreateDefaultScenes = () => {
     const box = scene.newEntity('Box');
     const realT = scene.getComponent(box, Transform);
     realT.scale = new Vector(100, 100, 100);
+    // realT.rotation.x = 45;
+    // realT.rotation.y = 45;
     scene.addComponent(box, MeshFilter).meshRef = MeshAsset.get('Cube');
     scene.addComponent(box, Material).diffuse = new Point(255, 70, 0, 1); // Red
     scene.addComponent(box, MeshRenderer).shading = false;
@@ -66,13 +72,13 @@ const SceneManager = () => {
         // Load scenes from local storage
         let scenes = null;
         try {
-            // scenes = JSON.parse(localStorage.getItem(SceneStorageKey), Reviver.parse);
+            scenes = JSON.parse(localStorage.getItem(SceneStorageKey), Reviver.parse);
         } catch (e) { }
-        const hasSavedState = false && scenes && scenes.scenes && scenes.version === SupportedVersion;
+        const hasSavedState = scenes && scenes.scenes && scenes.version === SupportedVersion;
         return hasSavedState ? scenes.scenes : CreateDefaultScenes();
     });
 
-    const { activeScene, setActiveScene } = useContext(GlobalState);
+    const { activeScene } = useContext(GlobalState);
 
     useEffect(() => {
         // Save to localStorage whenever availableScenes changes
@@ -81,8 +87,8 @@ const SceneManager = () => {
     }, [availableScenes]);
 
     useEffect(() => {
-        if (availableScenes.length > 1) {
-            gDirector.setActiveScene(availableScenes[1]);
+        if (availableScenes.length > 0) {
+            gDirector.setActiveScene(availableScenes[0]);
         }
     }, []);
 

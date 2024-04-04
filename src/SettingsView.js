@@ -52,6 +52,12 @@ const SettingsView = () => {
         refreshSettings();
     }
 
+    const setVectorValue = (systeName, prefName, axis, value) => {
+        gDirector.getSystemByName(systeName).preferences[prefName][axis] = value;
+        refreshSettings();
+    };
+
+
     const setSystemState = (systemName, enabled) => {
         gDirector.setSystemState(systemName, enabled);
         setSystemStates({ ...gDirector.systemStates });
@@ -106,6 +112,7 @@ const SettingsView = () => {
                                     <GenericObjectForm
                                         fields={Object.keys(settings[selectedSystem])}
                                         component={settings[selectedSystem]}
+                                        updateVectorField={(name, axis, value) => { setVectorValue(selectedSystem, name, axis, value) }}
                                         UpdateField={(name, value) => setSettingValue(selectedSystem, name, value)}
                                     />
                                 </div>
