@@ -138,7 +138,7 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
         doSetSelected={() => { setOpen(!open) }}
         doDeselect={() => { setOpen(!open) }}
         actions={[
-          { className: open ? 'bi-chevron-up' : 'bi-chevron-down', onClick: () => setOpen(!open), color: 'blue' },
+          { className: open ? 'bi-chevron-up' : 'bi-chevron-down', onClick: () => setOpen(!open), color: 'var(--bs-link-color)' },
           { className: 'bi-trash-fill', onClick: isRemovable() ? () => removeMe() : null, color: 'red' },
         ]}
       >

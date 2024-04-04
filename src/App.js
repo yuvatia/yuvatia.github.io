@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-icons/fa";
-import { FaMaximize, FaMinimize } from "react-icons/fa6";
+import { FaMaximize, FaMinimize, FaMoon } from "react-icons/fa6";
 import { LuClapperboard } from "react-icons/lu";
 
 import { EngineCanvas, gDirector, gEditorSystem } from './EngineCanvas';
@@ -29,6 +29,14 @@ const App = () => {
   const [activeScene, setActiveScene] = useState(null);
   const [backupScene, setBackupScene] = useState(null);
   const [selectedEntity, setSelectedEntity] = useState(0);
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const [maximizedState, setMaximizedState] = useState(false);
 
@@ -71,16 +79,16 @@ const App = () => {
   }
 
   return (
-    <GlobalState.Provider value={{ activeScene, selectedEntity, setSelectedEntity, setActiveScene }}>
-      <div id="grid-wrapper">
+    <GlobalState.Provider value={{ activeScene, selectedEntity, theme, setSelectedEntity, setActiveScene }}>
+      <div id="grid-wrapper" data-bs-theme={theme || 'light'}>
         <div className="grid-container" id="grid-container">
-          <div className="controls">
-            {activeScene ? (<>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', height: '100%' }}>
-                {gDirector ? <SettingsView /> : null}
+          <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {gDirector ? <SettingsView /> : null}
+            {activeScene ? (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', flex: 1 }}>
                 {gDirector && gDirector.getSystemState(PhysicsSystem.getName()) ?
                   <FaPause onClick={onPause} size={20} className='controlIcon' /> :
-                  <FaPlay t onClick={onPlay} size={20} className='controlIcon' />}
+                  <FaPlay onClick={onPlay} size={20} className='controlIcon' />}
                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
                 {
                   maximizedState ? <FaMinimize className='controlIcon' size={20} onClick={() => {
@@ -92,15 +100,20 @@ const App = () => {
                   }} />
                 }
               </div>
-            </>) : null}
+            ) : null}
+            <i className="bi bi-moon-fill theme-toggle"
+              id="theme-toggle"
+              style={{ marginRight: '1vw', fontSize: '20px' }}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            />
           </div>
           <div className="left" id="left">
             {activeScene && !maximizedState ? (
-              <Tabs defaultActiveKey="sceneView" id="uncontrolled-tab-example">
-                <Tab eventKey="sceneView" title={<><i class="bi bi-box controlIcon" />{GetActiveScene().name}</>}>
+              <Tabs defaultActiveKey="sceneView" id="uncontrolled-tab-example" style={{ display: 'grid', justifyItems: 'space-evenly', gridTemplateColumns: '1fr 1fr' }}>
+                <Tab eventKey="sceneView" title={<div className='tabEntry'><i class="bi bi-box controlIcon" />{GetActiveScene().name}</div>}>
                   <SceneView />
                 </Tab>
-                <Tab eventKey="sceneManager" title={<><LuClapperboard size={20} className='controlIcon' />Manage</>}>
+                <Tab eventKey="sceneManager" title={<div className='tabEntry'><LuClapperboard size={20} className='controlIcon' />Manage</div>}>
                   <SceneManager />
                 </Tab>
               </Tabs>

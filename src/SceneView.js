@@ -69,7 +69,7 @@ export const ListItem = ({
   const iconValues = { delete: 'bi-trash-fill', copy: 'bi-copy', lookup: 'bi-search', ...iconOverrides };
   const actionsFallback = [
     { className: iconValues.delete, onClick: onDelete, color: 'red' },
-    { className: iconValues.copy, onClick: onCopy, color: 'blue' },
+    { className: iconValues.copy, onClick: onCopy, color: 'var(--bs-link-color)' },
     { className: iconValues.lookup, onClick: onLookup, color: 'black' }
   ];
   const isSelected = (v) => {
@@ -83,7 +83,7 @@ export const ListItem = ({
       as='li'
       key={value}
       style={{ cursor: 'pointer', transition: 'transform 200ms', ...(isSelected(value) ? selectedStyle : style) }}
-      className={isSelected(value) ? selectedClass : ""}
+      className={`list-item ${isSelected(value) ? selectedClass : ''}`}
       onClick={(e) => {
         if (isSelected(value)) {
           doDeselect(value);
@@ -238,7 +238,7 @@ export const SceneView = () => {
         doDeselect={doDeselect}
         actions={[
           { className: 'bi-trash-fill', onClick: doRemove, color: 'red' },
-          { className: 'bi-copy', onClick: doClone, color: 'blue' },
+          { className: 'bi-copy', onClick: doClone, color: 'var(--bs-link-color)' },
           { className: 'bi-search', onClick: doFocus, color: 'black' }
         ]}
         bottomMenu={[

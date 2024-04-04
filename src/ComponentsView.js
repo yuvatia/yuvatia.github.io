@@ -123,7 +123,7 @@ export const ComponentsView = ({ entity, activeScene }) => {
               backgroundColor: 'green',
               borderColor: 'green',
               marginTop: '5%',
-              color: 'white'
+              color: 'var(--bg-color)'
             }}
             variant="success"
             id="dropdown-basic"

@@ -1,19 +1,54 @@
+[data-bs-theme="light"] {
+  --border-bg: #dee2e6;
+  --selected-item-bg: #e8edef;
+  --theme-toggle-color: #e8e864;
+  --theme-toggle-hover-color: black;
+}
+
+[data-bs-theme="dark"] {
+  --border-bg: #3b3c3e;
+  --selected-item-bg: var(--bs-secondary);
+  --theme-toggle-color: black;
+  --theme-toggle-hover-color: #e8e864;
+}
+
+/* For some reason --bs-modal-color is not set */
+.modal,
+.modal-content {
+  color: var(--bs-body-color);
+  transition: color 100ms ease-in-out;
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  transition: color 100ms ease-in-out;
+}
+
+.theme-toggle {
+  color: var(--theme-toggle-color);
+  transition: color 100ms ease-in-out;
+}
+
+.theme-toggle:hover {
+  cursor: pointer;
+  color: var(--theme-toggle-hover-color);
 }
 
 #grid-wrapper {
   height: 100%;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
 }
 
 .controlIcon {
   width: 1.25em;
   height: 1.5em;
   margin-right: 0.5em;
+
 }
 
 .controlIcon:hover {
@@ -32,7 +67,7 @@ body,
   grid-template-columns: 1fr 3fr 1fr;
   grid-template-rows: 1fr 11fr;
   gap: calc(min(1vw, 1vh));
-  margin: calc(max(0.5vw, 0.5vh));
+  padding: calc(max(0.5vw, 0.5vh));
   height: 98%;
   transition: 300ms;
 }
@@ -56,7 +91,7 @@ body,
 
 
 .grid-container>div {
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-bg);
 }
 
 .controls {
@@ -117,7 +152,7 @@ canvas#color {
 .ListHeader {
   display: flex;
   align-items: center;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-bg);
   border-radius: 3px;
   padding: min(1vw, 1vh);
   margin: min(1vw, 1vh);
@@ -126,7 +161,7 @@ canvas#color {
 .InspectorHeader {
   display: flex;
   align-items: center;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--border-bg);
   padding: min(1vw, 1vh);
   margin: min(1vw, 1vh);
 }
@@ -143,4 +178,45 @@ input[type=number]::-webkit-outer-spin-button {
   -moz-appearance: none;
   appearance: none;
   margin: 0;
+}
+
+.confirm-dialog-body {
+  padding: 0;
+}
+
+.confirm-dialog-alert {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirm-dialog-content {
+  margin-bottom: 1rem;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.icon-decline {
+  color: red;
+  cursor: pointer;
+}
+
+.icon-accept {
+  color: green;
+  cursor: pointer;
+}
+
+.confirm-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-icon {
+  color: #dc3545;
+  /* Bootstrap's danger color */
 }

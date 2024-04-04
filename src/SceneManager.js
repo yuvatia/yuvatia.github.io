@@ -19,6 +19,7 @@ import { Cube } from './engine/src/geometry';
 import { Material, MeshFilter, MeshRenderer } from './engine/src/components';
 import { Point, Vector } from './engine/src/math';
 import { MeshAsset } from './engine/asset';
+import { ExclamationTriangleFill } from 'react-bootstrap-icons';
 
 const CreateDefaultScenes = () => {
     /*
@@ -50,7 +51,15 @@ const SupportedVersion = 1;
 const SceneStorageKey = 'AvailableScenes';
 
 const SceneManager = () => {
+    const RequestEnum = {
+        DELETE_SCENE: 1,
+        SET_ACTIVE_SCENE: 2
+    };
+    const [requestType, setRequestType] = useState(0);
+    const [confirmationDialogTitle, setConfirmationDialogTitle] = useState('');
+    const [confirmationDialogText, setConfirmationDialogText] = useState('');
     const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+
     const [pendingScene, setPendingScene] = useState(null);
 
     const [availableScenes, setAvailableScenes] = useState(() => {
@@ -86,6 +95,21 @@ const SceneManager = () => {
         setAvailableScenes([...availableScenes]);
     }
 
+    const promptDelete = (scene) => {
+        if (!isRemovable(scene)) {
+            return;
+        }
+        setPendingScene(scene);
+        setRequestType(RequestEnum.DELETE_SCENE);
+        setConfirmationDialogTitle('Confirm scene deletion');
+        setConfirmationDialogText('All scene data will be deleted!');
+        setShowConfirmationDialog(true);
+    }
+
+    const doDelete = (scene) => {
+        setAvailableScenes(availableScenes.filter(v => v != scene));
+    }
+
     const isRemovable = (scene) => {
         // In the future, make demo scenes unremovable
         return true;
@@ -95,28 +119,39 @@ const SceneManager = () => {
         <div id='SceneManager' style={{ margin: 'min(1vw, 1vh)' }}>
             <ConfirmationDialog
                 // parentSelector={() => document.querySelector('#SceneManager')}
+                title={confirmationDialogTitle}
                 onAccept={() => {
-                    doSetActiveScene(pendingScene);
+                    switch (requestType) {
+                        case RequestEnum.SET_ACTIVE_SCENE:
+                            doSetActiveScene(pendingScene);
+                            break;
+                        case RequestEnum.DELETE_SCENE:
+                            doDelete(pendingScene);
+                            break;
+                    }
                     setShowConfirmationDialog(false)
                 }}
                 onDecline={() => { setShowConfirmationDialog(false) }}
                 show={showConfirmationDialog}>
-                Selecting the scene will replace the current scene
+                {confirmationDialogText}
             </ConfirmationDialog>
             <NiceList
                 values={availableScenes}
                 searchHint="Search for scene..."
                 selectedValue={activeScene}
                 selectedClass='selectedScene'
-                selectedStyle={{ backgroundColor: '#e8edef' }}
+                selectedStyle={{ backgroundColor: 'var(--selected-item-bg)' }}
                 doSetSelected={(scene) => {
                     setPendingScene(scene);
+                    setRequestType(RequestEnum.SET_ACTIVE_SCENE);
+                    setConfirmationDialogTitle('Confirm scene selection');
+                    setConfirmationDialogText('Selecting the scene will replace the current scene!');
                     setShowConfirmationDialog(true);
                 }}
                 doDeselect={() => { }}
                 actions={[
-                    { className: 'bi-trash-fill', onClick: (scene) => { if (isRemovable(scene)) setAvailableScenes(availableScenes.filter(v => v != scene)) }, color: 'red' },
-                    { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'blue' },
+                    { className: 'bi-trash-fill', onClick: promptDelete, color: 'red' },
+                    { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'var(--bs-link-color)' },
                     { className: 'bi-save', onClick: DownloadScene }
                 ]}
                 bottomMenu={[
@@ -142,11 +177,16 @@ const SceneManager = () => {
                             class="form-control"
                             style={{
                                 display: 'inline', width: 'auto',
-                                backgroundColor: (activeScene === scene) ? '#e8edef' : 'transparent'
+                                backgroundColor: (activeScene === scene) ? 'var(--selected-item-bg)' : 'transparent'
                             }}
                             type="text"
                             value={scene.name}
-                            onChange={(e) => doRename(scene, e.target.value)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            onChange={(e) => {
+                                doRename(scene, e.target.value)
+                            }}
                         />
                     </>
                 }
