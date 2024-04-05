@@ -28,6 +28,7 @@ export const GetActiveScene = () => {
 const App = () => {
   const [activeScene, setActiveScene] = useState(null);
   const [backupScene, setBackupScene] = useState(null);
+  const [saveSceneCallback, setSaveSceneCallback] = useState({callback: () => {}});
   const [selectedEntity, setSelectedEntity] = useState(0);
 
   const [theme, setTheme] = useState(() => {
@@ -62,14 +63,12 @@ const App = () => {
 
   const onPlay = () => {
     setBackupScene(activeScene);
-    const clone = activeScene.deepCopy('workingScene');
-    // setActiveScene(clone);
+    const clone = activeScene.deepCopy();
     gDirector.setActiveScene(clone);
     gDirector.setSystemState(PhysicsSystem.getName(), true);
   }
 
   const onStop = () => {
-    // setActiveScene(backupScene);
     gDirector.setSystemState(PhysicsSystem.getName(), false);
     gDirector.setActiveScene(backupScene);
   }
@@ -79,7 +78,7 @@ const App = () => {
   }
 
   return (
-    <GlobalState.Provider value={{ activeScene, selectedEntity, theme, setSelectedEntity, setActiveScene }}>
+    <GlobalState.Provider value={{ activeScene, selectedEntity, saveSceneCallback, theme, setSelectedEntity, setActiveScene, setSaveSceneCallback }}>
       <div id="grid-wrapper" data-bs-theme={theme || 'light'}>
         <div className="grid-container" id="grid-container">
           <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

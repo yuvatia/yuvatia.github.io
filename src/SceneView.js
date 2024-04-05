@@ -161,7 +161,7 @@ export const NiceList = ({
 }
 
 export const SceneView = () => {
-  const { activeScene, setActiveScene, selectedEntity, setSelectedEntity } = useContext(GlobalState);
+  const { activeScene, saveSceneCallback, selectedEntity, setSelectedEntity } = useContext(GlobalState);
   const [entities, setEntities] = useState([]);
 
   const refreshEntities = () => {
@@ -248,7 +248,7 @@ export const SceneView = () => {
         bottomMenu={[
           { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
           { AsIcon: FaTrashCan, onClick: doClear, color: 'red' },
-          { AsIcon: FaSave, onClick: () => { }, color: 'black' },
+          { AsIcon: FaSave, onClick: () => { saveSceneCallback.callback && saveSceneCallback.callback(GetActiveScene()) }, color: 'var(--bs-link-color)' },
           { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon', color: 'red' },
         ]}
       >

@@ -11,7 +11,7 @@ import { Asset, MeshAsset } from './engine/asset';
 
 function GenericSelect({ defaultValue, noneValue, onChange, options }) {
   return (
-    <Form.Select defaultValue={defaultValue} onChange={(e) => onChange(e.target.value)}>
+    <Form.Select value={defaultValue} onChange={(e) => onChange(e.target.value)}>
       {noneValue ?
         (<option value={noneValue}>
           None

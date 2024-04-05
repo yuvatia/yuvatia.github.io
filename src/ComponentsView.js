@@ -35,8 +35,8 @@ export const ComponentSpecification = {
   },
   Rigidbody: {
     type: Rigidbody,
-    // Missing collider, invMass. We remove Transform though
-    fields: ["mass", "friction", "restitution", "linearVelocity", "linearDamping", "angularVelocity", "angularDamping", "gravityScale"]
+    // Missing collider
+    fields: ["mass", "friction", "restitution", "linearVelocity", "linearDamping", "angularVelocity", "angularDamping", "gravityScale", "colliderType"]
   },
   FollowConstraint: {
     type: FollowConstraint,

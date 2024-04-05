@@ -136,6 +136,12 @@ canvas#color {
   margin: 2%;
 }
 
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
 .dropdown-item-hover:hover {
   background-color: #f8f9fa;
 }

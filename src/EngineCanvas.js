@@ -17,7 +17,7 @@ class EditorSystem {
     getName() {
         return 'Editor';
     }
-    
+
     subscribe(callback) {
         this.callbacks.push(callback);
     }
@@ -80,7 +80,7 @@ export const EngineCanvas = () => {
     }, []);
 
     return (
-        <div style={{ width: "100%", height: "100%", touchAction: "none" }}>
+        <div id="canvas-container">
             <canvas id="color"></canvas>
             <canvas id="depth" hidden></canvas>
             <canvas id="stencil" hidden></canvas>

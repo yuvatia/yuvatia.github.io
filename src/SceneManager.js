@@ -16,7 +16,7 @@ import { Rigidbody } from './engine/src/kinematics';
 import { DCELRepresentation } from './engine/src/halfmesh';
 import { Transform } from './engine/src/transform';
 import { Cube } from './engine/src/geometry';
-import { Material, MeshFilter, MeshRenderer } from './engine/src/components';
+import { Material, MeshFilter, MeshRenderer, UUID } from './engine/src/components';
 import { Point, Vector } from './engine/src/math';
 import { MeshAsset } from './engine/asset';
 import { ExclamationTriangleFill } from 'react-bootstrap-icons';
@@ -78,7 +78,7 @@ const SceneManager = () => {
         return hasSavedState ? scenes.scenes : CreateDefaultScenes();
     });
 
-    const { activeScene } = useContext(GlobalState);
+    const { activeScene, setSaveSceneCallback } = useContext(GlobalState);
 
     useEffect(() => {
         // Save to localStorage whenever availableScenes changes
@@ -88,11 +88,20 @@ const SceneManager = () => {
 
     useEffect(() => {
         if (availableScenes.length > 0) {
-            gDirector.setActiveScene(availableScenes[0]);
+            doSetActiveScene(availableScenes[0]);
         }
     }, []);
 
     const doSetActiveScene = (scene) => {
+        setSaveSceneCallback({
+            callback: (scene) => {
+                const index = availableScenes.findIndex(v => v === scene);
+                if (index >= 0) {
+                    availableScenes[index] = scene;
+                    setAvailableScenes([...availableScenes]);
+                }
+            }
+        });
         gDirector.setActiveScene(scene);
     };
 
@@ -158,7 +167,7 @@ const SceneManager = () => {
                 actions={[
                     { className: 'bi-trash-fill', onClick: promptDelete, color: 'red' },
                     { className: 'bi-copy', onClick: (scene) => { setAvailableScenes([...availableScenes, scene.deepCopy()]) }, color: 'var(--bs-link-color)' },
-                    { className: 'bi-save', onClick: DownloadScene }
+                    { className: 'bi-download', onClick: DownloadScene }
                 ]}
                 bottomMenu={[
                     { AsIcon: IoAddCircle, onClick: () => { setAvailableScenes([...availableScenes, new Scene('Untitled ')]) }, color: 'green' },
