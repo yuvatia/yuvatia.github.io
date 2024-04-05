@@ -19,6 +19,7 @@ import { Scene } from './engine/src/scene';
 import { PhysicsSystem } from './engine/src/physics';
 import SceneManager from './SceneManager';
 import { DownloadScene, UploadScene } from './SceneUtils';
+import HelpModal from './HelpModal';
 
 
 export const GetActiveScene = () => {
@@ -28,7 +29,7 @@ export const GetActiveScene = () => {
 const App = () => {
   const [activeScene, setActiveScene] = useState(null);
   const [backupScene, setBackupScene] = useState(null);
-  const [saveSceneCallback, setSaveSceneCallback] = useState({callback: () => {}});
+  const [saveSceneCallback, setSaveSceneCallback] = useState({ callback: () => { } });
   const [selectedEntity, setSelectedEntity] = useState(0);
 
   const [theme, setTheme] = useState(() => {
@@ -82,6 +83,7 @@ const App = () => {
       <div id="grid-wrapper" data-bs-theme={theme || 'light'}>
         <div className="grid-container" id="grid-container">
           <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HelpModal />
             {gDirector ? <SettingsView /> : null}
             {activeScene ? (
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', flex: 1 }}>
