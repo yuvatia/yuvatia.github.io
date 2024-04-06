@@ -1,13 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { SimpleDirector } from "./engine/src/Director"
-import { Renderer } from "./engine/src/renderer"
-import { Material, MeshFilter, MeshRenderer } from "./engine/src/components";
-import { DCELRepresentation } from "./engine/src/halfmesh";
-import { Cube } from "./engine/src/geometry";
-import { Point, Vector } from "./engine/src/math";
-import { Tag } from "./engine/src/scene";
-import { Transform } from "./engine/src/transform";
-import { setupScene } from "./engine/src/script";
+import { useEffect, useRef } from "react";
+import { SimpleDirector } from "./engine/src/Director";
 
 
 class EditorSystem {
@@ -70,7 +62,7 @@ export const EngineCanvas = ({ director, setDirector, id }) => {
         director.start();
 
         setDirector(director);
-    
+
         // return () => {
         //     gDirector.stop();
         //     gDirector.unsubscribeFromEvents();

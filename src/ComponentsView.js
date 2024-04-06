@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Transform } from './engine/src/transform';
-import { Tag, DirectionalLight, Material, MeshFilter, MeshRenderer } from './engine/src/components';
+import React, { useEffect, useState } from 'react';
+import { Dropdown } from 'react-bootstrap';
+import { ComponentView } from './ComponentView';
 import { gEditorSystem } from './EngineCanvas';
-import { ComponentView, ComponentView2, GenericObjectForm } from './ComponentView';
-import { Collapse, Dropdown } from 'react-bootstrap';
+import { NiceButton } from './SceneView';
+import { DirectionalLight, Material, MeshFilter, MeshRenderer, Tag } from './engine/src/components';
 import { FollowConstraint, Rigidbody } from './engine/src/kinematics';
-import { NiceButton, NiceList } from './SceneView';
+import { Transform } from './engine/src/transform';
 
 export const ComponentSpecification = {
   Tag: {
@@ -70,15 +70,9 @@ export const ComponentsView = ({ entity, activeScene }) => {
     refreshAvailableComponents();
   };
 
-  const doRemoveByName = (name) => {
-    const component = ComponentSpecification[name].type;
-    activeScene.removeComponent(entity, component);
-    refreshAvailableComponents();
-  }
-
   useEffect(() => {
     const onEngineEvent = (event) => {
-      if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
+      if (event.name === "onFrameStart" || event.name === "onSetActiveScene") {
         refreshAvailableComponents();
       }
     }

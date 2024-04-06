@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { gEditorSystem } from './EngineCanvas';
-import { MeshFilter, MeshRenderer, Tag } from './engine/src/components';
-import { GlobalState } from './GlobalState';
-import { Form, InputGroup, ListGroup, Table } from 'react-bootstrap';
-import { IoAddCircle } from 'react-icons/io5';
+import { Form, InputGroup, ListGroup } from 'react-bootstrap';
+import { FaDownload, FaSave, FaSearch } from 'react-icons/fa';
 import { FaTrashCan } from "react-icons/fa6";
+import { IoAddCircle } from 'react-icons/io5';
+import { gEditorSystem } from './EngineCanvas';
+import { GlobalState } from './GlobalState';
+import { DownloadScene } from './SceneUtils';
+import { MeshFilter, MeshRenderer, Tag } from './engine/src/components';
 import { Transform } from './engine/src/transform';
-import { FaDownload, FaSave, FaSearch, FaUpload } from 'react-icons/fa';
-import { DownloadScene, UploadScene } from './SceneUtils';
 
 export const NiceButton = ({ value, className, color, style, onClick, noEffects, ...props }) => {
   return (
@@ -218,7 +218,7 @@ export const SceneView = ({ renderer, scene }) => {
 
   useEffect(() => {
     const onEngineEvent = (event) => {
-      if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
+      if (event.name === "onFrameStart" || event.name === "onSetActiveScene") {
         refreshEntities();
       }
     };

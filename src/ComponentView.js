@@ -1,20 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Collapse, Table, useAccordionButton } from 'react-bootstrap';
 import { gEditorSystem } from './EngineCanvas';
-import { GlobalState } from './GlobalState';
-import { Accordion, AccordionButton, Button, CloseButton, Collapse, Table, useAccordionButton } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
+import { NiceList } from './SceneView';
 import { Tag } from './engine/src/components';
-import { ListItem, NiceList } from './SceneView';
-
-const CustomAccordionButton = ({ eventKey, children }) => {
-  const decoratedOnClick = useAccordionButton(eventKey);
-
-  return (
-    <div onClick={decoratedOnClick} style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-      {children}
-    </div>
-  );
-};
 
 export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => {
   if (fields === null) {

@@ -1,18 +1,18 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 
-import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-icons/fa";
-import { FaMaximize, FaMinimize, FaMoon } from "react-icons/fa6";
+import { FaPause, FaPlay, FaStop } from "react-icons/fa";
+import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { LuClapperboard } from "react-icons/lu";
 
 import { Tab, Tabs } from 'react-bootstrap'; // Import Bootstrap components as needed
 
-import { EngineCanvas } from './EngineCanvas';
 import { ComponentsView } from './ComponentsView';
+import { EngineCanvas } from './EngineCanvas';
+import HelpModal from './HelpModal';
+import SceneManager from './SceneManager';
 import { SceneView } from './SceneView';
 import SettingsView from './SettingsView';
 import { PhysicsSystem } from './engine/src/physics';
-import SceneManager from './SceneManager';
-import HelpModal from './HelpModal';
 
 const EngineContext = ({
     id,
@@ -80,10 +80,10 @@ const EngineContext = ({
                         </Tabs>
                     ) : <div>Loading</div>}
                 </div>
-                <div className="middle" id="middle">
+                <div className="middle">
                     <EngineCanvas director={director} setDirector={setDirector} id={id}></EngineCanvas>
                 </div>
-                <div className="right" id="right">
+                <div className="right">
                     {activeScene && activeScene.isEntityValid(selectedEntity) && !maximizedState ?
                         <ComponentsView activeScene={activeScene} entity={selectedEntity} />
                         :

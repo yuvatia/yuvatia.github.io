@@ -7,5 +7,5 @@ export const GlobalState = createContext({
   backupScene: null,  // activeScene is forked to backupScene when we start playing
   selectedEntity: -1,
   theme: 'light',
-  saveSceneCallback: () => {}
+  saveSceneCallback: () => { }
 });

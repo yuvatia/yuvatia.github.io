@@ -1,4 +1,3 @@
-import { Row, Col, Form } from 'react-bootstrap';
 
 export const VectorView = ({ name, vector, onChange }) => {
   return (

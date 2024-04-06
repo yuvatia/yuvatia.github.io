@@ -1,13 +1,13 @@
-import { Col, Form, Row } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 
-import { VectorView } from './VectorView';
-import { Point, Vector } from './engine/src/math';
-import { Tag, UUID, UUIDComponent } from './engine/src/components';
 import React, { useContext, useEffect, useState } from 'react';
-import { GlobalState } from './GlobalState';
 import { gEditorSystem } from './EngineCanvas';
-import { Asset, MeshAsset } from './engine/asset';
+import { GlobalState } from './GlobalState';
+import { VectorView } from './VectorView';
+import { Asset } from './engine/asset';
+import { Tag, UUID, UUIDComponent } from './engine/src/components';
+import { Point, Vector } from './engine/src/math';
 
 function GenericSelect({ defaultValue, noneValue, onChange, options }) {
   return (
@@ -37,7 +37,7 @@ export const EntitySelector = ({ value, onChange }) => {
 
   useEffect(() => {
     const onEngineEvent = (event) => {
-      if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
+      if (event.name === "onFrameStart" || event.name === "onSetActiveScene") {
         refreshEntities();
       }
     };
@@ -81,7 +81,7 @@ export const AssetSelector = ({ AssetType, value, onChange }) => {
 
   useEffect(() => {
     const onEngineEvent = (event) => {
-      if (event.name === "onFrameStart" || event.name == "onSetActiveScene") {
+      if (event.name === "onFrameStart" || event.name === "onSetActiveScene") {
         refreshAssets();
       }
     };

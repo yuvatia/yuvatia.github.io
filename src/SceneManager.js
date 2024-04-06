@@ -1,26 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Modal, Table, Form, Container, Row, Col, FormControl } from 'react-bootstrap';
-import { LuClapperboard } from 'react-icons/lu';
+import { FaUpload } from 'react-icons/fa';
+import { IoAddCircle } from 'react-icons/io5';
+import ConfirmationDialog from './ConfirmationDialog';
+import { ExampleScenes } from './ExampleScenes';
 import { GlobalState } from './GlobalState';
-import { Reviver } from './engine/src/reviver';
+import { DownloadScene, UploadScene } from './SceneUtils';
 import { NiceList } from './SceneView';
+import { MeshAsset } from './engine/asset';
+import { SetupSerialization } from './engine/src/Director';
+import { Material, MeshFilter, MeshRenderer } from './engine/src/components';
+import { Rigidbody } from './engine/src/kinematics';
+import { Point, Vector } from './engine/src/math';
+import { Reviver } from './engine/src/reviver';
 import { Scene } from './engine/src/scene';
 import { setupScene } from './engine/src/script';
-import { DraggableModalDialog } from './SettingsView';
-import ConfirmationDialog from './ConfirmationDialog';
-import { IoAddCircle, IoTrashBin } from 'react-icons/io5';
-import { FaUpload } from 'react-icons/fa';
-import { DownloadScene, UploadScene } from './SceneUtils';
-import { Rigidbody } from './engine/src/kinematics';
-import { DCELRepresentation } from './engine/src/halfmesh';
 import { Transform } from './engine/src/transform';
-import { Cube } from './engine/src/geometry';
-import { Material, MeshFilter, MeshRenderer, UUID } from './engine/src/components';
-import { Point, Vector } from './engine/src/math';
-import { MeshAsset } from './engine/asset';
-import { ExclamationTriangleFill } from 'react-bootstrap-icons';
-import { ExampleScenes } from './ExampleScenes';
-import { SetupSerialization } from './engine/src/Director';
 
 const CreateDefaultScenes = () => {
     SetupSerialization();
@@ -121,7 +115,7 @@ const SceneManager = ({ director }) => {
     }
 
     const doDelete = (scene) => {
-        setAvailableScenes(availableScenes.filter(v => v != scene));
+        setAvailableScenes(availableScenes.filter(v => v !== scene));
     }
 
     const isRemovable = (scene) => {
@@ -140,6 +134,8 @@ const SceneManager = ({ director }) => {
                             break;
                         case RequestEnum.DELETE_SCENE:
                             doDelete(pendingScene);
+                            break;
+                        default:
                             break;
                     }
                     setShowConfirmationDialog(false)

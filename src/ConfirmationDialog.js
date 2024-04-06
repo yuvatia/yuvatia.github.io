@@ -1,10 +1,10 @@
 import { useContext } from 'react';
-import { Modal, Alert } from 'react-bootstrap';
-import { ExclamationTriangleFill, XCircleFill, CheckCircleFill } from 'react-bootstrap-icons';
+import { Modal } from 'react-bootstrap';
+import { CheckCircleFill, ExclamationTriangleFill, XCircleFill } from 'react-bootstrap-icons';
 import { GlobalState } from './GlobalState';
 
 const ConfirmationDialog = ({ title, children, onAccept, onDecline, ...props }) => {
-    const {theme} = useContext(GlobalState);
+    const { theme } = useContext(GlobalState);
     return (
         <Modal data-bs-theme={theme} {...props} centered style={{ background: 'none', border: 'none' }}>
             <Modal.Body style={{ display: 'flex', flexDirection: 'row' }}>

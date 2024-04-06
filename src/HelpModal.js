@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { Modal, Button, Row, Col, Container } from 'react-bootstrap';
+import { Col, Container, Modal, Row } from 'react-bootstrap';
 import { isMobile } from 'react-device-detect';
-import { GlobalState } from './GlobalState';
 import { FaInfoCircle } from 'react-icons/fa';
+import { GlobalState } from './GlobalState';
 
 function HelpModal() {
     const { theme } = useContext(GlobalState);

@@ -1,18 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { Col, Container, Form, Row } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import { gEditorSystem } from './EngineCanvas';
-import { Container, Row, Col, Button, Form } from 'react-bootstrap';
-import { GenericInput } from './GenericInput';
-import { Table } from 'react-bootstrap';
 
-import Draggable from 'react-draggable';
 import ModalDialog from 'react-bootstrap/ModalDialog';
+import Draggable from 'react-draggable';
 
-import { IoSettings } from 'react-icons/io5'
+import { IoSettings } from 'react-icons/io5';
 import { GenericObjectForm } from './ComponentView';
-import { NiceList } from './SceneView';
-import { useCol } from 'react-bootstrap/esm/Col';
 import { GlobalState } from './GlobalState';
+import { NiceList } from './SceneView';
 
 export const DraggableModalDialog = (props) => {
     return (
@@ -21,7 +18,7 @@ export const DraggableModalDialog = (props) => {
     );
 }
 
-const SettingsView = ({director}) => {
+const SettingsView = ({ director }) => {
     const { theme } = useContext(GlobalState);
     const [show, setShow] = useState(false);
     const [settings, setSettings] = useState(null);

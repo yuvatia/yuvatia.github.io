@@ -1,26 +1,13 @@
-import React, { useEffect, useReducer, useState } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
 
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
-import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-icons/fa";
-import { FaMaximize, FaMinimize, FaMoon } from "react-icons/fa6";
-import { LuClapperboard } from "react-icons/lu";
 
-import { EngineCanvas, gEditorSystem } from './EngineCanvas';
-import { ComponentsView } from './ComponentsView';
-import { SceneView } from './SceneView';
-import SettingsView from './SettingsView';
-import { GlobalState } from './GlobalState';
-import { Reviver } from './engine/src/reviver';
-import { Scene } from './engine/src/scene';
-import { PhysicsSystem } from './engine/src/physics';
-import SceneManager from './SceneManager';
-import { DownloadScene, UploadScene } from './SceneUtils';
-import HelpModal from './HelpModal';
+import { gEditorSystem } from './EngineCanvas';
 import EngineContext from './EngineContext';
+import { GlobalState } from './GlobalState';
 
 
 const App = () => {
