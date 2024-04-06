@@ -9,7 +9,7 @@ import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-ico
 import { FaMaximize, FaMinimize, FaMoon } from "react-icons/fa6";
 import { LuClapperboard } from "react-icons/lu";
 
-import { EngineCanvas, gDirector, gEditorSystem } from './EngineCanvas';
+import { EngineCanvas, gEditorSystem } from './EngineCanvas';
 import { ComponentsView } from './ComponentsView';
 import { SceneView } from './SceneView';
 import SettingsView from './SettingsView';
@@ -37,8 +37,6 @@ const App = () => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const [maximizedState, setMaximizedState] = useState(false);
-
   // Subscribe to frame event to refresh entire state?
   // this is a hammer
   useEffect(() => {
@@ -59,36 +57,16 @@ const App = () => {
     };
   }, []); // Empty array means this effect runs once on mount and cleanup on unmount
 
-  const onPlay = () => {
-    setBackupScene(activeScene);
-    const clone = activeScene.deepCopy();
-    gDirector.setActiveScene(clone);
-    gDirector.setSystemState(PhysicsSystem.getName(), true);
-  }
-
-  const onStop = () => {
-    gDirector.setSystemState(PhysicsSystem.getName(), false);
-    gDirector.setActiveScene(backupScene);
-  }
-
-  const onPause = () => {
-    gDirector.toggleSystemState(PhysicsSystem.getName());
-  }
-
   return (
     <GlobalState.Provider value={{ activeScene, selectedEntity, saveSceneCallback, theme, setSelectedEntity, setActiveScene, setSaveSceneCallback }}>
       <EngineContext
+        id='main'
         theme={theme}
         setTheme={setTheme}
-        director={gDirector}
         activeScene={activeScene}
         backupScene={backupScene}
-        maximizedState={maximizedState}
-        setMaximizedState={setMaximizedState}
+        setBackupScene={setBackupScene}
         selectedEntity={selectedEntity}
-        onPause={onPause}
-        onPlay={onPlay}
-        onStop={onStop}
       />
     </GlobalState.Provider>
   );

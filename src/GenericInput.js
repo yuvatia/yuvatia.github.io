@@ -155,7 +155,7 @@ export const GenericInput = ({
       return (
         <Form.Check
           type="checkbox"
-          id={name}
+          key={name}
           checked={value}
           onChange={({ currentTarget }) => onChange(name, currentTarget.checked)}
           style={{ display: 'flex', flexDirection: 'row', gap: '1vw' }}

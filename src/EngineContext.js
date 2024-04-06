@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useRef } from 'react';
 
 import { FaPause, FaPlay, FaStop, FaSave, FaUpload, FaDownload } from "react-icons/fa";
 import { FaMaximize, FaMinimize, FaMoon } from "react-icons/fa6";
@@ -14,24 +14,38 @@ import { PhysicsSystem } from './engine/src/physics';
 import SceneManager from './SceneManager';
 import HelpModal from './HelpModal';
 
-export default function EngineContext({
+const EngineContext = ({
+    id,
     theme,
     setTheme,
-    director,
     activeScene,
     backupScene,
-    maximizedState,
-    setMaximizedState,
-    selectedEntity,
-    onPause,
-    onPlay,
-    onStop }) {
+    setBackupScene,
+    selectedEntity }) => {
+    const gridContainerRef = useRef(null);
+    const [maximizedState, setMaximizedState] = useState(false);
+    const [director, setDirector] = useState(null);
+
+    const onPlay = () => {
+        setBackupScene(activeScene);
+        const clone = activeScene.deepCopy();
+        director.setActiveScene(clone);
+        director.setSystemState(PhysicsSystem.getName(), true);
+    }
+    const onStop = () => {
+        director.setSystemState(PhysicsSystem.getName(), false);
+        director.setActiveScene(backupScene);
+    }
+
+    const onPause = () => {
+        director.toggleSystemState(PhysicsSystem.getName());
+    }
     return (
-        <div id="grid-wrapper" className="grid-wrapper" data-bs-theme={theme || 'light'}>
-            <div className="grid-container" id="grid-container">
+        <div className="grid-wrapper" data-bs-theme={theme || 'light'}>
+            <div className="grid-container" ref={gridContainerRef}>
                 <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <HelpModal />
-                    {director ? <SettingsView /> : null}
+                    {director ? <SettingsView director={director} /> : null}
                     {activeScene ? (
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '1vw', alignItems: 'center', flex: 1 }}>
                             {director && director.getSystemState(PhysicsSystem.getName()) ?
@@ -40,35 +54,34 @@ export default function EngineContext({
                             {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
                             {
                                 maximizedState ? <FaMinimize className='controlIcon' size={20} onClick={() => {
-                                    document.getElementById('grid-container').classList.toggle('maximized');
+                                    gridContainerRef.current.classList.toggle('maximized');
                                     setMaximizedState(!maximizedState);
                                 }} /> : <FaMaximize className='controlIcon' size={20} onClick={() => {
-                                    document.getElementById('grid-container').classList.toggle('maximized');
+                                    gridContainerRef.current.classList.toggle('maximized');
                                     setMaximizedState(!maximizedState);
                                 }} />
                             }
                         </div>
                     ) : null}
                     <i className="bi bi-moon-fill theme-toggle"
-                        id="theme-toggle"
                         style={{ marginRight: '1vw', fontSize: '20px' }}
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     />
                 </div>
-                <div className="left" id="left">
+                <div className="left">
                     {activeScene && !maximizedState ? (
-                        <Tabs defaultActiveKey="sceneView" id="uncontrolled-tab-example" style={{ display: 'grid', justifyItems: 'space-evenly', gridTemplateColumns: '1fr 1fr' }}>
+                        <Tabs defaultActiveKey="sceneView" style={{ display: 'grid', justifyItems: 'space-evenly', gridTemplateColumns: '1fr 1fr' }}>
                             <Tab eventKey="sceneView" title={<div className='tabEntry'><i class="bi bi-box controlIcon" />{activeScene.name}</div>}>
-                                <SceneView scene={activeScene} />
+                                <SceneView renderer={director.renderer} scene={activeScene} />
                             </Tab>
                             <Tab eventKey="sceneManager" title={<div className='tabEntry'><LuClapperboard size={20} className='controlIcon' />Manage</div>}>
-                                <SceneManager />
+                                <SceneManager director={director} />
                             </Tab>
                         </Tabs>
                     ) : <div>Loading</div>}
                 </div>
                 <div className="middle" id="middle">
-                    <EngineCanvas id='main'></EngineCanvas>
+                    <EngineCanvas director={director} setDirector={setDirector} id={id}></EngineCanvas>
                 </div>
                 <div className="right" id="right">
                     {activeScene && activeScene.isEntityValid(selectedEntity) && !maximizedState ?
@@ -81,3 +94,5 @@ export default function EngineContext({
         </div>
     );
 }
+
+export default EngineContext;

@@ -5,7 +5,6 @@ import { GlobalState } from './GlobalState';
 import { Reviver } from './engine/src/reviver';
 import { NiceList } from './SceneView';
 import { Scene } from './engine/src/scene';
-import { gDirector } from './EngineCanvas';
 import { setupScene } from './engine/src/script';
 import { DraggableModalDialog } from './SettingsView';
 import ConfirmationDialog from './ConfirmationDialog';
@@ -56,7 +55,7 @@ const CreateDefaultScenes = () => {
 const SupportedVersion = 1;
 const SceneStorageKey = 'AvailableScenes';
 
-const SceneManager = () => {
+const SceneManager = ({ director }) => {
     const RequestEnum = {
         DELETE_SCENE: 1,
         SET_ACTIVE_SCENE: 2
@@ -102,7 +101,7 @@ const SceneManager = () => {
                 }
             }
         });
-        gDirector.setActiveScene(scene);
+        director.setActiveScene(scene);
     };
 
     const doRename = (scene, newName) => {
@@ -131,9 +130,8 @@ const SceneManager = () => {
     }
 
     return (
-        <div id='SceneManager' style={{ margin: 'min(1vw, 1vh)' }}>
+        <div style={{ margin: 'min(1vw, 1vh)' }}>
             <ConfirmationDialog
-                // parentSelector={() => document.querySelector('#SceneManager')}
                 title={confirmationDialogTitle}
                 onAccept={() => {
                     switch (requestType) {

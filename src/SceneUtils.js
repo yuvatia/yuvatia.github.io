@@ -1,4 +1,3 @@
-import { gDirector } from "./EngineCanvas";
 import { Reviver } from "./engine/src/reviver";
 import { Scene } from "./engine/src/scene";
 

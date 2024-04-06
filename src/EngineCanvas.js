@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SimpleDirector } from "./engine/src/Director"
 import { Renderer } from "./engine/src/renderer"
 import { Material, MeshFilter, MeshRenderer } from "./engine/src/components";
@@ -50,27 +50,27 @@ class EditorSystem {
 };
 
 export const gEditorSystem = new EditorSystem();
-export let gDirector = null;
+// export let gDirector = null;
 
-export const EngineCanvas = ({ id }) => {
+export const EngineCanvas = ({ director, setDirector, id }) => {
+    const color = useRef(null);
+    const stencil = useRef(null);
+    const depth = useRef(null);
+
     useEffect(() => {
-        if (gDirector) {
+        if (director) {
             console.log("Director already initialized, skipping...");
             return;
         }
 
-        const buffers = [`${id}-color`, `${id}-depth`, `${id}-stencil`].map(name => document.getElementById(name)).filter(e => e !== null);
-        if (!buffers || buffers.length != 3) {
-            console.log("Buffers not available yet, postponing initialization");
-            return;
-        }
-        const [color, depth, stencil] = buffers;
-        gDirector = SimpleDirector(color, depth, stencil, false);
-        gDirector.registerSystem(gEditorSystem);
+        director = SimpleDirector(color.current, depth.current, stencil.current, false);
+        director.registerSystem(gEditorSystem);
 
-        gDirector.setFpsTarget(60);
-        gDirector.start();
+        director.setFpsTarget(60);
+        director.start();
 
+        setDirector(director);
+    
         // return () => {
         //     gDirector.stop();
         //     gDirector.unsubscribeFromEvents();
@@ -80,9 +80,9 @@ export const EngineCanvas = ({ id }) => {
 
     return (
         <div className="canvas-container">
-            <canvas className='color-canvas' id={`${id}-color`}></canvas>
-            <canvas className='depth-canvas' id={`${id}-depth`} hidden></canvas>
-            <canvas className='stencil-canvas' id={`${id}-stencil`} hidden></canvas>
+            <canvas className='color-canvas' ref={color} id={`${id}-color`}></canvas>
+            <canvas className='depth-canvas' ref={depth} id={`${id}-depth`} hidden></canvas>
+            <canvas className='stencil-canvas' ref={stencil} id={`${id}-stencil`} hidden></canvas>
         </div>
     );
 }

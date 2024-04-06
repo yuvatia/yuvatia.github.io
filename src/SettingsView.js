@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { gDirector, gEditorSystem } from './EngineCanvas';
+import { gEditorSystem } from './EngineCanvas';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { GenericInput } from './GenericInput';
 import { Table } from 'react-bootstrap';
@@ -21,7 +21,7 @@ export const DraggableModalDialog = (props) => {
     );
 }
 
-const SettingsView = () => {
+const SettingsView = ({director}) => {
     const { theme } = useContext(GlobalState);
     const [show, setShow] = useState(false);
     const [settings, setSettings] = useState(null);
@@ -32,18 +32,18 @@ const SettingsView = () => {
     const handleShow = () => setShow(true);
 
     const refreshSettings = () => {
-        const nextSettings = gDirector.systems.reduce((acc, system) => {
+        const nextSettings = director.systems.reduce((acc, system) => {
             acc[system.getName()] = { ...system.preferences } || { ...system.settings } || {};
             return acc;
         }, {});
 
         setSettings(nextSettings);
 
-        setSystemStates({ ...gDirector.systemStates });
+        setSystemStates({ ...director.systemStates });
     }
 
     const setSettingValue = (systemName, prefName, value) => {
-        gDirector.systems.forEach(system => {
+        director.systems.forEach(system => {
             if (system.getName() === systemName) {
                 const target = system.preferences || system.settings;
                 target[prefName] = value;
@@ -53,19 +53,19 @@ const SettingsView = () => {
     }
 
     const setVectorValue = (systeName, prefName, axis, value) => {
-        gDirector.getSystemByName(systeName).preferences[prefName][axis] = value;
+        director.getSystemByName(systeName).preferences[prefName][axis] = value;
         refreshSettings();
     };
 
 
     const setSystemState = (systemName, enabled) => {
-        gDirector.setSystemState(systemName, enabled);
-        setSystemStates({ ...gDirector.systemStates });
+        director.setSystemState(systemName, enabled);
+        setSystemStates({ ...director.systemStates });
     }
 
     useEffect(() => {
         refreshSettings();
-        setselectedSystem(gDirector.systems[0].getName());
+        setselectedSystem(director.systems[0].getName());
     }, []);
 
     useEffect(() => {
@@ -104,7 +104,7 @@ const SettingsView = () => {
                                     <Form.Check
                                         type="checkbox"
                                         label="Enabled"
-                                        id={systemStates[selectedSystem]}
+                                        key={systemStates[selectedSystem]}
                                         checked={systemStates[selectedSystem]}
                                         onChange={({ currentTarget }) => setSystemState(selectedSystem, currentTarget.checked)}
                                         style={{ display: 'flex', flexDirection: 'row', gap: '1vw', paddingBottom: 'min(1vw, 1vh)', marginBottom: 'min(1vw, 1vh)', borderBottom: '2px solid var(--border-bg)' }}

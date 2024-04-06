@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { gDirector, gEditorSystem } from './EngineCanvas';
+import { gEditorSystem } from './EngineCanvas';
 import { MeshFilter, MeshRenderer, Tag } from './engine/src/components';
 import { GlobalState } from './GlobalState';
 import { Form, InputGroup, ListGroup, Table } from 'react-bootstrap';
@@ -159,7 +159,7 @@ export const NiceList = ({
   );
 }
 
-export const SceneView = ({ scene }) => {
+export const SceneView = ({ renderer, scene }) => {
   const { activeScene, saveSceneCallback, selectedEntity, setSelectedEntity } = useContext(GlobalState);
   const [entities, setEntities] = useState([]);
 
@@ -206,11 +206,9 @@ export const SceneView = ({ scene }) => {
   }
 
   const doFocus = (entity) => {
-    if (!gDirector) return;
+    if (!renderer) return;
     if (!scene.hasComponent(entity, Transform)) return;
     const position = scene.getComponent(entity, Transform).position;
-    const renderer = gDirector.renderer;
-    if (!renderer) return;
     const meshFilter = scene.getComponent(entity, MeshFilter);
     if (!meshFilter || !meshFilter.meshRef || !meshFilter.meshRef.mesh) return;
     const mesh = meshFilter.meshRef.mesh;
