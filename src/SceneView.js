@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { gDirector, gEditorSystem } from './EngineCanvas';
 import { MeshFilter, MeshRenderer, Tag } from './engine/src/components';
-import { GetActiveScene } from './App';
 import { GlobalState } from './GlobalState';
 import { Form, InputGroup, ListGroup, Table } from 'react-bootstrap';
 import { IoAddCircle } from 'react-icons/io5';
@@ -160,59 +159,59 @@ export const NiceList = ({
   );
 }
 
-export const SceneView = () => {
+export const SceneView = ({ scene }) => {
   const { activeScene, saveSceneCallback, selectedEntity, setSelectedEntity } = useContext(GlobalState);
   const [entities, setEntities] = useState([]);
 
   const refreshEntities = () => {
-    setEntities(GetActiveScene().getEntities().map(({ id: entity }) => entity));
+    setEntities(scene.getEntities().map(({ id: entity }) => entity));
   };
 
   const doRemove = (entity) => {
-    GetActiveScene().destroyEntity(entity);
+    scene.destroyEntity(entity);
     refreshEntities();
   };
 
   const doClone = (entity) => {
-    const newEntity = GetActiveScene().cloneEntity(entity);
+    const newEntity = scene.cloneEntity(entity);
     refreshEntities();
     setSelectedEntity(newEntity);
   }
 
   const doAdd = () => {
-    GetActiveScene().newEntity();
+    scene.newEntity();
     refreshEntities();
   };
 
   const doClear = () => {
-    GetActiveScene().clear();
+    scene.clear();
     refreshEntities();
   }
 
   const doSetSelected = (entity) => {
     // First, set outline of currently selected to false, if valid
-    if (GetActiveScene().isEntityValid(selectedEntity)) {
-      GetActiveScene().forceGetComponent(selectedEntity, MeshRenderer).outline = false;
+    if (scene.isEntityValid(selectedEntity)) {
+      scene.forceGetComponent(selectedEntity, MeshRenderer).outline = false;
     }
     // Outline selected entity
-    GetActiveScene().forceGetComponent(entity, MeshRenderer).outline = true;
+    scene.forceGetComponent(entity, MeshRenderer).outline = true;
     setSelectedEntity(entity);
   }
 
   const doDeselect = () => {
-    if (GetActiveScene().isEntityValid(selectedEntity)) {
-      GetActiveScene().forceGetComponent(selectedEntity, MeshRenderer).outline = false;
+    if (scene.isEntityValid(selectedEntity)) {
+      scene.forceGetComponent(selectedEntity, MeshRenderer).outline = false;
     }
     setSelectedEntity(-1);
   }
 
   const doFocus = (entity) => {
     if (!gDirector) return;
-    if (!GetActiveScene().hasComponent(entity, Transform)) return;
-    const position = GetActiveScene().getComponent(entity, Transform).position;
+    if (!scene.hasComponent(entity, Transform)) return;
+    const position = scene.getComponent(entity, Transform).position;
     const renderer = gDirector.renderer;
     if (!renderer) return;
-    const meshFilter = GetActiveScene().getComponent(entity, MeshFilter);
+    const meshFilter = scene.getComponent(entity, MeshFilter);
     if (!meshFilter || !meshFilter.meshRef || !meshFilter.meshRef.mesh) return;
     const mesh = meshFilter.meshRef.mesh;
     renderer.camera.focusAt(mesh.getBoundingBox().translate(position));
@@ -235,7 +234,7 @@ export const SceneView = () => {
   return (
     <div style={{ margin: 'min(1vw, 1vh)' }}>
       <NiceList
-        values={entities.filter(entity => GetActiveScene().hasComponent(entity, Tag))}
+        values={entities.filter(entity => scene.hasComponent(entity, Tag))}
         searchHint={"Search for entity..."}
         selectedValue={selectedEntity}
         doSetSelected={doSetSelected}
@@ -248,8 +247,8 @@ export const SceneView = () => {
         bottomMenu={[
           { AsIcon: IoAddCircle, onClick: doAdd, color: 'green' },
           { AsIcon: FaTrashCan, onClick: doClear, color: 'red' },
-          { AsIcon: FaSave, onClick: () => { saveSceneCallback.callback && saveSceneCallback.callback(GetActiveScene()) }, color: 'var(--bs-link-color)' },
-          { AsIcon: FaDownload, onClick: () => DownloadScene(GetActiveScene()), className: 'controlIcon', color: 'red' },
+          { AsIcon: FaSave, onClick: () => { saveSceneCallback.callback && saveSceneCallback.callback(scene) }, color: 'var(--bs-link-color)' },
+          { AsIcon: FaDownload, onClick: () => DownloadScene(scene), className: 'controlIcon', color: 'red' },
         ]}
       >
         {(entity) => {

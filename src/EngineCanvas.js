@@ -52,15 +52,14 @@ class EditorSystem {
 export const gEditorSystem = new EditorSystem();
 export let gDirector = null;
 
-export const EngineCanvas = () => {
-    const [activeBuffer, setActiveBuffer] = useState('color');
+export const EngineCanvas = ({ id }) => {
     useEffect(() => {
         if (gDirector) {
             console.log("Director already initialized, skipping...");
             return;
         }
 
-        const buffers = ["color", "depth", "stencil"].map(name => document.getElementById(name)).filter(e => e !== null);
+        const buffers = [`${id}-color`, `${id}-depth`, `${id}-stencil`].map(name => document.getElementById(name)).filter(e => e !== null);
         if (!buffers || buffers.length != 3) {
             console.log("Buffers not available yet, postponing initialization");
             return;
@@ -80,10 +79,10 @@ export const EngineCanvas = () => {
     }, []);
 
     return (
-        <div id="canvas-container">
-            <canvas id="color"></canvas>
-            <canvas id="depth" hidden></canvas>
-            <canvas id="stencil" hidden></canvas>
+        <div className="canvas-container">
+            <canvas className='color-canvas' id={`${id}-color`}></canvas>
+            <canvas className='depth-canvas' id={`${id}-depth`} hidden></canvas>
+            <canvas className='stencil-canvas' id={`${id}-stencil`} hidden></canvas>
         </div>
     );
 }

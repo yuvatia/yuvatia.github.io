@@ -126,7 +126,7 @@ export const ComponentsView = ({ entity, activeScene }) => {
               color: 'var(--bg-color)'
             }}
             variant="success"
-            id="dropdown-basic"
+            id="component-dropdown"
           >
             Add component
           </Dropdown.Toggle>
