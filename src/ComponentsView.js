@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { ComponentView } from './ComponentView';
-import { gEditorSystem } from './EngineCanvas';
 import { NiceButton } from './SceneView';
 import { DirectionalLight, Material, MeshFilter, MeshRenderer, Tag } from './engine/src/components';
 import { FollowConstraint, Rigidbody } from './engine/src/kinematics';
@@ -45,8 +44,7 @@ export const ComponentSpecification = {
 };
 
 
-export const ComponentsView = ({ entity, activeScene }) => {
-  // const { activeScene } = useContext(GlobalState);
+export const ComponentsView = ({ entity, editor, activeScene }) => {
   const [availableTypes, setAvailableTypes] = useState([]);
 
   // Missing: MeshFilter, Kinematics (FollowConstraint, Rigidbody, Collider)
@@ -77,9 +75,9 @@ export const ComponentsView = ({ entity, activeScene }) => {
       }
     }
 
-    gEditorSystem.subscribe(onEngineEvent);
+    editor.subscribe(onEngineEvent);
     return () => {
-      gEditorSystem.unsubscribe(onEngineEvent);
+      editor.unsubscribe(onEngineEvent);
     };
   }, [entity]);  // See doc in ComponentView
 

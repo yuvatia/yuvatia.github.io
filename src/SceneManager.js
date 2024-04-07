@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaUpload } from 'react-icons/fa';
 import { IoAddCircle } from 'react-icons/io5';
 import ConfirmationDialog from './ConfirmationDialog';
 import { ExampleScenes } from './ExampleScenes';
-import { GlobalState } from './GlobalState';
 import { DownloadScene, UploadScene } from './SceneUtils';
 import { NiceList } from './SceneView';
 import { MeshAsset } from './engine/asset';
@@ -49,7 +48,7 @@ const CreateDefaultScenes = () => {
 const SupportedVersion = 1;
 const SceneStorageKey = 'AvailableScenes';
 
-const SceneManager = ({ director }) => {
+const SceneManager = ({ director, activeScene, initialScenes, theme, setSaveSceneCallback }) => {
     const RequestEnum = {
         DELETE_SCENE: 1,
         SET_ACTIVE_SCENE: 2
@@ -62,6 +61,9 @@ const SceneManager = ({ director }) => {
     const [pendingScene, setPendingScene] = useState(null);
 
     const [availableScenes, setAvailableScenes] = useState(() => {
+        if (initialScenes && initialScenes[0] !== undefined && initialScenes[0] !== null) {
+            return initialScenes;
+        }
         // Load scenes from local storage
         let scenes = null;
         try {
@@ -71,9 +73,8 @@ const SceneManager = ({ director }) => {
         return hasSavedState ? scenes.scenes : CreateDefaultScenes();
     });
 
-    const { activeScene, setSaveSceneCallback } = useContext(GlobalState);
-
     useEffect(() => {
+        if (initialScenes && initialScenes[0] !== undefined && initialScenes[0] !== null) return;
         // Save to localStorage whenever availableScenes changes
         const info = { version: SupportedVersion, scenes: availableScenes };
         localStorage.setItem(SceneStorageKey, JSON.stringify(info));
@@ -126,6 +127,7 @@ const SceneManager = ({ director }) => {
     return (
         <div style={{ margin: 'min(1vw, 1vh)' }}>
             <ConfirmationDialog
+                theme={theme || 'light'}
                 title={confirmationDialogTitle}
                 onAccept={() => {
                     switch (requestType) {
@@ -183,7 +185,7 @@ const SceneManager = ({ director }) => {
                 {(scene) =>
                     <>
                         <input
-                            class="form-control"
+                            className="form-control"
                             style={{
                                 display: 'inline', width: 'auto',
                                 backgroundColor: (activeScene === scene) ? 'var(--selected-item-bg)' : 'transparent'

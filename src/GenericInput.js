@@ -2,7 +2,6 @@ import { Form } from 'react-bootstrap';
 
 
 import React, { useContext, useEffect, useState } from 'react';
-import { gEditorSystem } from './EngineCanvas';
 import { GlobalState } from './GlobalState';
 import { VectorView } from './VectorView';
 import { Asset } from './engine/asset';
@@ -27,7 +26,7 @@ function GenericSelect({ defaultValue, noneValue, onChange, options }) {
 
 
 export const EntitySelector = ({ value, onChange }) => {
-  const { activeScene } = useContext(GlobalState);
+  const { activeScene, editorSystem } = useContext(GlobalState);
 
   const [entities, setEntities] = useState([]);
 
@@ -42,9 +41,9 @@ export const EntitySelector = ({ value, onChange }) => {
       }
     };
 
-    gEditorSystem.subscribe(onEngineEvent);
+    editorSystem.subscribe(onEngineEvent);
     return () => {
-      gEditorSystem.unsubscribe(onEngineEvent);
+      editorSystem.unsubscribe(onEngineEvent);
     };
   }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
 
@@ -71,8 +70,7 @@ export const EntitySelector = ({ value, onChange }) => {
 }
 
 export const AssetSelector = ({ AssetType, value, onChange }) => {
-  const { activeScene } = useContext(GlobalState);
-
+  const { editorSystem } = useContext(GlobalState);
   const [assets, setAssets] = useState([]);
 
   const refreshAssets = () => {
@@ -86,11 +84,11 @@ export const AssetSelector = ({ AssetType, value, onChange }) => {
       }
     };
 
-    gEditorSystem.subscribe(onEngineEvent);
+    editorSystem.subscribe(onEngineEvent);
     return () => {
-      gEditorSystem.unsubscribe(onEngineEvent);
+      editorSystem.unsubscribe(onEngineEvent);
     };
-  }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
+  }, []); // Empty array means this effect runs once on mount and cleanup on unmount
 
 
   const options = assets.map(asset => {

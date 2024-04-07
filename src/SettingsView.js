@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Col, Container, Form, Row } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
-import { gEditorSystem } from './EngineCanvas';
 
 import ModalDialog from 'react-bootstrap/ModalDialog';
 import Draggable from 'react-draggable';
 
 import { IoSettings } from 'react-icons/io5';
 import { GenericObjectForm } from './ComponentView';
-import { GlobalState } from './GlobalState';
 import { NiceList } from './SceneView';
 
 export const DraggableModalDialog = (props) => {
@@ -18,8 +16,7 @@ export const DraggableModalDialog = (props) => {
     );
 }
 
-const SettingsView = ({ director }) => {
-    const { theme } = useContext(GlobalState);
+const SettingsView = ({ theme, editor, director }) => {
     const [show, setShow] = useState(false);
     const [settings, setSettings] = useState(null);
     const [selectedSystem, setselectedSystem] = useState(null);
@@ -72,9 +69,9 @@ const SettingsView = ({ director }) => {
             }
         };
 
-        gEditorSystem.subscribe(onEngineEvent);
+        editor.subscribe(onEngineEvent);
         return () => {
-            gEditorSystem.unsubscribe(onEngineEvent);
+            editor.unsubscribe(onEngineEvent);
         };
     }, []); // Empty array means this effect runs once on mount and cleanup on unmount
 
@@ -82,7 +79,7 @@ const SettingsView = ({ director }) => {
         settings && selectedSystem &&
         <React.Fragment>
             <IoSettings className='controlIcon' size={20} onClick={handleShow} style={{ marginLeft: '1vw' }} />
-            <Modal data-bs-theme={theme} dialogAs={DraggableModalDialog} show={show} onHide={handleClose}>
+            <Modal data-bs-theme={theme || 'light'} dialogAs={DraggableModalDialog} show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Settings</Modal.Title>
                 </Modal.Header>

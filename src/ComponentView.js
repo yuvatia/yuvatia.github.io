@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Collapse, Table, useAccordionButton } from 'react-bootstrap';
-import { gEditorSystem } from './EngineCanvas';
 import { GenericInput } from './GenericInput';
 import { NiceList } from './SceneView';
 import { Tag } from './engine/src/components';
+import { GlobalState } from './GlobalState';
 
 export const GenericObjectForm = ({ fields, component, updateVectorField, UpdateField }) => {
   if (fields === null) {
@@ -41,6 +41,8 @@ export const GenericObjectForm = ({ fields, component, updateVectorField, Update
 };
 
 export const ComponentView = ({ type, typename, entity, activeScene, fields, removeMe }) => {
+  const { editorSystem } = useContext(GlobalState);
+
   const [component, setComponent] = useState(null);
   const [open, setOpen] = useState(false);
 
@@ -95,9 +97,9 @@ export const ComponentView = ({ type, typename, entity, activeScene, fields, rem
       }
     }
 
-    gEditorSystem.subscribe(onEngineEvent);
+    editorSystem.subscribe(onEngineEvent);
     return () => {
-      gEditorSystem.unsubscribe(onEngineEvent);
+      editorSystem.unsubscribe(onEngineEvent);
     };
   }, [entity, activeScene]); // // runs on - mount, cleanup, entity change. Important due to binding of refreshComponent
 

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { SimpleDirector } from "./engine/src/Director";
 
 
-class EditorSystem {
+export class EditorSystem {
     callbacks = [];
     scene = null;
 
@@ -41,10 +41,9 @@ class EditorSystem {
     }
 };
 
-export const gEditorSystem = new EditorSystem();
 // export let gDirector = null;
 
-export const EngineCanvas = ({ director, setDirector, id }) => {
+export const EngineCanvas = ({ director, editor, setDirector, id }) => {
     const color = useRef(null);
     const stencil = useRef(null);
     const depth = useRef(null);
@@ -56,7 +55,7 @@ export const EngineCanvas = ({ director, setDirector, id }) => {
         }
 
         director = SimpleDirector(color.current, depth.current, stencil.current, false);
-        director.registerSystem(gEditorSystem);
+        director.registerSystem(editor);
 
         director.setFpsTarget(60);
         director.start();

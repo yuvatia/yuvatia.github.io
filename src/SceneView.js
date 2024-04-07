@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, InputGroup, ListGroup } from 'react-bootstrap';
 import { FaDownload, FaSave, FaSearch } from 'react-icons/fa';
 import { FaTrashCan } from "react-icons/fa6";
 import { IoAddCircle } from 'react-icons/io5';
-import { gEditorSystem } from './EngineCanvas';
-import { GlobalState } from './GlobalState';
 import { DownloadScene } from './SceneUtils';
 import { MeshFilter, MeshRenderer, Tag } from './engine/src/components';
 import { Transform } from './engine/src/transform';
@@ -159,8 +157,7 @@ export const NiceList = ({
   );
 }
 
-export const SceneView = ({ renderer, scene }) => {
-  const { activeScene, saveSceneCallback, selectedEntity, setSelectedEntity } = useContext(GlobalState);
+export const SceneView = ({ renderer, editor, scene, selectedEntity, setSelectedEntity, saveSceneCallback }) => {
   const [entities, setEntities] = useState([]);
 
   const refreshEntities = () => {
@@ -223,11 +220,11 @@ export const SceneView = ({ renderer, scene }) => {
       }
     };
 
-    gEditorSystem.subscribe(onEngineEvent);
+    editor.subscribe(onEngineEvent);
     return () => {
-      gEditorSystem.unsubscribe(onEngineEvent);
+      editor.unsubscribe(onEngineEvent);
     };
-  }, [activeScene]); // Empty array means this effect runs once on mount and cleanup on unmount
+  }, [scene]); // Empty array means this effect runs once on mount and cleanup on unmount
 
   return (
     <div style={{ margin: 'min(1vw, 1vh)' }}>
@@ -251,10 +248,10 @@ export const SceneView = ({ renderer, scene }) => {
       >
         {(entity) => {
           // Solves a race when SceneView is rendering while scene is destroyed
-          if (!activeScene.getComponent(entity, Tag)) {
+          if (!scene.getComponent(entity, Tag)) {
             return null;
           }
-          return (activeScene.getComponent(entity, Tag).name);
+          return (scene.getComponent(entity, Tag).name);
         }}
       </NiceList>
     </div>

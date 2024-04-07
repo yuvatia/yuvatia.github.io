@@ -114,10 +114,6 @@ body,
   background-color: lightblue;
 }
 
-.selectedComponent {
-  /* font-weight: bold; */
-}
-
 .right {
   grid-area: right;
   /* grid-template-columns: 1fr; */
