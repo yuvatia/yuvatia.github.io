@@ -55,7 +55,9 @@ export const EngineCanvas = ({ director, editor, setDirector, id }) => {
         }
 
         director = SimpleDirector(color.current, depth.current, stencil.current, false);
-        director.registerSystem(editor);
+        if(editor !== null && editor !== undefined) {
+            director.registerSystem(editor);
+        }
 
         director.setFpsTarget(60);
         director.start();

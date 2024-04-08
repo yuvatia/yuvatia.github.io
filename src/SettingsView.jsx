@@ -9,7 +9,7 @@ import { IoSettings } from 'react-icons/io5';
 import { GenericObjectForm } from './ComponentView';
 import { NiceList } from './SceneView';
 
-export const DraggableModalDialog = (props) => {
+export const DraggableModalDialog = (props, ref) => {
     return (
         <Draggable handle=".modal-title"><ModalDialog {...props} />
         </Draggable>
@@ -87,7 +87,7 @@ const SettingsView = ({ theme, editor, director }) => {
                     <Container>
                         <Row>
                             <Col xs={4} style={{
-                                "border-right": "1px solid var(--border-bg)"
+                                borderRight: "1px solid var(--border-bg)"
                             }}>
                                 <NiceList values={Object.keys(settings)} selectedValue={selectedSystem} doDeselect={() => { }} doSetSelected={(entity) => setselectedSystem(entity)} notSearchable hoverScale={1.05}>
                                     {(setting) => setting}

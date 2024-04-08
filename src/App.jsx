@@ -25,7 +25,6 @@ const App = () => {
 
   return (
     <>
-      <EngineContext id="engine-context" theme={theme} setTheme={setTheme}/>
       <Post components={{ EngineContext }} />
       <MonteCarlo components={{ EngineContext }} />
     </>

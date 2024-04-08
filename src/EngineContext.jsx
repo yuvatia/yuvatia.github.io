@@ -8,25 +8,28 @@ import { Tab, Tabs } from 'react-bootstrap'; // Import Bootstrap components as n
 
 import { ComponentsView } from './ComponentsView';
 import { EditorSystem, EngineCanvas } from './EngineCanvas';
+import { GlobalState } from './GlobalState';
 import HelpModal from './HelpModal';
 import SceneManager from './SceneManager';
 import { SceneView } from './SceneView';
 import SettingsView from './SettingsView';
 import { PhysicsSystem } from './engine/src/physics';
-import { GlobalState } from './GlobalState';
 
 const EngineContext = ({
     id,
     theme,
     setTheme,
-    scene }) => {
+    scene,
+    autoplay,
+    style,
+    maximized }) => {
     const gridContainerRef = useRef(null);
 
     const [activeScene, setActiveScene] = useState(scene);
 
     const [editor] = useState(new EditorSystem());
 
-    const [maximizedState, setMaximizedState] = useState(false);
+    const [maximizedState, setMaximizedState] = useState(maximized || false);
     const [backupScene, setBackupScene] = useState(null);
     const [director, setDirector] = useState(null);
     const [selectedEntity, setSelectedEntity] = useState(-1);
@@ -52,8 +55,6 @@ const EngineContext = ({
         };
     }, [editor]); // Empty array means this effect runs once on mount and cleanup on unmount
 
-
-
     const onPlay = () => {
         setBackupScene(activeScene);
         const clone = activeScene.deepCopy();
@@ -68,10 +69,22 @@ const EngineContext = ({
     const onPause = () => {
         director.toggleSystemState(PhysicsSystem.getName());
     }
+
+    useEffect(() => {
+        if(!activeScene) return;
+        // TODO: hack needed to make sure director is initialized
+        if (director && activeScene) {
+            onPlay();
+            if (!autoplay) {
+                director.setSystemState(PhysicsSystem.getName(), false);
+            }
+        }
+    }, [director])
+
     return (
         <GlobalState.Provider value={{ theme, activeScene, editorSystem: editor }}>
-            <div className="grid-wrapper" data-bs-theme={theme || 'light'}>
-                <div className="grid-container" ref={gridContainerRef}>
+            <div className="grid-wrapper" style={{ ...style }} data-bs-theme={theme || 'light'}>
+                <div className={`grid-container ${maximizedState ? 'maximized' : ''}`} ref={gridContainerRef}>
                     <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <HelpModal theme={theme} />
                         {director ? <SettingsView editor={editor} theme={theme} director={director} /> : null}
@@ -83,10 +96,8 @@ const EngineContext = ({
                                 {backupScene ? (<FaStop size={20} onClick={onStop} className='controlIcon' />) : (<FaStop size={20} className='controlIcon' />)}
                                 {
                                     maximizedState ? <FaMinimize className='controlIcon' size={20} onClick={() => {
-                                        gridContainerRef.current.classList.toggle('maximized');
                                         setMaximizedState(!maximizedState);
                                     }} /> : <FaMaximize className='controlIcon' size={20} onClick={() => {
-                                        gridContainerRef.current.classList.toggle('maximized');
                                         setMaximizedState(!maximizedState);
                                     }} />
                                 }

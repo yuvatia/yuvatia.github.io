@@ -1,10 +1,38 @@
+import { MeshAsset } from '../engine/asset';
+import { Material, MeshFilter, MeshRenderer } from '../engine/src/components';
+import { Rigidbody } from '../engine/src/kinematics';
+import { Point, Vector } from '../engine/src/math';
 import { Scene } from '../engine/src/scene.js'
+import { Transform } from '../engine/src/transform';
+import EngineContext from '../EngineContext.jsx'
+
+export const Engine = ({ scene, height = '40%', width = '40%', autoplay }) => (
+    <EngineContext id='main' theme='dark' style={{ height, width, margin: '0 auto' }} maximized scene={scene} autoplay={autoplay} />
+);
+
+export const MakeSceneWithCube = () => {
+    const scene = new Scene('Cube');
+    const box = scene.newEntity('Cube');
+    const realT = scene.getComponent(box, Transform);
+    realT.scale = new Vector(100, 100, 100);
+    scene.addComponent(box, MeshFilter).meshRef = MeshAsset.get('Cube');
+    scene.addComponent(box, Material).diffuse = new Point(255, 70, 0, 1); // Red
+    scene.addComponent(box, MeshRenderer).shading = false;
+    const rbody = scene.addComponent(box, Rigidbody);
+    rbody.angularVelocity.y = 0.1;
+    rbody.angularDamping = 1;
+    return scene;
+};
+export const SceneWithCube = MakeSceneWithCube();
+
 
 ## BRUH
 
-<EngineContext id='main' theme='dark' maximized={true} scene={new Scene('test')}/>
-
+<Engine scene={SceneWithCube} width='40%' height='auto' autoplay />
 Here is a simple math equation:
+<Engine scene={SceneWithCube} width='40%' height='auto' />
+Finally, we have
+<Engine/>
 
 $$E = mc^2$$
 import { Scene } from "../engine/src/scene"
