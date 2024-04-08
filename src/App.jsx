@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { MDXProvider } from '@mdx-js/react';
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'katex/dist/katex.min.css';
+
 import './App.css';
 
 import EngineContext from './EngineContext';
 import { Scene } from './engine/src/scene';
 
+import Post from './posts/hello.mdx';
+import MonteCarlo from './posts/Monte Carlo.mdx'
 
 const App = () => {
 
@@ -20,17 +25,9 @@ const App = () => {
 
   return (
     <>
-      <EngineContext
-        id='main'
-        theme={theme}
-        setTheme={setTheme}
-      />
-      <EngineContext
-        id='sub'
-        theme={theme}
-        setTheme={setTheme}
-        scene={new Scene('Hello sub!')}
-      />
+      <EngineContext id="engine-context" theme={theme} setTheme={setTheme}/>
+      <Post components={{ EngineContext }} />
+      <MonteCarlo components={{ EngineContext }} />
     </>
   );
 }

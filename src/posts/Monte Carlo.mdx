@@ -1,0 +1,542 @@
+Introduction/Review
+==
+Consider the integral of $f(x)$ in some interval $[a, b]$. Consider some partition of the interval to $n$ disjoint intervals $[x_{i-1}, x_{i}]$, such that $\bigcup\limits_{i = 1}^{n}[x_{i -1},x_{i}] = [a, b]$, where ${x_{0} = a}$ and $x_{n} = b$. 
+
+Geometrically, this can be thought of as splitting the interval to $n$ distinct intervals, as seen in figure 1:
+
+[figure 1](TODO)
+
+The Reimann sum $S$ of the function with respect to the partition is defined as the sum of the area of $n$ rectangles of height $f(x_{i}^*)$ and width $\Delta x_{i}$ (defined as $x_{i} - x_{i-1}$),  where $x_{i}^*$ is some point in the interval $[x_{i - 1}, x_{i}]$. Analytically this can be expressed as:
+
+$$
+S = \sum\limits_{i = 1}^{n}f(x_i^*)\Delta x_{i}
+$$
+
+The point $x_{i}^*$ can be any point in the sub-interval, but usually it is either $x_{i}$ (in which case we say that the summation method is the **right rule**), $x_{i-1}$ (**left rule**) or the midway point. There is also another summation method called the trapezoidal rule which we will ignore for the moment.
+
+We say that a function is Reimann integrable in some interval $[a, b]$ if the limit $\lim_{||\Delta x||\to 0}S$ exists and is equal for all partitions and summations. The notation $|| \Delta x ||$ means $\max(\Delta x_{1,}\Delta x_{2}, \dots,  \Delta x_{n})$, which is the minimal partition size. Geometrically this means that we are splitting the interval into infinitesimal sub-intervals such that their length is 0, and then calculating the total area of all the rectangles. This also means that regardless of the partition scheme, $x_{i}^*$ converges to $x_i$. Also, by necessity, this implies that $n$ goes to $\infty$, otherwise such partitioning is impossible. The limit is defined as the value of the Reimann integral of the function in $[a, b]$, and is formally written as:
+
+$$
+\lim_{||\Delta x||\to 0} \sum\limits_{i = 1}^{n}f(x_i^{*})\Delta x_{i}= \int_{b}^{a}f(x)dx = I_{[a, b]}
+$$
+
+Sadly, evaluating the integral by definition is impossible, as it requires $O(\infty)$ work.
+
+This is where [the fundamental theorem of calculus](#fundamental-theorem) comes to the rescue. The theorem states that given some function $F(x)$ such that $F'(x) = f(x)$ (we say that $F(x)$ is the anti-derivative of $f(x)$) in $[a, b]$, we get:
+
+$$
+\int_{a}^{b}f(x)dx = F(b) - F(a)
+$$
+
+If we are able to sample from $F(x)$ in $a$ and $b$ (for now sampling can be thought of as a fancy way of saying "evaluate the function at some point"), this reduces the amount of work needed to evaluate the integral to just $O(s)$, where $s$ is the work needed to sample $F$ at some point.
+
+If we can provide a close form expression for $F$, this can become $O(1)$. For example let's integrate $\sin(x)$ in $[0, \pi]$:
+
+$$
+\int _{0}^{\pi}\sin(x) dx = -\cos(x)\Big|_{0}^{\pi} = -\cos(\pi) + cos(0) = 1 + 1 = 2
+$$
+
+This calculation involved us being able to find the anti-derivative of $\sin(x)$. Finding these close-form expressions is often a very hard task that requires a lot of non-trivial work, and even then a lot of functions simply do not have a close-form anti-derivative, while others do not even have a close-form expression themselves to begin with, yet these are functions we use to model certain systems and behaviors, and we still want to be able to approximate integrals where these functions are the integrand. 
+
+As a motivating example, consider the function:
+$$
+f(x) = \int e^{-x^{2}}dx
+$$
+This function has special importance in many fields, for example in statistics. It is so important that it has a name - [the error function](#error-function). This function has no closed-form expression, which means that we don't have a straight forward way of sampling it arbitrarily. So how can we go about evaluating this function, or in other words, how can we estimate the value of an integral numerically?
+
+Quadrate Rule
+==
+
+The definition of Reimann integrability is constructive in the sense that it already provides us with a numerical integration method - calculate the Reimann sum of some partition. Let's assume equal partitioning of the interval:
+
+$$
+\Delta x_{i} = \frac{b-a}{n}
+$$
+
+Under such partitioning scheme, it is trivial to show that $\Delta x_{i} \to 0 \iff n \to \infty$. Also, let's assume that we use the right rule for summation, so each term is given by $f(x_{i})\Delta x_{i}$.
+
+We can now rewrite the integral as:
+
+$$
+\int_{a}^{b}f(x)dx = \lim_{n \to \infty}\sum\limits_{i=1}^{n}f(x_{i})\frac{b-a}{n}
+$$
+Alternatively, we can think of the integral as the weighted-average of the function over all points in $[a, b]$, where the weight of each sample is the same and equals $\frac{b-a}{n}$.
+
+Let's consider this sum as an estimator for the integral. it is intuitive that as $n$ gets larger, the error decreases and eventually becomes small enough so that the estimate is satisfactory. This method has the upside of not needing to find an anti-derivative.
+
+The following code is a very basic implementation of the estimator we've just presented:
+
+```python
+from __future__ import annotations
+from typing import List, Callable
+
+import math
+
+
+class Interval(object):
+    def __init__(self, start: float, end: float):
+        self.start = start
+        self.end = end
+
+    def length(self) -> float:
+        return self.end - self.start
+        
+	def __repr__(self) -> str:
+	    return f"[{self.start}, {self.end}]"
+    
+    def partition(self, n: int) -> List[Interval]:
+        intervals = []
+        next_start = self.start
+        for i in range(n):
+	        next_end = next_start + self.length() / n
+	        intervals.append(Interval(next_start, next_end))
+	        next_start = next_end
+        return intervals
+
+
+def reimann_estimate(func: Callable, interval: Interval, n: int) -> float:
+	def evaluate_term(interval: Interval) -> float:
+	    return interval.length() * func(interval.end)
+	estimate = 0.0
+	for sub_interval in interval.partition(n):
+		estimate += evaluate_term(sub_interval)
+	return estimate
+```
+
+Let's use `reimann_estimate` to estimate the integral presented in the motivating example in the interval $[0, 5]$, and compare it to the "real" value of the integral calculated using `scipy`'s integrator (this is actually a bit of a chicken and egg problem as `scipy`'s integrator is also numerical):
+
+```python
+from scipy.integrate import quad as scipy_integrator
+
+
+def calculate_integral(func: Callable, interval: Interval) -> float:
+    return scipy_integrator(func, interval.start, interval.end)
+
+
+def print_comparison(func: Callable, interval: Interval, n: int) -> None:
+    real_value, _ = calculate_integral(func, interval)
+    print(f"Integral in {interval} = {real_value}")
+    estimated_value = reimann_estimate(func, interval, n)
+    print(f"Integral in {interval} ~ {estimated_value} ({n} samples)")
+
+
+def f(x: float) -> float:
+    return math.pow(math.e, -math.pow(x, 2))
+
+```
+For $n=10, 100, 1000$ we get:
+```
+>>> print_comparison(f, Interval(0, 5), 10)
+Integral in [0, 5] = 0.8862269254513955
+Integral in [0, 5] ~ 0.6362269254527216 (10 samples)
+
+>>> print_comparison(f, Interval(0, 5), 100)
+Integral in [0, 5] = 0.8862269254513955
+Integral in [0, 5] ~ 0.8612269254517139 (100 samples)
+
+>>> print_comparison(f, Interval(0, 5), 1000)
+Integral in [0, 5] = 0.8862269254513955
+Integral in [0, 5] ~ 0.883726925451429 (1000 samples)
+```
+Clearly the estimate improves proportional to the number of samples (and as we will soon see this is actually a linear relationship, meaning that to cut the error by half we will need twice as much samples). Obviously, the accuracy of the estimate also depends on the length of the interval. Let's use the integral of $\sin(x)$ in $[-20\pi, 200]$ as an example:
+```
+>>> print_comparison(math.sin, Interval(-20 * math.pi, 200), 100)
+Integral in [-62.83185307179586, 200] = 0.512812324993114
+Integral in [-62.83185307179586, 200] ~ -0.9707998420821013 (100 samples)
+
+>>> print_comparison(math.sin, Interval(-20 * math.pi, 200), 1000)
+Integral in [-62.83185307179586, 200] = 0.512812324993114
+Integral in [-62.83185307179586, 200] ~ 0.3950916325113602 (1000 samples)
+
+>>> print_comparison(math.sin, Interval(-20 * math.pi, 200), 10000)
+Integral in [-62.83185307179586, 200] = 0.512812324993114
+Integral in [-62.83185307179586, 200] ~ 0.5013062861351869 (10000 samples)
+
+>>> print_comparison(math.sin, Interval(-20 * math.pi, 200), 100000)
+Integral in [-62.83185307179586, 200] = 0.512812324993114
+Integral in [-62.83185307179586, 200] ~ 0.5116643777331759 (100000 samples)
+```
+As we can see we needed to calculate the sum with a much larger $n$ than before to get a decent approximation.
+
+While pretty intuitive, we still can't say much about the accuracy of this method and don't have any benchmarks with which we could compare it to other numerical integration methods. We would like to be able to answer the following questions:
+1. Given an integrand and an acceptable error margin, how many partitions $n$ do we need to be able to calculate its integral in some interval?
+2. What is the relationship between $n$ and the accuracy of the estimate?
+3. What is the relationship between the work needed to compute the estimate, the length of the interval $[a, b]$ and the number of partitions $n$?
+
+
+TODO
+---
+
+$$
+E = \Big |\int_{a}^{b}f(x)dx - \sum\limits_{i=1}^{n} f(x_{i}^{*}) \Delta x_{i} \Big| \tag{1.0}
+$$
+
+Due to linearity we can write:
+
+$$
+\int_{a}^{b}f(x)dx = \sum\limits_{i=1}^{n}\int_{\Delta x_{i}}f(x)dx \tag{1.1}
+$$
+
+Also, note that $f(x_{i}^{*})$ is constant, thus we can write:
+$$
+f(x_{i}^{*})\Delta x_{i} = \int_{\Delta x_{i}}f(x_{i}^{*})dx \tag{1.2}
+$$
+
+Plugging $(1.1)$ and $(1.2)$ into $(1.0)$ we get:
+
+$$
+E = \Big |\sum\limits_{i=1}^{n}\int_{\Delta x_{i}} \Big(f(x) - f(x_{i}^{*})\Big)dx \Big | \tag{1.3}
+$$
+
+Note that we used the fact that integrals are linear operations once again to group the integrals.
+
+Equation $(1.3)$ is actually pretty intuitive - it tells us that the global error $E$ is the sum of all local errors in each sub-interval $\Delta x_{i}$.  We will denote the local error with $E_{\Delta x_{i}}$:
+
+$$
+E_{\Delta x_{i}} = \int_{\Delta x_{i}} \Big(f(x) - f(x_{i}^{*})\Big)dx \tag{1.4}
+$$
+
+Under the assumption that $f(x)$ is continous, we can use the [Mean-Value Theorem](#mean-value-theorem) in each sub-interval. The MVT states that in each sub-interval $[x_{i-1}, x_{i}]$ there is a point todo TODO
+
+$$
+f'(\epsilon_{i}) (x_{i}^{*} - x) = f(x_{i}^{*})-f(x)
+$$
+
+Integration both sides, we get:
+
+$$
+\int_{\Delta x_{i}}f'(\epsilon_{i})(x_{i}^{*} - x)dx = \int_{\Delta x_{i}}(f(x_{i}^{*}) - f(x))dx \tag{1.5}
+$$
+
+Note that the RHS of the equation is actually $E_{\Delta x_{i}}$ so the LHS equals the local error. Evaluating the integral is pretty straight forward:
+$$
+\int_{\Delta x_{i}}f'(\epsilon_{i})(x_{i}^{*} - x)dx = f'(\epsilon_{i}) \Big(x_{i}^{*}\Delta x_{i} - \frac{1}{2}\Big[x^{2}\Big]_{x_{i-1}}^{x_{i}}\Big) = \frac{f'(\epsilon_{i}) }{2}\Big(2x_{i}^{*}(x_{i}-x_{i-1})-x_{i}^{2}+ x_{i-1}^{2}\Big)=(*)
+$$
+Assuming right-rule, $x_{i}^{*}=x_{i}$, so:
+$$
+(*) =\frac{f'(\epsilon_{i}) }{2}\Big(2x_{i}^{2}-2x_{i}x_{i-1}-x_{i}^{2}+ x_{i-1}^{2}\Big) =\frac{f'(\epsilon_{i}) }{2}(x_{i}-x_{i-1})^{2}=\frac{f'(\epsilon_{i}) }{2}\Delta x_{i}^{2} = (**)
+$$
+Assuming equal division, $\Delta x_{i} = \frac{b-a}{n}$ and so:
+$$
+E_{\Delta x_{i}} = \frac{f'(\epsilon_{i}) }{2}\frac{(b-a)^{2}}{n^{2}} = O(n^{-2}) \tag{1.6}
+$$
+(Under the assumption that $n>>b-a$)
+This means that the global error is:
+$$
+\tag{1.7}
+E = | \sum\limits_{i=1}^{n} E_{\Delta x_{i}} = nO(n^{-2}) = O(n^{-1})
+$$
+As for work, assuming each evaluation of the function is $O(s)$, we get:
+$O=\sum\limits_{i=1}^{n}(O(s)=nO(s)=O(ns)$
+Assuming $O(s)=O(1)$ we get
+
+BLABLA
+===
+
+For a $D$-dimensional integral over some $D$-dimensional volume $V$ we can write:
+$$I=\int_{V}f(\vec{x})dV=\int_{x_{d}} \dots\int_{x_{1}}f(x_{1}, \dots, x_{d})dx_{1}\dots dx_{d}$$
+Using [Fubini's Theorem](#fubini) we can evaluate this integral by evaluating a series of 1-dimensional integrals:
+$$I=\int_{x_{d}} \Big(\dots\Big(\int_{x_{1}}f(x_{1}, \dots, x_{d})dx_{1}\Big)\dots\Big) dx_{d}$$
+Each 1-dimensional integral maps a $k$ dimensional integrand to a $k-1$ dimensional function, eventually resulting in a scalar ($1$ dimensional) value for $I$. Since we only integrate in one dimension each time, we can write:
+$$
+\int_{x_{i}}f(x_{1}, ..., x_{d})dx_{i}=\int_{x}h(x)dx
+$$
+Where $h(x)=f(x_{1},...,x_{d})$ where we think of all variables aside from $x_{i}$ as constants. 
+
+Like we did in the 1-dimensional case, we can break down each integral into a sum of integrals of sub-intervals of the domain in each dimension thanks to linearity and get:
+
+$$
+I=\sum\limits_{i_{d}=1}^{n_{d}}\int_{\Delta x_{d}} \Big(\dots\Big(\sum\limits_{i_{1}=1}^{n_{1}}\int_{\Delta x_{1}}f(x_{1}, \dots, x_{d})dx_{1}\Big)\dots\Big) dx_{d}
+$$
+
+And finally, changing the order of operations (integration vs summation):
+$$
+\tag{3.0}
+I=\sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{1}}\Big(\int_{\Delta x_{d}} \Big(\dots\Big(\int_{\Delta x_{1}}f(x_{1}, \dots, x_{d})dx_{1}\Big)\dots\Big) dx_{d}\Big)
+$$
+
+Blabla
+
+The generalized Reimann sum for a $d$-dimensional function is:
+
+$$
+S=\sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}f(\vec{x_{i}^{*}})\prod_{i=1}^{d}(b_{i}-a_{i})
+$$
+
+Let's use this sum to estimate a surface integral. Consider the function $f(x,y)=x^{2}y$ in the square $R=[1, 3]^{2}$. Analytically evaluating the integral is pretty straight forward using Fubini's theorem:
+
+$$
+\int_{y=1}^{y=3}\int_{x=1}^{y=3}(x^{2}y)dxdy=\int_{y=1}^{y=3}\frac{x^3y}{3}\Big|_{x=1}^{x=3}dy=\int_{y=1}^{y=3}\Big(\frac{27y}{3}-\frac{y}{3}\Big)dy=\frac{13y^{2}}{3}\Big|_{y=1}^{y=3}=\frac{104}{3}\approx34.66
+$$
+
+The following Python code builds upon the previous code and calculates the Reimann sum assuming equal partitioning and equal number of partitions in all dimensions:
+
+```Python
+def reimann_2d(func: Callable, x_bounds: Interval, y_bounds: Interval, n: int) -> float:
+    x_partitions = x_bounds.partition(n)
+    y_partitions = y_bounds.partition(n)
+
+	volume = 0.0
+	for x_partition in x_partitions:
+		x_upper = x_partition.end
+		for y_partition in y_partitions:
+			partitioned_area = x_partition.length() * y_partition.length()
+			y_upper = y_partition.end
+			sampled_point = func(x_upper, y_upper)
+			sub_volume = sampled_point * partitioned_area
+			volume += sub_volume
+
+    return volume
+
+# Example function
+def f(x: float, y: float) -> float:
+    return math.pow(x, 2) * y
+
+rect = [Interval(1, 3), Interval(1, 3)]
+estimate_f = lambda n: reimann_2d(f, rect[0], rect[1], n)
+
+print(estimate_f(10))
+print(estimate_f(100))
+print(estimate_f(2000))
+```
+
+This code prints:
+```
+39.816000000000045
+35.162136000000075
+34.69133866698893
+```
+
+The third estimate is pretty decent, but if you run the last function call on your machine you will find that it takes a noticeable amount of time to compute. This is the result I get on my machine using IPython's built in `%timeit` magic function:
+```
+3.59 s ± 259 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+```
+
+Before discussing better alternative, let's venture into a more rigorous analysis of the performance and accuracy of this estimation method.
+
+Due to Fubini's theorem we know that:
+$$
+\prod_{i=1}^{d}(b_{i}-a_{i}) = \int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{1}}dx_{1}\Big)\dots \Big)dx_{d}
+$$
+Thus we can express the Reimann sum as:
+$$
+\sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{1}}\Big(\int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{1}}  f(\vec{x_{i}^{*}})dx_{1}\Big)\dots \Big)dx_{d}\Big)
+$$
+Assuming the function are integrable all of these transitions are valid.
+
+
+So we can write the generalized error as:
+$$
+E=\Big| \sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}\Big(\int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{1}}  (f(\vec{x}) - f(\vec{x_{i}^{*}}))dx_{1}\Big)\dots \Big)dx_{d}\Big)\Big|
+$$
+
+The innermost integral is the local error. We can use the generalized MVT to estimate the error. The MVT for multivariable functions is a natural extension of the 1-dimensional case. In some volume $[x,x_{i}^{*}]^{d}$, the MVT states that there exists a point $\overrightarrow{\epsilon_{i}}$:
+
+$$
+\nabla \cdot f(\vec{\epsilon_{i}}) \cdot (\overrightarrow{x_{i}^{*}}-\vec{x})= f(\vec{x_{i}^{*}}) - f(\vec{x})
+$$
+
+Now, integrating over $V_{i}=[x_{i-1}, x_{i}]^{d}$, we get:
+
+$$
+\int_{V_{i}} \Big(\nabla \cdot f(\vec{\epsilon_{i}}) \cdot (\overrightarrow{x_{i}^{*}}-\vec{x}) \Big)dV_{i}= 
+\int _{V_{i}} \Big(f(\vec{x_{i}^{*}}) - f(\vec{x}))\Big)dV_{i}
+$$
+
+The RHS expands to:
+
+$$
+\int_{V_{i}} \Big(\nabla \cdot f(\vec{\epsilon_{i}}) \cdot \overrightarrow{x_{i}^{*}} - \nabla \cdot f(\vec{\epsilon_{i}}) \cdot \overrightarrow{x} \Big)dV_{i}
+\overset{linearity}{=}
+\nabla \cdot f(\vec{\epsilon_{i}}) \cdot \overrightarrow{x_{i}^{*}} \int_{V_{i}}dV_{i} - \nabla \cdot f(\vec{\epsilon_{i}}) \cdot \int_{V_{i}}\vec{x}dV_{i}=(*)
+$$
+
+For brevity let  $\overrightarrow{M_{i}}=\nabla \cdot f(\vec{\epsilon_{i}})$. Note that all components of this vector are constant.
+
+$$
+(*)=(\overrightarrow{M_{i}}\cdot \overrightarrow{x_{i}^{*}})V_{i}-\overrightarrow{M_{i}} \cdot \int_{V_{i}}\vec{x}dV_{i} = (\overrightarrow{M_{i}}\cdot \overrightarrow{x_{i}^{*}})V_{i} - \overrightarrow{M_{i}} \cdot \overrightarrow{I_{i}} =(**)
+$$
+
+Let's attempt to provide an estimate for $\overrightarrow{I_{i}}$. We will assume:
+1. Equal partitioning, meaning $\Delta x_{i, k}=\frac{b_{k}-a_{k}}{n_{k}}$ for every $i, k$
+2. Equal number of partitions in each dimension, meaning $n_{k}=n$ for every $k$.
+$$
+\overrightarrow{I_{i}} = \int_{V_{i}}\vec{x}dV_{i} = \int_{V_{i}}(x_{1},\dots,x_{d})dx_{1}\dots dx_{d} = \Big(\frac{x_{1}^{2}}{2}\prod_{i=2}^{d}x_{i}, \dots, \frac{x_{d}^{2}}{2}\prod_{i=1}^{d-1}x_{i}\Big)
+$$
+So each component of the integrated vector is the product of all other components times half its own square. The dominant term in each component is the square of the original component, so we can write:
+
+$$
+\overrightarrow{I_{i}} = (O(\Delta x_{i,1}^{2}),\dots, O(\Delta x_{i,d}^{2}))
+$$
+
+Let's turn our attention to $(\overrightarrow{M_{i}}\cdot \overrightarrow{x_{i}^{*}})V_{i}$: For some $i$, assuming the partial derivatives are bound, we can think of it as some constant times the volume of the partition, so we can think of it as $O(V_{i})$. So we have:
+
+$$
+(**) = O(V_{i})-(M_{i,1}O(\Delta x_{i,1}^{2})+\dots+ M_{i,d}O(\Delta x_{i,d}^{2})) = O(\prod_{k=1}^{d}\Delta x_{i, k})-O(\sum\limits_{k=1}^{d}\Delta x_{i, k}^{2})= (***)
+$$
+
+Utilizing our assumptions on the partitioning scheme we get:
+
+$$
+(***) = O(\frac{1}{n^d}\prod_{k=1}^{d}(a_{k}-b_{k}))-O(\frac{1}{n^2}\sum\limits_{k=1}^{d}\Delta x_{i, k}^{2})
+$$
+
+Under the valid assumption that $n \textgreater\textgreater \Delta x_{i, k}$, we can say that the local error $E_{\text{local}}$ is $O(n^{-d})$.
+
+As for the global error, we have:
+
+$$
+\begin{alignat}{}
+\\
+E=\Big| \sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}\Big(\int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{1}}  (f(\vec{x}) - f(\vec{x_{i}^{*}}))dx_{1}\Big)\dots \Big)dx_{d}\Big)\Big| \approx
+\\
+\Big| \sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}\Big(\int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{2}}  E_{\text{local}} dx_{2}\Big)\dots \Big)dx_{d}\Big)\Big| =
+\\
+\Big| E_{\text{local}} \sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}\Big(\int_{\Delta x_{d}}\Big(\dots \Big(\int_{\Delta x_{2}}  dx_{2}\Big)\dots \Big)dx_{d}\Big)\Big| \approx
+\\
+E_{\text{local}}O(n^{d-1}) = n^{-d}O(n^{d-1})=O(n^{-1})
+\end{alignat}
+$$
+
+So the global error remains the same regardless of the dimensionality of the problem. However, the work is now:
+
+$$
+S=\sum\limits_{i_{d}=1}^{n_{d}}\dots\sum\limits_{i_{1}=1}^{n_{i}}O(1)\prod_{i=1}^{d}(b_{i}-a_{i}) = n^{d}O(1) = O(n^d)
+$$
+
+This is an instance of the [curse of dimensionality](#curse-dimensionality), where results are exponentially proportional to the dimensionality of the problem. All other quadrature rule approximations suffer from this phenomena as well. This means that numerically integrating in higher dimension is a computational nightmare, especially for real-time programs.
+
+aa
+---
+
+Monte Carlo
+
+The 1-Dimensional Monte Carlo estimator is:
+$$
+F(n)=\frac{1}{n}\sum\limits_{i=0}^{n}\frac{f(x_{i})}{p(x_{i})}
+$$
+
+This can be thought of as the weighted mean of $n$ samples of the function in random points, scaled by their relative density. Note that the work here is $O(n)$ since we need to sample to function $n$ times (and produce $n$ random points, which is also $O(n)$)
+
+This is due to the LLN
+
+$$
+\mu_{F} = E\Big[\frac{1}{n}\sum\limits_{i=0}^{n}\frac{f(x_{i})}{p(x_{i})}\Big]=\frac{1}{n}\sum\limits_{i=0}^{n}E\left[\frac{f(x_{i})}{p(x_{i})}\right]= \frac{1}{n}\sum\limits_{i=0}^{n}\int_{x}\frac{f(x)}{p(x)}p(x)dx=\int_{x}f(x)dx
+$$
+
+Using the LLN we know that for a large enough n $F(n)$ converges to its mean.
+
+Also:
+
+$\sigma^{2}_{F}=Var\Big(\frac{1}{n}\sum\limits_{i=0}^{n}\frac{f(x_{i})}{p(x_{i})}\Big)=\frac{1}{n^2}nVar\Big(\frac{f(x)}{p(x)}\Big)=\frac{1}{n}Var\Big(\frac{f(x)}{p(x)}\Big)$
+
+This is due to the central limit theorem (CLT)
+And so we get that the standard daviation is $O(\sigma)=O(n^{-\frac{1}{2}})$
+This has worse convergence that Reimann sum however work is always $O(n)$!!! 
+
+The generalized Monte-Carlo estimator for an integral evaluated in the volume $[a_{i},b_{i}]^d$ using uniform distribution as the PDF is:
+
+$$
+F(n)=\frac{1}{n}\prod_{k=1}^{d}(b_{k}-a_{k})\sum\limits_{i=1}^{n}f(\overrightarrow{\epsilon_{i}})
+$$
+
+The Monte-Carlo estimate of the same function $f(x,y)=x^2y$ integrated over $[1,3]^2$ is:
+
+$$
+F(n)=\frac{(3-1)^{2}}{n}\sum\limits_{i=1}^{n}f(\epsilon_{i,x},\epsilon_{i,y})=\frac{4}{n}\sum\limits_{i=1}^{n}f(\epsilon_{i,x},\epsilon_{i,y})
+$$
+
+The following code uses this estimator to compute the integral:
+
+```Python
+from typing import Tuple
+import random
+
+def sample_random_point_1d(bounds: Interval) -> float:
+	return bounds.length() * random.random() + bounds.start
+
+def sample_random_point_2d(x_bounds: Interval, y_bounds: Interval) -> Tuple[float, float]:
+	rand_x = sample_random_point_1d(x_bounds)
+	rand_y = sample_random_point_1d(y_bounds)
+	return rand_x, rand_y
+
+
+def monte_carlo_estimate(func: Callable, x_bounds: Interval, y_bounds: Interval, n: int) -> float:
+	random.seed(1337)  # Ensures we get the same random numbers
+    sample_sum = 0.0
+    coefficient = x_bounds.length() * y_bounds.length() / n
+    for i in range(n):
+        x, y = sample_random_point_2d(x_bounds, y_bounds)
+        sample_sum += func(x, y)
+
+    return coefficient * sample_sum
+
+# Example function
+def f(x: float, y: float) -> float:
+    return math.pow(x, 2) * y
+
+rect = [Interval(1, 3), Interval(1, 3)]
+estimate = lambda n: monte_carlo_estimate(f, rect[0], rect[1], n)
+```
+
+The estimates for the same $n$ values as before are:
+
+```
+>>> estimate(10)
+35.058836036864
+>>> estimate(100)
+37.147420375112304
+>>> estimate(2000)
+34.84172596010197
+```
+
+The first key observation here is that the error seems to have increased at first, contrary to what our intuition might suggest. However, if we recall that Monte-Carlo estimation is based on the average error, it makes sense - on average, the estimator using 10 random samples generated by some PDF *is* going to be closer to the real value, however we still have a chance of sampling exactly the "right" points that contribute the most weight to the integral, or points where the function's value just happens to be close to the value of the integral over the domain. We may also sample less important regions of the function that don't contribute much to the integral. As $n$ grows, the average error diminishes in $O(n^{-\frac{1}{2}})$ and the estimate almost always converges to the real value.
+
+Another observation is that whereas we needed $O(n^2)$ work in the case of our Reimann estimator, our work now is $O(n)$. The average runtime of the last call (with $n=2000$) on my machine is:
+
+```
+2.53 ms ± 190 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+```
+
+To compare, consider that the average runtime of the Reimann estimator was ~3 seconds!
+
+
+Variance Reduction
+===
+
+Consider our first observation regarding the accuracy of Monte Carlo estimators: the accuracy and the rate of convergence of the estimate depend on how well we sample the function - if we mostly sample in points that have little contribution to the integral, then we will need a much greater sample size until we get a decent estimate. Conversely, if we sample mostly in points that have a large contribution to the integral, we will need less samples. The variance of the estimator is smaller in the latter compared to the former. Naturally, we wish to find ways to reduce the variance.
+
+BLABLA
+
+Importance Sampling
+===
+
+Consider the following PDF: $p(\vec{x})=cf(\vec{x})$ for some value $c$. Consider the variance of the estimator:
+
+$$
+\text{Var}(F) = \text{Var}\left(\frac{1}{n}\sum\limits_{i=1}^{n}\frac{f(\vec{x_{i}})}{cf(\vec{x_{i}})}\right)=Var(\frac{1}{n}\sum\limits_{i=1}^{n}\frac{1}{c})=\text{Var}(\frac{1}{c})=0
+$$
+
+This makes $p$ the perfect estimator - we get the correct result immediately! This sounds too good to be true, and in fact it is - the trick is in the value of $c$: since $p$ is a PDF, it must integrate to 1 in its domain. Consider the 1-dimensional case:
+
+$$
+\int_{D}p(x)dx = \int_{D}cf(x)dx=c\int_{D}f(x)dx=1 \Longrightarrow c= \frac{1}{\int_{D}f(x)dx}
+$$
+
+This means that in order to find the PDF $p$, we first need to evaluate the integral, which is what we set out to do in the first place. This conclusion, albeit intuitive, provides an idea for a powerful variance reduction method - importance sampling.
+
+The idea behind importance sampling is to use a PDF that resembles the integrand $f$. This way, our samples will align more nicely with the function and we should be able to provide a better estimate for the same amount of work.
+
+
+```functionplot
+---
+title: The random graph
+xLabel: Time
+yLabel: Cost
+bounds: [0, 10, 0, 50]
+disbaleZoom: 1
+grid: true
+---
+g(x,)=x^PI
+f(x)=E+log(x)*2
+``

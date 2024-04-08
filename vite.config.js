@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import mdx from 'vite-plugin-mdx';
+import mdx from '@mdx-js/rollup'
+import rehypeKatex from 'rehype-katex'
+import remarkMath from 'remark-math'
+import rehypeHighlight from 'rehype-highlight'
 
 export default defineConfig(() => {
     return {
@@ -9,9 +12,11 @@ export default defineConfig(() => {
         },
         plugins: [
             react(),
-            // mdx({
-            //     include: /\.mdx?$/, // Include both .md and .mdx files
-            // }),
+            mdx({
+                include: /\.mdx?$/, // Include both .md and .mdx files
+                remarkPlugins: [remarkMath],
+                rehypePlugins: [rehypeKatex, rehypeHighlight],
+            }),
         ],
     };
 });
