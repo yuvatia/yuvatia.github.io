@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight'
 
 export default defineConfig(() => {
     return {
+        base: '/gfx-editor/',
         build: {
             outDir: 'build',
         },
