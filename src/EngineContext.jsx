@@ -22,6 +22,7 @@ const EngineContext = ({
     scene,
     autoplay,
     style,
+    hideMenu,
     maximized }) => {
     const gridContainerRef = useRef(null);
 
@@ -84,8 +85,8 @@ const EngineContext = ({
     return (
         <GlobalState.Provider value={{ theme, activeScene, editorSystem: editor }}>
             <div className="grid-wrapper" style={{ ...style }} data-bs-theme={theme || 'light'}>
-                <div className={`grid-container ${maximizedState ? 'maximized' : ''}`} ref={gridContainerRef}>
-                    <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className={`grid-container ${maximizedState ? 'maximized' : ''} ${hideMenu ? 'hidden-menu' : ''}`} ref={gridContainerRef}>
+                    <div className="controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} hidden={hideMenu}>
                         <HelpModal theme={theme} />
                         {director ? <SettingsView editor={editor} theme={theme} director={director} /> : null}
                         {activeScene ? (

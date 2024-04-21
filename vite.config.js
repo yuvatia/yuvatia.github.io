@@ -4,10 +4,11 @@ import mdx from '@mdx-js/rollup'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
+import remarkFrontmatter from 'remark-frontmatter';
 
 export default defineConfig(() => {
     return {
-        base: '/gfx-editor/',
+        // base: '/gfx-editor/',
         build: {
             outDir: 'build',
         },
@@ -15,9 +16,14 @@ export default defineConfig(() => {
             react(),
             mdx({
                 include: /\.mdx?$/, // Include both .md and .mdx files
-                remarkPlugins: [remarkMath],
+                remarkPlugins: [remarkMath, remarkFrontmatter],
                 rehypePlugins: [rehypeKatex, rehypeHighlight],
             }),
         ],
+        server: {
+            watch: {
+                usePolling: true
+            }
+        }
     };
 });

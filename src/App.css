@@ -94,6 +94,10 @@ body,
   border: 1px solid var(--border-bg);
 }
 
+.grid-container.hidden-menu>div {
+  border: none;
+}
+
 .controls {
   grid-area: controls;
   /* background-color: #e9e9e9; */
@@ -221,4 +225,54 @@ input[type=number]::-webkit-outer-spin-button {
 .header-icon {
   color: #dc3545;
   /* Bootstrap's danger color */
+}
+
+
+/*blog */
+
+.blog-container {
+  display: grid;
+  grid-template-columns: 1fr 4fr; /* default state */
+  width: 100%;
+  height: 100vh;
+}
+
+.blog-container.closed {
+  grid-template-columns: 0.1fr 4fr; /* state when menu is closed */
+}
+
+.menu {
+  transition: width 0.5s;
+  overflow: hidden;
+}
+
+.menu.open {
+  width: 200px;
+}
+
+.menu.closed {
+  width: 50px;
+}
+
+.menu.closed:hover {
+  width: 200px;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 600px) {
+  .blog-container {
+      grid-template-columns: 1fr;
+  }
+
+  .menu.open, .menu.closed:hover {
+      width: 100%;
+  }
+
+  .menu.closed {
+      width: 50px;
+  }
 }

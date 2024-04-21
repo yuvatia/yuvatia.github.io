@@ -1,39 +1,469 @@
 import { MeshAsset } from '../engine/asset';
-import { Material, MeshFilter, MeshRenderer } from '../engine/src/components';
+import { DirectionalLight, Material, MeshFilter, MeshRenderer } from '../engine/src/components';
 import { Rigidbody } from '../engine/src/kinematics';
 import { Point, Vector } from '../engine/src/math';
 import { Scene } from '../engine/src/scene.js'
 import { Transform } from '../engine/src/transform';
 import EngineContext from '../EngineContext.jsx'
 
-export const Engine = ({ scene, height = '40%', width = '40%', autoplay }) => (
-    <EngineContext id='main' theme='dark' style={{ height, width, margin: '0 auto' }} maximized scene={scene} autoplay={autoplay} />
+export const frontmatter = {
+    title: 'Rotation Representation'
+};
+
+export const Engine = ({ scene, height = '40%', width = '40%', autoplay, hideMenu = true, ...props }) => (
+    <EngineContext id='main' style={{ height, width, margin: '0 auto' }} maximized scene={scene} autoplay={autoplay} hideMenu={hideMenu} {...props} />
 );
+
+export const addShape = (scene, shape, name, diffuse, wireframe = true) => {
+    const box = scene.newEntity(name || shape);
+    const realT = scene.getComponent(box, Transform);
+    realT.scale = new Vector(150, 150, 150);
+    scene.addComponent(box, MeshFilter).meshRef = MeshAsset.get(shape);
+    if (diffuse) {
+        scene.addComponent(box, Material).diffuse = diffuse.clone();
+    } else {
+        scene.addComponent(box, Material).faceColoring = true;
+    }
+    // scene.addComponent(box, MeshRenderer).wireframe = wireframe;
+    return box;
+};
+
+
+export const addRigidShape = (scene, shape, name) => {
+    const box = addShape(scene, shape, name);
+    const rbody = scene.addComponent(box, Rigidbody);
+    rbody.angularDamping = 1;
+    return box;
+};
 
 export const MakeSceneWithCube = () => {
     const scene = new Scene('Cube');
-    const box = scene.newEntity('Cube');
-    const realT = scene.getComponent(box, Transform);
-    realT.scale = new Vector(100, 100, 100);
-    scene.addComponent(box, MeshFilter).meshRef = MeshAsset.get('Cube');
-    scene.addComponent(box, Material).diffuse = new Point(255, 70, 0, 1); // Red
-    scene.addComponent(box, MeshRenderer).shading = false;
-    const rbody = scene.addComponent(box, Rigidbody);
+    const box = addRigidShape(scene, 'Cube');
+    const rbody = scene.getComponent(box, Rigidbody);
     rbody.angularVelocity.y = 0.1;
-    rbody.angularDamping = 1;
     return scene;
 };
+
+export const MakeSceneWithRotatingShape = (shape, { xRot, yRot, zRot }, addLight = false) => {
+    const scene = new Scene(shape);
+    const cube = addRigidShape(scene, shape);
+    const rbody = scene.getComponent(cube, Rigidbody);
+    rbody.angularVelocity = new Vector(xRot, yRot, zRot);
+    if (addLight) {
+        const light = scene.newEntity('Light');
+        const lightComp = scene.addComponent(light, DirectionalLight);
+        lightComp.direction.z = -lightComp.direction.z;
+    }
+    return scene;
+};
+
+export const MakeSceneWithRotatedCube = () => {
+    const scene = new Scene('Scene');
+    const cube = addShape(scene, 'Cube', 'Cube', new Point(0, 255, 0, 0.5));
+    scene.getComponent(cube, Transform).rotation.z = 45;
+    const cube2 = addShape(scene, 'Cube', 'Cube2', new Point(255, 0, 0, 0.5));
+    return scene;
+};
+
 export const SceneWithCube = MakeSceneWithCube();
 
 
-## BRUH
+# Rotations
 
-<Engine scene={SceneWithCube} width='40%' height='auto' autoplay />
-Here is a simple math equation:
-<Engine scene={SceneWithCube} width='40%' height='auto' />
-Finally, we have
-<Engine/>
+Rotations are one of those things that we can recognize but may have a hard time describing formally. In this post, we will derive a mathematical notation of rotation, which we will then use to show how rotations can be described in 3D space.
 
-$$E = mc^2$$
-import { Scene } from "../engine/src/scene"
+### Intuition
 
+#### 2D Case
+
+The page you're reading is (most likely) a two-dimensional space/plane. In this plane, we can draw two-dimensional shapes, such as a rectangle:
+
+<Engine scene={MakeSceneWithRotatingShape('Cube', {xRot: 0, yRot: 0, zRot: 0.0})} width='40%' height='auto' autoplay />
+
+In your head, start rotating this rectangle counter-clockwise around its center. You're probably visualizing something that looks like this:
+
+<Engine scene={MakeSceneWithRotatingShape('Cube', {xRot: 0, yRot: 0, zRot: 0.01})} width='40%' height='auto' autoplay />
+
+One immediate observation is that the result of the rotation always remains on the plane of the paper. More precisely, we say that rotation $R$ is a map from a vector space $V$ to itself, or more compactly $R: V \to V$. 
+
+A stronger observation is that the rectangle maintains its shape and size. More precisely, we can say that the angles between its edges, and the length of its edges, remain the same. The same is true for every line segment in the rectangle, and for distances between segments and points. More compactly, we can say that rotations preseve the dot product: recall that the geometric definition of the dot product in eucledian space is defined as:
+
+$$
+u \cdot v = ||u||_{2}||v||_{2} \cos(\theta)
+$$
+
+Denote $R(u), R(v)$ as the result of rotating vectors $u, v$ by $R$. Since the dot product of a vector with itself is the squared norm, and here we use the eucledian norm which is the length of the vector, we can write that if:
+
+$$
+R(u)\cdot R(u) = u\cdot u \iff ||R(u)||_{2} = ||u||_{2}
+$$
+
+The property of preseving distances is called a [isometry](https://en.wikipedia.org/wiki/Isometry)
+
+If we take the dot product of two vectors, then we get:
+$$
+R(u)\cdot R(v) = u\cdot v \iff ||R(u)||_{2} ||R(v)||_{2}\cos(\theta') = ||u||_{2} ||v||_{2}\cos(\theta) \iff \\
+\cos(\theta') = \cos(\theta) \iff \iff ||\theta'|| = ||\theta||
+$$
+
+So distances and angles are preserved iff the dot product is preserved (although angles can 'flip', in which case the transformed shape will be mirrored). Through simple algebraic manipulation, it can be shown that if a map preserves the dot product, then it is a linear map:
+
+$$
+(R(u+v)-R(u)-R(v)) \cdot (R(u+v)-R(u)-R(v)) = \\
+R(u+v) \cdot R(u+v) + R(u) \cdot R(u) + R(v) \cdot R(v) -\\ 2R(u+v) \cdot R(u) + 2R(u) \cdot R(v) - 2R(v) \cdot R(u+v) = \\
+(u+v) \cdot (u+v) + u \cdot u + v \cdot v - 2(u+v) \cdot u + 2u\cdot v - 2v\cdot(u+v) = \\
+0 \Rightarrow R(u+v) = R(u) + R(v)
+$$
+
+Similarly:
+$$
+(R(\lambda v)-\lambda R(v)) \cdot (R(\lambda v)-\lambda R(v)) = \\
+(\lambda v) \cdot (\lambda v) - 2\lambda v \cdot \lambda v + \lambda^2 v \cdot v = 0 \Rightarrow R(\lambda v) = \lambda R(v)
+$$
+
+Thus we conclude that if a map $f: V \to V$ preserves the dot product, then it is a linear map and can be represented by an $n \times n$ transformation matrix (where $n=\text{dim}(V)$). The latter statement holds only for a finite-dimensional vector space, but we will never discuss the infinite-dimensional case so we can ignore it.
+
+A few more insights are that the origin (in this case, the center of the shape) remains fixed (this can also be deduced immediately from our conclusion that $R$ is a linear map, since $T(0)=0$ for all $T$ representing a linear transfomration), and that the distance each point travels depends on its proximity to the origin (shape center) - points further away from the center travel further, and all points equally far travel the same distance. This is due to rotations being movement along a circle, and the distance along a circle is proportional to the angle and the radius - to maintain the same angle, points further away (bigger radius) must travel further.
+
+In order to be able to continously rotate an object in 2D space, we only needed to define the winding order (clockwise vs counter-clockwise, with ccw being the norm). The rotation itself in this case is defined by a number - the angle of rotation around a circle whose origin is at the center of the shape, and the sign of the angle determines the direction of rotation. This means that in order to describe a rotation in 2D space, we have only 1 degree of freedom (DOF) - the angle of rotation $\theta$. By looking at this scene, we can accurately describe the rotation of the rectangle as being rotated by $45\degree$ (ccw):
+
+<Engine scene={MakeSceneWithRotatedCube()} width='40%' height='auto' autoplay />
+
+#### 3D Case
+
+The 3D case is a bit more involved, as we can no longer describe a rotation as a scalar. In order to visualize rotations in 3D, we use [Maxwell's corkscrew rule](https://en.wikipedia.org/wiki/Right-hand_rule#Rotations). Using this rule, try to convince yourself that this cube is rotating around the X axis, whose positive direction is pointing towards the right side of the screen:
+
+<Engine scene={MakeSceneWithRotatingShape('Cube', {xRot: 0.05, yRot: 0, zRot: 0})} width='40%' height='auto' autoplay />
+
+Note that this is a generalization of the 2D case - the cube is rotating around a circle whose center is on the $x$ axis, and the distance each point travels is proportional to its distance from the $x$ axis. Note that if we were to stand along the $x$ axis and look towards the cube, it would look the same as the 2D case!
+
+We can also rotate around the $y$ and $z$ axes (convince yourself using the corkscrew rule that the 2D rotation we've shown earlier is a rotation around the $z$ axis, pointing towards the reader), but rotations need not be limited to these axes - the corkscrew rule lets us rotate around any axis in 3D space! 
+
+As an exercise, see if you can use that rule to find the axis of rotation here:
+
+<Engine scene={MakeSceneWithRotatingShape('Cube', {xRot: 0.05, yRot: 0.05, zRot: 0})} width='40%' height='auto' autoplay />
+
+If you guessed $x-y=0$, you're correct!
+
+Since we observe the same distance and angle presevation properties in 3D as in 2D, we can conclude that rotations in 3D are also linear maps, and can be represented by a $3 \times 3$ transformation matrix. Since we now also need to specify the axis we rotate around, as well as the angle of rotation, we can describe the rotation using 4 variables - a 3D vector representing the axis of rotation, and a scalar representing the angle of rotation. However, since the axis of rotation can (and should) be normalized, we have 1 constraint which removes 1 DOF, which means we should be able to describe rotations using 3 DOFs. Alternatively, it is tempting to assume that since we have 3 prinicipal axes - $x$, $y$ and $z$, we can describe any rotation as a composition of rotations around the principal axes, and since the axes are already known we would only need 1 scalar for each, so 3 DOFs in total.
+
+Armed with this initial observations and assumptions, we can dive into the formalism of rotations in 3D space.
+
+### Definition
+
+Let $V$ be an $n$-dimensional vector space. A rotation $R$ is a linear map $R: V \to V$ s.t. it preseves the dot product:
+
+$$
+\forall u, v \in V: R(u) \cdot R(v) = u \cdot v
+$$
+
+### Properties
+
+**Bijectivity**
+
+Let $u, v$ be vectors in $V$. If the rotated vectors are equal, then we have:
+
+$$
+||u-v|| \underset{\text{isometry}}{=}||R(u-v)|| \underset{\text{R is linear}}{=} ||R(u)-R(v)|| \underset{R(u)=R(v)}{=}{0}
+$$
+
+Which is true if and only if $u=v$, thus $R$ is injective, meaning that $\dim(\text{Im} R) = \dim(V)$. By the [rank-nullity theorem](https://en.wikipedia.org/wiki/Rank%E2%80%93nullity_theorem), we have that $\dim(\text{Ker} R) = 0$, which means that $R$ is also surjective, and thus bijective.
+
+**Invertibility**
+
+A bijective map is invertible, meaning there exits an inverse map $R^{-1}$ such that $R^{-1} \circ R \circ v = v$ Since $R$ it a linear map of a finite-dimensional vector space, it can be represented using matrix multiplication:
+
+$$
+R(v) = Rv
+$$
+
+for some $n \times n$ matrix $R$, and since it is invertible, the inverse map is given by the inverse of the transformation matrix $R$:
+
+$$
+R^{-1}(v) = R^{-1}v
+$$
+
+**Orthogonality**
+
+Recall that the dot product can also be written in the form of a matrix multiplication:
+
+$$
+\begin{alignat}{0}
+u \cdot v = u^T v
+\end{alignat}
+$$
+
+Thus:
+$$
+\begin{alignat}{}
+Au \cdot Av = (Au)^T Av = u^T A^T A v = u^T (A^T A v) = u \cdot (A^T A v)\end{alignat}
+$$
+
+Since $R$ is prserves the dot product and can be expressed using a matrix, we have:
+
+$$
+u \cdot v = Ru \cdot Rv \underset{(2)}{=} u \cdot (R^T R v) \iff R^T R = I
+$$
+
+So it follows that $R^T = R^{-1}$, meaning that the inverse of a rotation matrix is its transpose, which means that $R$ is an [orthogonal matrix](https://en.wikipedia.org/wiki/Orthogonal_matrix).
+
+Note that the opposite is also true - orthogonal maps are always rotations (proper/improper, as discussed below). This also means that the identity matrix $I$ is a rotation, since $I^{T}I=I$. Geometrically, this is the same as leaving the vector unrotated.
+
+**Determinant**
+
+Since $R$ is orthogonal, $|\det(R)|=1$. This should come as no suprise considering the geometric interpretation of the determinant as the volume of the parallelepiped spanned by the vectors of the matrix and how volumes are transformed under the transformation - a determinant of magnitude 1 means that transformed volumes remain the same, which is why our rectangle and cube maitain their shape and size.
+
+The sign of the determinant determines the orientation of the transformation - if the determinant is positive, the transformation is orientation-preserving, and if it is negative, the transformation is orientation-reversing. If the orientation isn't preserved, the shape will be mirrored and we'll end up with a reflection. Since we would like to maintain orientation, we will require that $det(R)>0$ which necessiates $\det(R)=1$. We call such rotations *proper* rotation. The other case, where $det(R)=-1$ (mirroring) is called an *improper* rotation.
+
+**Group under Composition**
+
+Consider $S$ the set of rotations in $n$-dimensional space. We shall prove that $S$ is a group under composition:
+
+1. **Associativity** - since rotations can be represnted by matrix multiplications, and matrix multiplication is associative, then the composition of rotations is also associative.
+2. **Inverse element** - as we have shown, rotations are invertible, and the inverse of a rotation is a rotation, so the inverse of a rotation exists and is in $S$.
+3. **Identity element** - As we have shown, the identity matrix is a rotation, and the identity matrix is the identity element of matrix multiplication, so the identity element exists and is in $S$.
+
+Thus $S$ is a group under composition. This groups is important enough to have its own name - the [Special Orthogonal group](https://en.wikipedia.org/wiki/Orthogonal_group#Special_orthogonal_group) $SO(n)$. We will only discuss $SO(2)$ and $SO(3)$, which are the special orthogonal groups in 2D and 3D space, respectively.
+
+Being groups, $SO(n)$ are also closed under composition, meaning that composing rotations results in new rotations. Since we've shown that rotations are essentially matrix multiplication, this means that pre/post multiplying rotations (which is the same as composing rotations) results in a new rotation.
+
+### Constraining Rotation Matrices
+
+*Note: we will use column-major matrices*
+
+We've concluded that rotation in $n$-dimensional space can be represnted by $n \times n$ square matrices. We've also reasoned that rotations in 2D space have only 1 DOF (1 variable), and in 3D space have only 3 DOFs. Let's prove these claims.
+
+Rotation matrices are orthogonal, which means that its column vectors are:
+1. Normalized - the norm of each column vector is 1. This provides a set of $n$ independent constraints (since the columns are themselves linearly independent).
+2. Orthogonal to each other - all column vectors are orthogonal, which means that if we take the dot product between every pair of column vectors, we'll always get zero:
+
+$$
+\forall i, j \in [1, n], i \neq j: \overrightarrow{R_i} \cdot \overrightarrow{R_j} = 0
+$$
+
+This provides an additional $\binom{n}{2}$ constraints.
+
+3. Finally, we are only intereseted in proper rotations, so we enforce that $\det R = 1$.
+
+So in total, we have an $n$ square matrix with $n^{2}$ DOFs, and a set of $n+\binom{n}{2}$ constraints, meaning we have $n^2-n-\binom{n}{2}$ DOFs. This means that for $n=2$ we have 1 DOF, and for $n=3$ we have 3 DOFs.
+
+### 2D Rotation Matrices
+
+Consider a $2 \times 2$ matrix:
+
+$$
+R = \begin{pmatrix} a_{1} & b_{1} \\ a_{2} & b_{2} \end{pmatrix}
+$$
+
+Consider the constraint of the column vector norm:
+
+$$
+a_{1}^2 + a_{2}^2 = 1 \\
+b_{1}^2 + b_{2}^2 = 1 \\
+$$
+
+This set of constraints makes it very tempting to use polar coordinates instead:
+
+$$
+R = \begin{pmatrix} \cos\theta & \cos\phi \\ \sin\theta & \sin\phi \end{pmatrix}
+$$
+
+Adding the orthogonality contraint, we have:
+
+$$
+a \cdot b = \cos \theta \cos \phi + \sin \theta \sin \phi = \cos(\phi - \theta) = 0 \Rightarrow \phi = \theta + \frac{3\pi}{2}+\pi k = \theta + \frac{\pi}{2}+\pi k
+$$
+
+Solving for $\cos\phi, \sin\phi$, we get:
+$$
+\begin{aligned}{}
+\cos\phi = \cos(\theta + \frac{\pi}{2}+\pi k) = cos(\theta+\frac{\pi}{2})=-\sin\theta \\
+\sin\phi = \sin(\theta + \frac{\pi}{2}+\pi k) = \pm  \sin(\theta + \frac{\pi}{2}) = \pm \cos \theta
+\end{aligned}
+$$
+
+Which gives us two possible rotation matrices:
+
+$$
+R_{1,2} = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \pm \cos \theta \end{pmatrix}
+$$
+
+One of this is a proper rotation, while the other is a reflection. We can figure out which is which by taking the determinant:
+$$
+\det R = \pm \cos^{2} \theta + \sin^2{\theta} \underset{\text{proper rotation}} = 1 \iff R = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos \theta \end{pmatrix}
+$$
+
+Thus we have the final form of our rotation matrix in 2D:
+$$
+\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos \theta \end{pmatrix}
+$$
+
+As expected, we have 1 DOF. We could've also derived this matrix geometrically using trigonometry. Consider a vector $v$, rotated by $\theta$ degrees counter-clockwise along the unit circle:
+
+**TODO**: Add image
+
+We can write $v$ in terms of the angle $\alpha$ between $v$ and the $x$ axis:
+
+$$
+v = \begin{pmatrix} cos\alpha \\ \sin \alpha \end{pmatrix}
+$$
+
+Since rotating $v$ results in a new vector $v'$ whose magnitude is the same, this is equivalent so simply adding $\theta$ to $\alpha$, so we can use trigonometric summation formulas and get:
+$$
+\begin{aligned}{}
+v' = \begin{pmatrix} \cos(\alpha+\theta) \\ \sin(\alpha + \theta) \end{pmatrix} = \begin{pmatrix} \cos\alpha \cos\theta - \sin\alpha \sin\theta \\ \sin\alpha \cos\theta + \cos\alpha \sin\theta \end{pmatrix} = \\\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end {pmatrix} \begin{pmatrix} cos\theta \\ \sin \theta \end{pmatrix} = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}v=Rv
+\end{aligned}{}
+$$
+
+The relationship between angle summation and rotations can be used as an alternative method of showing that rotations are closed under summation.
+
+Note that in this derivation, we discussed rotating a point in the same coordinate system (notice that the $x$ and $y$ axes remained static). A transformation which changes a set of point relative to the same coordinate system is called an **active** or **alibi** transformation. We could also change the frame of reference while leaving the point fixed. This is called a **passive** or **alias** transformation.
+
+### 3D Rotation Matrices
+
+As we've shown before, rotations in 3D have 3 DOFs. Instead of deriving a generalized rotation matrix directly, we will instead construct a matrix which satisfies the requirements of being a rotation, while also having 3 DOFs.
+
+Consider the 2D rotation matrix derived above. If we extend the matrix to a $3 \times 3$ matrix, we get:
+
+$$
+R_{z} = \begin{pmatrix} \cos\theta & -\sin\theta & 0 \\ \sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{pmatrix}
+$$
+
+This matrix is clearly orthogonal with $\det=1$, so it is a proper rotation. In fact, it is a rotation around the $z$ axis - note that the $z$ component remains untouched, or simply recall our discussion earlier where we observed that rotations in the $XY$ plane are rotations around the $Z$ axis in 3D space.
+
+Let's formalize what we mean when we say that we are "rotating around an axis". Consider $R_{z}$. We say that the matrix is a rotation matrix around the $Z$ axis because the component along the $z$ axis is maintained, i.e. uneffected by the rotation, making it the axis of rotation. More formally, this means that:
+
+$$
+R_{z}(\hat{z}) = \hat{z}
+$$
+
+Since $R_{z}$ is a matrix this means that $R_{z}\hat{z}=\hat{z}$, meaning that $\hat{z}$ is an [**eigenvector**](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors) of $R_{z}$ with [**eigenvalue**](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors) $\lambda=1$. Consider the geometerical meaning of an eigenvalue - the eigenvalue is the factor by which an eingenvector is streteched or squished (descriptino taken verbatim from Wikipedia), and since we rotate around the $Z$ we expect it to be unaffected by the rotation.
+
+Similarly, we can construct two additional rotation matrices, one around the $X$ axis and one around the $Y$ axis:
+$$
+\begin{aligned}
+R_{x} = \begin{pmatrix} 1 & 0 & 0 \\ 0 & \cos\theta & -\sin\theta \\ 0 & \sin\theta & \cos\theta \end{pmatrix} \\
+R_{y} = \begin{pmatrix} \cos\theta & 0 & \sin\theta \\ 0 & 1 & 0 \\ -sin\theta & 0 & \cos\theta \end{pmatrix}
+\end{aligned}
+$$
+
+We can easily show that both are rotations with axis of rotation $\hat{x}$ and $\hat{y}$, respectively.
+
+The same reasoning can be applied to *all* rotation matrices. For $\lambda$ to be an eigenvalue with eigenvector $v$, the following must apply:
+$$
+R\vec{v}=\lambda\vec{v} \iff (R-\lambda I)\vec{v} = 0 \Rightarrow \det(R-\lambda I) = 0 \\
+$$
+
+Consider what happens when $R$ is a rotation and we plug $\lambda=1$:
+$$
+\begin{aligned}
+\det(R- I) \underset{\text{R is a rotation}}{=} \\
+\det(R^{T}) \det(R - I) \underset{\text{R is square}}{=} \\
+\det(R^{T}R- R) =\\
+\det(I- R) = -\det(R-I) \Rightarrow \det(R-I)=0
+\end{aligned}
+$$
+
+Thus, **all rotations have eigenvalue 1 with some eigenvector $v$, which serves as the axis of rotation**. This is actually the matrix proof for [Euler's rotation theorem](https://en.wikipedia.org/wiki/Euler%27s_rotation_theorem), which states that any displacement of a rigid body (i.e. an object that maitains its shape and size) where a point on the body remains fixed (e.g. the origin) can be represented by an instantenous axis of rotation. Stated less formally, the theorem states that *any rotation can be represented by an axis and an angle of rotation around that axis*. Recall that in the 2D case, the axis is implicitly stated to be $\hat{z}$, which is why we only needed to specify the angle of rotation. This result provides us with a more geometric argument for why all rotations can be represented using 3 angles - consider the unit sphere:
+
+**TODO: ENGINE SPHERE**
+
+Every point $P$ on the unit sphere can be [parametrized](https://en.wikipedia.org/wiki/Spherical_coordinate_system) using two angles $\theta$ and $\phi$, which are angles of rotation around two of the sphere's 3 elementary axes (due to the spherical symmetry it dosen't matter which axes we choose). This means that every unit vector - which can serve as an axis of rotation - in 3D can be represented using two angles. Finally, we represent the rotation around the axis of rotation using a third angle.
+
+#### Chaining Elementary Rotations
+
+##### Intrinsic vs Extrinsic
+
+When describing rotations of a rigid body, it is important to remember that bodies have their own local inertial frame of reference. Consider the rectangle from earlier - while the global $x$ and $y$ axes remain the same regardless of the rotation of the rectangle, a coordinate system attached to the lower left side of the rectangle at $t=0$ is transformed along with the rectangle. 
+
+In the 2D case, this doesn't matter since the $z$ axis remains the same, and we only rotate around it. In the 3D case however, this is important - what happens if we start with an axis-aligned box, such that its local axes are parallel to the global axes, then rotate it by $45 \degree$ around the $z$ axis, then rotate it by $45 \degree$ around the $y$ axis? In your head, can you perform this operation and visualize the result?
+
+You can't, because the operation isn't well defined. Before the first rotation, the local and global $z$ axes are aligned, so there is no ambiguity. However, after the initial rotation, the local $y$ axis has also been transformed and is now:
+
+$$
+y' = R_{z}(45 \degree) y = \begin{pmatrix} -\frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 \end{pmatrix}
+$$
+
+In global coordinates. This means that we cannot simply compose the two rotations without first specifying the nature of the rotation - is the second rotation done around the local axis, meaning that the coordinate system is moved along with the body, or is it done around the global axis, meaning that the body is rotated but the coordinate system remains unchanged? To solve this ambiguity, we introduce the concept of intrinsic and extrinsic rotations.
+
+An *intrinsic* rotation is one where the coordinate system is moved with the body. If the second rotation were intrinsic, then we would have rotated around $y'$, and could have simply composed the rotations using **pre-multiplication**: $v'=R_{y}(45\degree)R_{z}(45\degree)v$ (read: rotate $v$ by 45 degrees around its $z$ axis, then rotate it by 45 degrees around its $y$ axis, which changes between rotations).
+
+An *extrinsic* rotation is one where the coordinate system remains fixed. If the second rotation were extrinsic, then we would have rotated the object around $y$. However, now we run into an issue - after the first rotation, $v$ is no longer expressed in the basis of the global coordinate system, so we need to apply a similarity transform (here we use an uppercase $Y$ to denote that this is the global $y$ axis, and $R$ to denote the object's current orientation):
+
+$$
+R_{Y} \underset{\text{similarity transform}}{=} R_{z}R_{y}R_{z}^{-1}
+$$
+
+$$
+R_{Y}R_{z} = R_{z}R_{y}R_{z}^{-1}R_{z}=R_{z}R_{y}
+$$
+
+Which means we perform extrinsic rotations using **post-multiplication*. In this specific example, the current final transform would be:
+
+$$
+v''=R_{z}(45\degree)R_{y}(45\degree)v
+$$
+
+Which will rotate $v$ around the global $z$ axis by 45 degrees, then around the global $y$ axis by 45 degrees.
+
+Note that $v$, $v'$ and $v''$ are all expressed in the basis of the original frame of reference.
+
+##### General Rotation Matrix
+
+Consider the chaining of the three elementary rotation matrices XYZ (we use an abbriviated notation $c_{x}=\cos x, s_{x} = \sin x$), after working out the matrix multiplication we get:
+
+$$
+R_{z}(\gamma)R_{y}(\beta)R_{x}(\alpha) = 
+\begin{pmatrix}
+c_{\beta} c_{\gamma} & s_{\alpha}s_{\beta}c_{\gamma}-c_{\alpha}s_{\gamma} & c_{\alpha}s_{\beta}c_{\gamma} + s_{\alpha}s_{\gamma} \\
+c_{\beta} s_{\gamma} & s_{\alpha}s_{\beta}s_{\gamma} + c_{\alpha}c_{\gamma} & c_{\alpha}s_{\beta} s_{\gamma} - s_{\alpha}c_{\gamma}\\
+-s_{\beta} & s_{\alpha}c_{\beta} & c_{\alpha}c_{\beta}
+\end{pmatrix}
+$$
+
+This matrix has 3 DOFs ($\alpha, \beta, \gamma$) and thus can represent every rotation. We can use other triplets so long as there are no two sequential axes are identical, but XYZ is a relatively common sequence in 3D graphics. Note that this matrix can represent either a sequence of intrinsic rotations (XYZ), or a sequence of extrinsic rotations (ZXY).
+
+##### Inverse Rotation Problem
+
+Consider a general $3\times3$ matrix:
+
+$$
+\begin{pmatrix}a_{00} & a_{01} & a_{02} \\ a_{10} & a_{11} & a_{12} \\ a_{20} & a_{21} & a_{22} \end{pmatrix}
+$$
+
+If it is a rotation, we can express it in terms of a general rotation matrix composed of 3 elementary rotations as described above, then we can solve for the angles of rotations $\alpha, \beta, \gamma$:
+
+$$
+\frac{a_{21}}{a_{22}} = \frac{s_{\alpha}c_{\beta}}{c_{\alpha} c_{\beta}} = \tan{\alpha} \Rightarrow \alpha = \text{atan2}(a_{21},a_{22})
+$$
+
+$$
+\frac{a_{10}}{a_{00}} = \frac{c_{\beta}s_{\gamma}}{c_{\beta}c_{\gamma}} = \tan\gamma \Rightarrow \gamma = \text{atan2}(a_{10},a_{00})
+$$
+
+$$
+a_{20}=-\sin\beta \Rightarrow
+\beta = -\text{asin}(a_{20})
+$$
+
+It is important to recognize that this decomposition method has singularities where a unique solution cannot actually be found. The decomposition method presented above fails if either of $a_{22}$ and $a_{00}$ since $\text{atan2}$ will be undefined in such cases. These cases may occur when either of the cosine terms of the angles equals 0. If however $\cos\beta \ne 0$, which we can easily check since we can find $\beta$ independently of the values of the other angles, thne we can still figure out which cosine terms were zero and find a unique solution. However, when $\cos\beta = 0$, which happens when $\beta=\pm \frac{\pi}{2}$, we are unable to uniquely determine the value of $\alpha, \gamma$. In that case, the form of the rotation matrix will look like this:
+
+$$
+\begin{pmatrix}
+0 & \pm s_{\alpha}c_{\gamma}-c_{\alpha}s_{\gamma} & \pm c_{\alpha}c_{\gamma} + s_{\alpha}s_{\gamma} \\
+0 & \pm s_{\alpha} s_{\gamma} + c_{\alpha} c_{\gamma} & \pm c_{\alpha} s_{\gamma} - s_{\alpha} c_{\gamma} \\
+\mp 1 & 0 & 0
+\end{pmatrix}
+=
+\begin{pmatrix}
+0 & \pm s_{\alpha \mp \gamma} & c_{\alpha \mp \gamma} \\
+0 & \pm c_{\alpha \mp \gamma} & \pm s_{\gamma \mp \alpha} \\
+\mp 1 & 0 & 0
+\end{pmatrix}
+$$
+
+Which means we can only uniquely determine the sum or difference of $\alpha$ and $\gamma$. This cases are called singularities, and are the mathematical cause for the phenomena known as a [gimbal lock](https://en.wikipedia.org/wiki/Gimbal_lock), where one degree of freedom is lost locking the system to a rotation in a two-dimensional space.
+
+#### Axis-Angle Rotations
+
+Recall that Euler's rotation theorem states that every rotation/orientation can be expressed by an axis of rotation and an angle of rotation around that axis.

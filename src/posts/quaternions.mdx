@@ -1,0 +1,231 @@
+export const frontmatter = {
+    title: "Quaternions",
+    date: "2020-10-25",
+    tags: ["math", "robotics"],
+    draft: true,
+    log: true
+};
+
+## Quaternions
+
+Quaternions are a four-dimensional extension of complex numbers, defined as:
+
+$$
+q = w + xi + yj + zk
+$$
+
+Where $w, x, y, z$ are real numbers, and $i, j, k$ are imaginary units that satisfy the following relations:
+
+$$
+i^2 = j^2 = k^2 = ijk = -1\\
+ij=k, jk=i, ki=j, ji=-k, kj=-i, ik=-j
+$$
+
+The norm of a quaternion is defined as:
+$$
+|q| = \sqrt{w^2 + x^2 + y^2 + z^2}
+$$
+
+The conjugate of a quaternion is defined as:
+$$
+q^* = w - xi - yj - zk
+$$
+
+The inverse of a quaternion is defined as:
+$$
+q^{-1} = \frac{q^*}{|q|^2}
+$$
+
+For a unit quaternion, also called a versor, we have:
+$$
+q^{-1} = q^*
+$$
+
+We can write quaternions in more compact forms, such as $q = (w,\vec{v})$, where $\vec{v} = xi + yj + zk$ is the vector part of the quaternion.
+
+The product of two quaternions is given by:
+$$
+q_1q_2 = (w_1w_2 - \vec{v}_1 \cdot \vec{v}_2, w_1\vec{v}_2 + w_2\vec{v}_1 + \vec{v}_1 \times \vec{v}_2)
+$$
+Note that this is not a definiton but rather algebraically derived.
+
+We can also rewrite this in matrix form:
+$$
+q_1q_2 = \begin{bmatrix} w_1 & -\vec{v}_1^T \\ \vec{v}_1 & w_1I + \vec{v}_1^{\times} \end{bmatrix} \begin{bmatrix} w_2 \\ \vec{v}_2 \end{bmatrix}
+$$
+
+## SU(2) quaternions
+
+TODO rotating with quaternions is same as 2 reflections which is why we halve the angle
+
+## Rodrigues - Quaternions Equvalence
+
+TODO write about how it's more constructive to first show that Hamilton product (qvq^(-1)) is an isometry, then work out the matrix form, then due to equivalence with axis-angle we can derive relation between axis-angle and quaternion. However, the way shown here is a bit nicer in that it's an exercise in trigonometry, and easier to factorize
+
+Recall Rodrigues' rotation formula: given an axis $\hat{u}$ and an angle $\theta$, we can rotate any vector $\vec{v}$ by $\theta$ about $\hat{u}$ using the formula:
+
+$$
+\vec{v} + (\sin \theta)(\hat{u}\times\vec{v}) + (1-\cos\theta)\hat{u}\times(\hat{u}\times\vec{v})
+$$
+
+We can rewrite the rotation vector as a quaternion, with real part is $\frac{\theta}{2}$ and imaginary part $\langle u, (i, j ,k) \rangle$:
+$$
+\hat{q} = \cos \frac{\theta}{2}+\sin\frac{\theta}{2}(u_xi + u_yj + u_zk) = (\cos\frac{\theta}{2}, \sin\frac{\theta}{2}\hat{u}) 
+$$
+
+It is easy to show that this is a unit quaternion:
+$$
+|\hat{q}| = \sqrt{\cos^2\frac{\theta}{2} + ||\hat{u}||^2 \sin^2\frac{\theta}{2}} = 1
+$$
+
+We also rewrite $\vec{v}$ as a quaternion with real part 0:
+$$
+\vec{v} = 0 + v_{x}i + v_{y}j + v_{z}k
+$$
+
+Now, consider what happens when we perform a quaternion conjugation (Hamilton product) on $\vec{v}$ with $\hat{q}$:
+
+$$
+q_1q_2 = (w_1w_2 - \vec{v}_1 \cdot \vec{v}_2, w_1\vec{v}_2 + w_2\vec{v}_1 + \vec{v}_1 \times \vec{v}_2)
+$$
+
+$$
+\begin{gathered}
+\hat{q} \vec{v} \hat{q}^{-1} = \\
+\hat{q}\vec{v}\hat{q}^* = \\
+(\cos\frac{\theta}{2},\sin\frac{\theta}{2}\hat{u})(0, \vec{v})(\cos\frac{\theta}{2},-\sin\frac{\theta}{2}\hat{u})=\\
+(-\sin\frac{\theta}{2}\hat{u}\cdot{\vec{v}}, \cos\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\hat{u}\times\vec{v})(\cos\frac{\theta}{2},-\sin\frac{\theta}{2}\hat{u})=\\
+\end{gathered}
+$$
+
+Calculating the real part, we get:
+$$
+\begin{gathered}
+-\sin\frac{\theta}{2}\cos\frac{\theta}{2}\hat{u}\cdot{\vec{v}} +(\cos\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\hat{u}\times\vec{v})\sin\frac{\theta}{2}\hat{u} = \\
+\cancel{-\sin\frac{\theta}{2}\cos\frac{\theta}{2}\hat{u}\cdot{\vec{v}}} + \cancel{\sin\frac{\theta}{2}\cos\frac{\theta}{2}\vec{v}\cdot \hat{u}} + \sin^{2}\frac{\theta}{2}(\hat{u}\times\vec{v})\cdot\hat{u} = \\
+-sin^{2}\frac{\theta}{2}(\vec{v}\times\hat{u})\cdot\hat{u} = \\
+-sin^{2}\frac{\theta}{2}\vec{v}\cdot(\hat{u}\times\hat{u}) = \\
+0
+\end{gathered}
+$$
+
+The last three transitions are due to the cross product being anti-commutative, and due to the triple product rules, and finally every vector crossed with itself is the 0 vector, so we have a real part of 0.
+
+Calculating the imaginary part, we get:
+$$
+\begin{gathered}
+(-\sin\frac{\theta}{2}\hat{u}\cdot{\vec{v}}, \cos\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\hat{u}\times\vec{v})(\cos\frac{\theta}{2},-\sin\frac{\theta}{2}\hat{u})=\\
+w_{1}v_{2}+w_{2}v_{1}+v_{1}\times v_{2}=\\
+(-\sin\frac{\theta}{2}\hat{u}\cdot{\vec{v}})(-\sin\frac{\theta}{2}\hat{u})+\cos\frac{\theta}{2}(\cos\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\hat{u}\times\vec{v})+(\cos\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\hat{u}\times\vec{v})\times(-\sin\frac{\theta}{2}\hat{u}) = \\
+\sin^{2}\frac{\theta}{2}(\hat{u}\cdot\vec{v})\hat{u}+\cos^2\frac{\theta}{2}\vec{v}+\sin\frac{\theta}{2}\cos\frac{\theta}{2}\hat{u}\times\vec{v}-\cos\frac{\theta}{2}\sin\frac{\theta}{2}\vec{v}\times\hat{u}-\sin^2\frac{\theta}{2}(\hat{u}\times\vec{v})\times\hat{u} = \\
+\sin^{2}\frac{\theta}{2}(\hat{u}\cdot\vec{v})\hat{u}+\cos^2\frac{\theta}{2}\vec{v}+\sin\theta (\hat{u} \times \vec{v})-\sin^2\frac{\theta}{2}(\hat{u}\times\vec{v}) \times \hat{u}= \\
+\sin^2\frac{\theta}{2}((\hat{u}\cdot\vec{v})\hat{u}-(\hat{u}\times\vec{v})\times\hat{u})+cos^2\frac{\theta}{2}\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\
+\sin^2\frac{\theta}{2}((\hat{u}\cdot\vec{v})\hat{u}+(\vec{v}\cdot\hat{u})\hat{u}-(\hat{u}\cdot\hat{u})\vec{v}))+cos^2\frac{\theta}{2}\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\
+\sin^2\frac{\theta}{2}(2(\hat{u}\cdot\vec{v})\hat{u}-\vec{v})+cos^2\frac{\theta}{2}\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\
+2\sin^2\frac{\theta}{2}(\hat{u}\cdot\vec{v})\hat{u}-\sin^2\frac{\theta}{2}\vec{v}+cos^2\frac{\theta}{2}\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\
+(1-\cos\theta)(\hat{u}\cdot\vec{v})\hat{u}+\cos\theta\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\
+(1-\cos\theta)(\hat{u}\cdot\vec{v})\hat{u}+\cos\theta\vec{v}+\sin\theta(\hat{u}\times\vec{v}) = \\(*)
+\end{gathered}
+$$
+
+We used triple product rule combined with the anti-commutativity of the cross product:
+$$
+-(\vec{b} \times \vec{c})\times \vec{a} = \vec{a} \times (\vec{b} \times \vec{c}) = (\vec{b}\cdot \vec{a})\vec{c} - (\vec{c}\cdot \vec{a})\vec{b}
+$$
+
+And the trigonometric identities
+$$
+\begin{aligned}{}
+2\sin^2\frac{\theta}{2} = 1-\cos\theta \\
+\cos^2\frac{\theta}{2}-\sin^2\frac{\theta}{2} = \cos\theta
+\end{aligned}
+$$
+
+We can further simplify the term using the following relationship, derived from the triple product rule:
+
+$$
+\begin{gathered}
+\hat{u} \times (\hat{u} \times \vec{v}) = (\hat{u}\cdot \hat{u})\vec{v} - (\vec{v}\cdot \hat{u})\hat{u}=\vec{v}-(\hat{u}\cdot\vec{v})\hat{u}\Rightarrow\\
+(\hat{u}\cdot\vec{v})\hat{u} = \vec{v}-\hat{u}\times(\hat{u}\times\vec{v})
+\end{gathered}
+$$
+
+Continuing from $(*)$:
+
+$$
+\begin{gathered}
+(1-\cos\theta)(\vec{v}-\hat{u}\times(\hat{u}\times\vec{v}))+\cos\theta\vec{v}+\sin\theta(\hat{u}\times\vec{v})
+\end{gathered} = \\
+\vec{v}-\cancel{\cos\theta\vec{v}} + \cos\theta\hat{u}\times(\hat{u}\times{v})-\hat{u}\times(\hat{u}\times\vec{v})+\cancel{cos\theta \vec{v}}+\sin\theta(\hat{u}\times\vec{v}) = \\
+\vec{v}+(\sin\theta)(\hat{u}\times \vec{v})+(1-\cos\theta)\hat{u}\times(\hat{u}\times \vec{v}) = \\
+I\vec{v}+\sin\theta [u]_{\times}\vec{v}+(1-\cos\theta)[u]^2_{\times}v
+$$
+
+TODO find where extra negative sign was added
+
+Which is exactly Rodrigues' rotation formula. In conclusion, we have shown that the conjugation $qvq^{-1}$ gives a new quaterion $(0, \vec{v}')$, where $\vec{v}'$ is $\vec{v}$ rotated around the axis $\hat{u}$ by an angle $\theta$, meaning we can also represent rotations with quaternions. This also gives us a way to convert from an angle-axis representation to a unit quaternion:
+
+$$
+q(\theta \hat{u}) = (\cos\frac{\theta}{2}, \sin\frac{\theta}{2}\hat{u})
+$$
+
+## Singularities and Gimbal Locks
+
+TODO show none exist with quaternions making them ideal
+
+TODO double covering
+
+We have shown a surjective mapping of $so(3)$ (axis-angle) to unit quaternions. Recall that, as we have shown in our discussion of axis-angle representations and the matrix exponent, each rotation can be represented by two axis-angle pairs:
+
+$$
+\text{exp}((-\theta)(-\hat{u}))=\text{exp}(\theta\hat{u})
+$$
+
+Consider the quaternion representation of each angle-axis pair:
+
+$$
+\begin{gathered}
+q(\theta \hat{u})=(\cos\frac{\theta}{2}, \sin\frac{\theta}{2}\hat{u})\\
+q((-\theta)(-\hat{u})=(cos\frac{\theta}{2},-\sin\frac{\theta}{2}\hat{u})
+\end{gathered}
+$$
+
+The representations are unique, meaning that every orientation/rotation can be represented by two versors. We say that the group of unit quaternions double-covers the $SO(3)$.
+
+
+## Compounding Rotations
+
+We have shown
+$$
+\begin{gathered}
+\hat{q_{2}}(\hat{q_{1}}\vec{v}\hat{q_{1}}^*)\hat{q_{2}^*} = \\
+(\hat{q_{2}}\hat{q_{1}})\vec{v}(\hat{q_{1}}^*\hat{q_{2}^*}) = \\
+(\hat{q_{2}}\hat{q_{1}})\vec{v}(\hat{q_{2}}\hat{q_{1}})^{*}
+\end{gathered}
+$$
+
+So compounding rotations is as easy as multiplying quaternions.
+
+## SU(2)
+
+We show intuitively but no rigorously how SU(2) is imporphic to unit quaternions TODO
+
+
+# Reflections
+
+Consider a vector $\vec{v}$. We wish to reflect it about some arbitrary axis $\hat{u}$. This means:
+
+
+$$
+\vec{v} = v_{\parallel} + v_{\perp}
+$$
+
+
+$$
+\vec{v}' = v_{\parallel} - v_{\perp}
+$$
+
+Consider a sequence of two reflections:
+
+TODO show geometric argument
+

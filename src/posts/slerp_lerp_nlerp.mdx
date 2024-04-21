@@ -1,0 +1,122 @@
+export const frontmatter = {
+    title: "Slerp, Lerp, and Nlerp"
+};
+
+## Slerp, Lerp, and Nlerp
+
+In animation we are often intereseted in constant-speed motions. A constant-speed motion is achieved when the derivative of the motion with respect to time is constant, which is only achieved when the function of motion is linear. Apart from being constant-speed, we are also interested in taking the shortest path to abide by the Prinicipal of Least Work.
+
+Recall that there are two rigid motions that we are interested in (as we do not usually care for reflections):
+1. Rotations
+2. Translations
+
+A rotation can be represented as any of:
+1. Rotation matrices
+2. Euler Angles
+3. Axis-angle
+4. Quaternions
+5. Rotors
+
+A translation is usually represented by a vector.
+
+We can also have a combined represntation in the form of a dual quaternion, which will not be discussed here.
+
+### Lerp
+
+Consider a position vector ${v_{i}}$ and a position vector $v_{f}$. We wish to interpolate between these two vectors, under the constraint of constant-speed, which means we need the interpolation function to be linear. We can do this using a simple linear combination of $v_{i}$ and $v_{f}$:
+
+$$
+\text{lerp}(v_{i}, v_{f}, t) = v(t) = (1-t)v_{i} + tv_{f}, \quad t \in [0,1]
+$$
+
+This is called a LERP, short for linear interpolation. The image of the function is a line from $v_{i}$ to $v_{f}$, which means it is clearly the shortest path, and it is linear thus constant-speed. It is easy to see that for all possible values of $t$, we have a valid position vector (since positions are additive), meaning that the rigidity is preserved all throughout the motion.
+
+It's also worth pointing out the symmetry:
+$$
+\text{lerp}(v_{i}, v_{f}, t) = \text{lerp}(v_{f}, v_{i}, 1-t)
+$$
+
+Which makes it easy to interpolate back and forth.
+
+### Interpolating Rotations
+
+Consider two rotations. Rotation are not in general closed under addition. TODO bla bla
+
+### Slerp
+
+Given an initial orientation $v_{i}$ and a final orientation $v_{f}$, represented by points on the 3-sphere/2-sphere (in the two dimensional case), we have an angle of $\sin\theta$ between the two points representing the rotations. To properly interpolate along the 3-Sphere, we need to paramterize the geodesic between the two points. This is an arc along the great circle which sits on the plane defined by $v_{i} \times v_{f}$.
+
+Recall that rotations can be found using matrix exponentials of the axis-angle form. Matrix exponentials follow scalar exponential arithemtics:
+
+$$
+\begin{gather}{}
+\exp(A+B) = \exp(A)\exp(B)\\
+\exp(tA) = \exp(A)^{t}
+\end{gather}
+$$
+
+And exponentiating a skew-symmetric matrix gives a rotation matrix:
+$$
+\begin{gather}
+\exp(\theta \hat{n})=R(\theta, \hat{n})
+\end{gather}
+$$
+
+For bravity, we use $e$ to symbolize the matrix exponential. Note that this is not the scalar exponential.
+
+Denote the normalized vector $v_{i} \times v_{f}$ as $\hat{n}$. Since $v_{i}$ and $v_{f}$ both sit on the plane defined by $\hat{n}$ by construction, the following holds:
+
+$$
+v_{f} = e^{\theta \hat{n}}v_{i}=Rv_{i}
+$$
+
+Now, consider some vector $v_{t}$ on the arc connecting $v_{i}$ and $v_{f}$. Assuming $v_{i} \ne v_{f}$, i.e. $ \hat{n} \ne 0$, we know that $v_{i}$ and $v_{f}$ are linearly indepedent and thus we can write $v_{t}$ as a linear combination of $v_{i}$ and $v_{f}$:
+
+$$
+v_{t} = \alpha_{t} v_{i} + \beta_{t} v_{f}, \quad t \in [0,1]
+$$
+
+This is a linear relationship, thus it is a constant-speed motion. Now, we need to solve for $\alpha_{t}, \beta_{t}$.
+
+Since $v_{t}$ is on the arc connecting $v_{i}$ and $v_{f}$, we know that the angle between $v_{t}$ and $v_{i}$ is $t \theta$. We can write $v_{t}$ as a rotation of $v_{i}$ by $\theta t$:
+
+$$
+v_{t} = e^{\theta t \hat{n}}v_{i} \underset{(2)}{=} (e^{\theta \hat{n}})^{t}v_{i}\underset{(3)}{=}R^{t}v_{i}
+$$
+
+So we can rewrite the linear combination relationship as:
+
+$$
+\begin{gather}
+R^{t}v_{i} = \alpha_{t}v_{i} + \beta_{t}Rv_{i}
+\end{gather}
+$$
+
+Crossing each side with $v_{i}$, we get:
+$$
+\begin{gathered}
+(R^{t}v_{i}) \times v_{i} = \alpha_{t} v_{i} \times v_{i} + \beta_{t} (Rv_{i}) \times v_{i}\\
+(R^{t}v_{i}) \times v_{i} = \beta_{t} (Rv_{i}) \times v_{i} \\
+||R^{t}v_{i}||||v_{i}||\sin(t \theta) = \beta_{t} ||Rv_{i}||||v_{i}|| \sin \theta\\ \\
+\beta_{t} = \frac{\sin (t \theta)}{\sin \theta}
+\end{gathered}
+$$
+
+The last step follows from the fact that each 4D rotation vector sits on the same sphere thus the magnitudes are the same and cancel out.
+
+We can solve for $\alpha_{t}$ by crossing each side with $Rv_{i}$:
+
+$$
+\begin{gathered}
+R^{t}v_{i} \times Rv_{i} = \alpha_{t} v_{i} \times Rv_{i} + \beta_{t} Rv_{i} \times Rv_{i}\\
+||R^{t}v_{i}||\cdot ||Rv_{i}|| \cdot \sin((1-t)\theta)=\alpha_{t}||v_{i}||\cdot ||Rv_{i}||\cdot \sin \theta\\ 
+\alpha_{t}=\frac{\sin((1-t)\theta)}{\sin \theta}
+\end{gathered}
+$$
+
+Putting it all together, we have the slerp formula:
+
+$$
+\text{slerp}(v_{i}, v_{f}, t) = \frac{\sin((1-t)\theta)}{\sin \theta}v_{i} + \frac{\sin(t\theta)}{\sin \theta}v_{f}
+$$
+
