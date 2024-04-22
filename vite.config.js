@@ -6,6 +6,10 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import remarkFrontmatter from 'remark-frontmatter';
 
+import withToc from "@stefanprobst/rehype-extract-toc"
+import withTocExport from "@stefanprobst/rehype-extract-toc/mdx"
+import withSlugs from "rehype-slugs"
+
 export default defineConfig(() => {
     return {
         // base: '/gfx-editor/',
@@ -17,13 +21,18 @@ export default defineConfig(() => {
             mdx({
                 include: /\.mdx?$/, // Include both .md and .mdx files
                 remarkPlugins: [remarkMath, remarkFrontmatter],
-                rehypePlugins: [rehypeKatex, rehypeHighlight],
+                rehypePlugins: [rehypeKatex, rehypeHighlight, withSlugs, withToc, withTocExport],
             }),
         ],
         server: {
             watch: {
                 usePolling: true
             }
+        },
+        optimizeDeps: {
+            exclude: [
+
+            ]
         }
     };
 });

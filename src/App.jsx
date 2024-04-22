@@ -6,8 +6,6 @@ import './App.css';
 
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, Outlet } from 'react-router-dom';
-import { createBrowserRouter } from 'react-router-dom';
-
 
 import EngineContext from './EngineContext';
 
@@ -36,12 +34,54 @@ const Home = ({ posts }) => {
     );
 };
 
-const Post = ({ post }) => (
-    <div>
-        <h1>{post.frontmatter.title}</h1>
-        <post.Post />
-    </div>
+import { Container, Row, Col } from 'react-bootstrap';
+
+const TocItem = ({ item }) => (
+    <li key={item.id}>
+        <a href={`#${item.id}`}>{item.value}</a>
+        {item.children && <TocList items={item.children} />}
+    </li>
 );
+
+const TocList = ({ items }) => (
+    <ul>
+        {items.map(item => (
+            <TocItem key={item.id} item={item} />
+        ))}
+    </ul>
+);
+
+const Post = ({ post }) => {
+    const { toc } = post;
+
+    return (
+        <Container>
+            <Row>
+                <Col md={8}>
+                    <h1>{post.frontmatter.title}</h1>
+                    <post.Post />
+                </Col>
+                <Col md={4}>
+                    <div className="sticky-top" style={{ top: '2rem' }}>
+                        <TocList items={toc} />
+                    </div>
+                </Col>
+            </Row>
+        </Container>
+    );
+};
+const PostOld = ({ post }) => {
+    /*
+    toc = Array<id: str, text: str, children: Array<Toc> | null>
+    */
+    const toc = post.toc;
+    return (
+        <div className="responsive-post">
+            <h1>{post.frontmatter.title}</h1>
+            <post.Post />
+        </div>
+    )
+};
 
 const PostWrapper = ({ posts }) => {
     const { name } = useParams();
@@ -61,7 +101,7 @@ const App = () => {
                 Object.values(postsImports).map(importFn => importFn())
             );
             const postsWithFrontmatter = postsModules.map(module => {
-                return { frontmatter: module.frontmatter, Post: module.default };
+                return { frontmatter: module.frontmatter, toc: module.tableOfContents, Post: module.default };
             });
             setPosts(postsWithFrontmatter);
         };
