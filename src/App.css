@@ -24,6 +24,8 @@
 html,
 body,
 #root {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
   font-family: 'DejaVu Sans', 'Roboto', sans-serif;
   height: 100%;
   margin: 0;
@@ -232,16 +234,10 @@ input[type=number]::-webkit-outer-spin-button {
 
 
 /*blog */
-
 .blog-container {
-  display: grid;
-  grid-template-columns: 1fr 4fr; /* default state */
-  width: 100%;
-  height: 100vh;
-}
-
-.blog-container.closed {
-  grid-template-columns: 0.1fr 4fr; /* state when menu is closed */
+  margin: 1%;
+  width: 98%;
+  height: 90%;
 }
 
 .menu {
@@ -250,15 +246,15 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .menu.open {
-  width: 200px;
+  width: 100%;
 }
 
 .menu.closed {
-  width: 50px;
+  width: 30%;
 }
 
 .menu.closed:hover {
-  width: 200px;
+  width: 100%;
 }
 
 .content {
@@ -266,20 +262,65 @@ input[type=number]::-webkit-outer-spin-button {
   height: 100%;
 }
 
-@media (max-width: 600px) {
-  .blog-container {
-      grid-template-columns: 1fr;
-  }
-
-  .menu.open, .menu.closed:hover {
-      width: 100%;
-  }
-
-  .menu.closed {
-      width: 50px;
-  }
-}
-
 .responsive-post {
   max-width: 70vw;
+}
+
+.md-heading {
+  font-weight: normal;
+  text-decoration: none;
+  color: inherit;
+}
+
+.md-heading.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.md-heading:hover {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.md-heading::before {
+  content: "#";
+  display: none;
+}
+
+.md-heading:hover::before {
+  display: inline;
+}
+
+.md-blog-container {
+  position: fixed;
+  /* always cover entire viewport, solves weird issues with body style not conforming to container style */
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.post-container {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.post-toc {
+  position: sticky;
+  align-self: flex-start;
+  top: 2rem;
+  display: none;
+}
+
+/* toc only renders in big screens */
+@media screen and (min-width: 768px) {
+  .post-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .post-toc {
+    display: block;
+  }
 }

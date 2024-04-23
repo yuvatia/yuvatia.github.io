@@ -10,9 +10,10 @@ import withToc from "@stefanprobst/rehype-extract-toc"
 import withTocExport from "@stefanprobst/rehype-extract-toc/mdx"
 import withSlugs from "rehype-slugs"
 
+
 export default defineConfig(() => {
     return {
-        // base: '/gfx-editor/',
+        base: '/gfx-editor/',
         build: {
             outDir: 'build',
         },
