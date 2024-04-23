@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, Route, RouterProvider, createHashRouter as createRouter, createRoutesFromElements, useLoaderData, useParams } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
-
+import { isMobile } from 'react-device-detect';
 import EngineContext from './EngineContext';
 
 const baseUrl = import.meta.env.BASE_URL;
@@ -44,18 +44,19 @@ const Home = ({ theme, setTheme }) => {
     return (
         <div className={`blog-container ${isMenuOpen ? 'open' : 'closed'}`}>
             <div className={`menu ${isMenuOpen ? 'open' : 'closed'}`} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-bg)'
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                borderBottom: isMobile ? 'none' : '1px solid var(--border-bg)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexGrow: 1 }}>
-                    <CustomHeading as="h2" to="about">yuvatia</CustomHeading>
-                    <a style={{ marginLeft: '0.5vw' }} target='_blank' rel='noopener noreferrer' href='https://github.com/yuvatia'><FaGithub size={20} style={{ cursor: 'pointer' }} /></a>
-                    <a style={{ marginLeft: '0.5vw' }} href='mailto:yuvatia@gmail.com'><FaEnvelope size={20} style={{ cursor: 'pointer' }} /></a>
-                    <a style={{ marginLeft: '0.5vw' }} target='_blank' rel='noopener noreferrer' href='https://www.linkedin.com/in/yuvatia'><FaLinkedin size={20} style={{ cursor: 'pointer' }} /></a>
+                    <CustomHeading as="h2" to="about" style={{ fontSize: 'calc(10px + 2vmin)' }}>yuvatia</CustomHeading>
                 </div>
                 <div style={{ display: 'flex', marginBottom: '1vh', alignItems: 'center', justifyContent: 'flex-end', flexGrow: 1 }}>
                     {
                         Object.values({ "editor": "editor", "posts": "posts", "about": "about" }).map((name, index) => (
-                            <CustomHeading as="h2" to={name} style={{ marginLeft: '1vw' }}>{name}</CustomHeading>
+                            <>
+                                <CustomHeading as="h2" to={name} style={{ marginLeft: '0.5rem', fontSize: 'calc(10px + 2vmin)' }}>{name}</CustomHeading>
+                                <h2>/</h2>
+                            </>
                         ))
                     }
                     <i className="bi bi-moon-fill theme-toggle"
@@ -66,6 +67,16 @@ const Home = ({ theme, setTheme }) => {
             </div>
             <div className="content" style={{ width: '100%', height: '100%' }}>
                 <Outlet />
+            </div>
+            <div className='footer' style={{ width: '100%', marginTop: 'auto', borderTop: '1px solid var(--border-bg)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexGrow: 1 }}>
+                    <div style={{ color: 'var(--border-bg)' }}>© Yuval Atia 2024</div>
+                    <div>
+                        <a style={{ marginLeft: '0.5vw' }} target='_blank' rel='noopener noreferrer' href='https://github.com/yuvatia'><FaGithub size={20} style={{ cursor: 'pointer' }} /></a>
+                        <a style={{ marginLeft: '0.5vw' }} href='mailto:imyuvatia@gmail.com'><FaEnvelope size={20} style={{ cursor: 'pointer' }} /></a>
+                        <a style={{ marginLeft: '0.5vw' }} target='_blank' rel='noopener noreferrer' href='https://www.linkedin.com/in/yuvatia'><FaLinkedin size={20} style={{ cursor: 'pointer' }} /></a>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -120,7 +131,11 @@ const Post = ({ post }) => {
 
     return (
         <div className='post-container'>
-            <div style={{ marginRight: '1vw', borderRight: '1px solid var(--border-bg)', maxWidth: '90vw' }}>
+            <div style={{
+                marginRight: '1vw',
+                borderRight: isMobile ? 'none' : '1px solid var(--border-bg)',
+                maxWidth: '90vw'
+            }}>
                 <CustomHeading as="h1" to={`posts/${post.frontmatter.title}`} style={{ display: 'block', width: '100%', textAlign: 'center', margin: '0 auto' }}>{post.frontmatter.title}</CustomHeading>
                 <post.Post components={components} />
             </div>

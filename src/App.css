@@ -237,7 +237,9 @@ input[type=number]::-webkit-outer-spin-button {
 .blog-container {
   margin: 1%;
   width: 98%;
-  height: 90%;
+  height: 96%;
+  display: grid;
+  grid-template-rows: 5% 1fr min-content;
 }
 
 .menu {
