@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, Outlet, useLoaderData, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
+import { Link, Outlet, Route, RouterProvider, createHashRouter as createRouter, createRoutesFromElements, useLoaderData, useParams } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
 
 import EngineContext from './EngineContext';
 
@@ -10,16 +11,14 @@ const CustomHeading = ({ as, id, to, ...props }) => {
         as,
         { id, ...props },
         (id || to) ? (
-            <a className='md-heading' href={id ? `#${id}` : `${baseUrl}${to}`} {...props} />
-        ) : (
+            <HashLink className='md-heading' to={id ? `#${id}` : `${baseUrl}${to}`} {...props} />) : (
             <span className='md-heading' {...props} />
         ));
 };
 
 import { Card } from 'react-bootstrap';
-import { FaGithub } from 'react-icons/fa6';
-import { BigIcon } from './SceneView';
 import { FaEnvelope, FaLinkedin } from 'react-icons/fa';
+import { FaGithub } from 'react-icons/fa6';
 
 const PostsList = ({ ...props }) => {
     const posts = useLoaderData().sort((a, b) => new Date(b.frontmatter.date || null) - new Date(a.frontmatter.date || null));
@@ -47,7 +46,7 @@ const Home = ({ theme, setTheme }) => {
             <div className={`menu ${isMenuOpen ? 'open' : 'closed'}`} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-bg)'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', justifyContent: 'flex-start', flexGrow: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexGrow: 1 }}>
                     <CustomHeading as="h2" to="about">yuvatia</CustomHeading>
                     <a style={{ marginLeft: '0.5vw' }} target='_blank' rel='noopener noreferrer' href='https://github.com/yuvatia'><FaGithub size={20} style={{ cursor: 'pointer' }} /></a>
                     <a style={{ marginLeft: '0.5vw' }} href='mailto:yuvatia@gmail.com'><FaEnvelope size={20} style={{ cursor: 'pointer' }} /></a>
@@ -74,7 +73,7 @@ const Home = ({ theme, setTheme }) => {
 
 const TocItem = ({ item, activeId }) => (
     <li key={item.id}>
-        <a className={`md-heading ${activeId === item.id ? 'active' : ''}`} href={`#${item.id}`}>{item.value}</a>
+        <HashLink className={`md-heading ${activeId === item.id ? 'active' : ''}`} to={`#${item.id}`}>{item.value}</HashLink>
         {item.children && <TocList items={item.children} activeId={activeId} />}
     </li>
 );
@@ -193,7 +192,7 @@ const App = () => {
         localStorage.setItem('theme', theme);
     });
 
-    const router = createBrowserRouter(
+    const router = createRouter(
         createRoutesFromElements(
             <Route path={baseUrl} element={<Home theme={theme} setTheme={setTheme} errorElement={<NotFound />} />}>
                 <Route index element={<About />}></Route>

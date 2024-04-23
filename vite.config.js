@@ -13,7 +13,8 @@ import withSlugs from "rehype-slugs"
 
 export default defineConfig(() => {
     return {
-        base: '/gfx-editor/',
+        base: '/',
+        // base: '/gfx-editor/',
         build: {
             outDir: 'build',
         },
