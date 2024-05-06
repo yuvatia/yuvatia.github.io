@@ -83,14 +83,14 @@ const Home = ({ theme, setTheme }) => {
 };
 
 const TocItem = ({ item, activeId }) => (
-    <li key={item.id}>
+    <li key={item.id} style={{ listStyleType: 'none' }}>
         <HashLink className={`md-heading ${activeId === item.id ? 'active' : ''}`} to={`#${item.id}`}>{item.value}</HashLink>
         {item.children && <TocList items={item.children} activeId={activeId} />}
     </li>
 );
 
 const TocList = ({ items, activeId }) => (
-    <ul>
+    <ul style={{ listStyleType: 'none', paddingLeft: '1rem' }}>
         {items.map(item => (
             <TocItem key={item.id} item={item} activeId={activeId} />
         ))}
@@ -131,11 +131,7 @@ const Post = ({ post }) => {
 
     return (
         <div className='post-container'>
-            <div style={{
-                marginRight: '1vw',
-                borderRight: isMobile ? 'none' : '1px solid var(--border-bg)',
-                maxWidth: '90vw'
-            }}>
+            <div className='post-container-inner'>
                 <CustomHeading as="h1" to={`posts/${post.frontmatter.title}`} style={{ display: 'block', width: '100%', textAlign: 'center', margin: '0 auto' }}>{post.frontmatter.title}</CustomHeading>
                 <post.Post components={components} />
             </div>
