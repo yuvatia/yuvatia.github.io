@@ -1,0 +1,478 @@
+export const frontmatter = {
+    title: "Affine Spaces"
+};
+
+# Vector Spaces Overview
+
+In linear algebra, we define a vector space over a field $F$ as a set $V$ whose elements we call vectors, equipped with a vector addition operation and a scalar multiplication operation (where scalars are elements of $F$), which satisfy some axioms which essentially ensure that vector addition and scalar multiplication are associative and commutative, and that they are both defined such that they have an identity element in $V$ called the zero vector (for vector addition) and an identity element in $F$ (for scalar multiplication). We also require that the resulting object of vector additions and scalar multiplications of vectors in $V$ and scalars in $F$ will also be in $V$:
+
+$$
+\forall {u, v} \in V, \forall {\alpha, \beta} \in F, \quad \alpha u + \beta v \in V
+$$
+
+From this definition we develop the idea of a linear combination of vectors in $V$. We say that $w$ is a linear combination of vectors $v_{1},\dots , v_{n} \in V$ and scalar coefficients $\alpha_{1},\dots , \alpha_{n}$ not all zero, if it can be written as:
+
+$$
+w = \sum_{i=1}^{n} \alpha_{i}v_{i}
+$$
+
+Where the Einstein summation notation denotes repeatly applying the vector addition operation, and $\alpha_{i} v_{i}$ is the resulting vector of the scalar multiplication operation. We say that a set of vectors is linearly dependent if one of the vectors in the set can be written as a linear combination of the others, and linearly independent otherwise. For example, given the set $(u, w) \subset V$, we say that $u$ and $w$ are linearly indepdent if the only solution to the equation $u = \alpha w$ is $\alpha = 0$.
+
+From the axioms of a vector space we can show that every vector $v \in V$ can be written as a linear combination of other vectors in $V$. This leads to the idea of a span of vectors: a span of vectors is the minimal set of all possible linear combinations of these vectors. This in turn motivates the notion of a basis - given a vector space $V$, what is the minimal set of vectors in $v$ such that their span is $V$? We call such set of vectors a basis of $V$, and it can be proven that every vector space has a basis. Vector spaces may have multiple bases, however if two distinct bases do not have the same amount of elements then clearly one of them is by definition not a basis, so we know that all bases of a vector space have the same number of elements. We call this number the dimension of the vector space. Some bases are easier to work with than others, and are called standard bases.
+
+Consider a basis $B=(b_{1}, b_{2}, \dots , b_{n})$ of a vector space $V$ of dimension $n$ over a field $F$, Every vector $v$ can be written as a linear combination of the basis vectors:
+
+$$
+v = \sum_{i=1}^{n} \alpha_{i}b_{i}
+$$
+
+This leads to a natural way of representing the vectors of a vector space once a basis has been selected - the vector can be represented as an n-tuple of scalars $(\alpha_{1}, \alpha_{2}, \dots , \alpha_{n})$, called a coordinate vector, and denoted as $[v]_{B}$ (the coordinate vector of $v$ with respect to the basis $B$). Since this mapping of a vector to a coordinate vector is a bijection, we can perform computations and manipulations on coordinate vectors and then convert the result back to a vector. This greatly simplifies the dealing with vectors. One practical example of this method is solving a system of homogenous linear equations:
+
+$$
+\begin{align*}
+a_{11}x_{1} + a_{12}x_{2} + \dots + a_{1n}x_{n} &= 0 \\
+a_{21}x_{1} + a_{22}x_{2} + \dots + a_{2n}x_{n} &= 0 \\
+&\vdots \\
+a_{m1}x_{1} + a_{m2}x_{2} + \dots + a_{mn}x_{n} &= 0
+\end{align*}
+$$
+
+Where $x_{1}, x_{2}, \dots, x_{n}$ are vectors of some vector space. We can instead represent each equation as a coordinate vector, then place all coordinate vectors in a matrix, and then solve the system of equations by performing row operations on the matrix. This is the basis of the Gaussian elimination method. Once we have found the solution, we can convert the coordinate vector back to a vector.
+
+Coordinate vectors also provide a simple way of converting vectors from one basis to another: given a coordinate vector expressed in basis $e_{1}$, we can convert it to a coordinate vector expressed in basis $e_{2}$ by multiplying the coordinate vector by the matrix $P$ whose columns are the basis vectors of $e_{2}$ expressed in basis $e_{1}$. This is called a change of basis.
+
+Sometime, we are interested in looking at a subset $U$ of a vector space $V$. Since this subset carries with it the vector addition and scalar multiplication operation from the vector space, we can determine if the subset is a vector space by checking that it is closed under vector addition and linear multiplication
+
+$$
+\forall {u, v} \in U, \forall {\alpha, \beta} \in F, \quad \alpha u + \beta v \in U
+$$
+
+If $U$ meets this requirement, we say that $U$ is a vector subspace of $V$. There is some rigidity to this, however: consider the case where $\alpha=\beta=0$, then we get $\alpha u + \beta v = 0$, which is the zero vector. This means that any vector space must contain the zero vector, which makes the zero vector particularly special.
+
+Since vector spaces are constructed in a way which maintains a linear structure, they are also called linear spaces, not to be confused with the notation of a linear space from incidence geometry.
+
+We are intereted in studying the structure of maps which take vectors in a vector space to other vectors in the same space or in other spaces. Consider a map $T: V \to W$ between two vector spaces $V$ and $W$. We say that $T$ is a linear map if it preserves the linear structure of the vector space, that is, if it satisfies the following property for all $u, v \in V$ and $\alpha \in F$:
+
+$$
+T(\alpha u + v) = \alpha T(u) + T(v)
+$$
+
+This property ensures that the linear structure is preserved. Since every vector space must contain the zero vector, we are interested in showing how it behaves under a linear map $T: V \to W$:
+
+$$
+T(0) = T(0 + 0) = T(0) + T(0)
+$$
+
+Which, by one of the axioms of vector addition in $W$, means that $T(0)$ must be the zero vector in $W$. This means that linear maps must map the zero vector of the domain space to the zero vector of the image space. When $V=W$, we can say that $T: V \to V$ fixes the zero vector. Such map, which maps a vector space to itself, is called an endomorphism. It is worth noting that when $V \ne W$, the vector addition is not necessarily the same operation, thus when we say $T(u+v)=T(u)+T(v)$, the addition in the left hand side is not necessarily the same as the addition in the right hand side.
+
+Since every vector in $V$ can be expressed as a linear combination of a basis $e$ of $V$, then $\forall v \in V$:
+
+$$
+T(v) = T\left(\sum_{i=1}^{n} \alpha_{i}e_{i}\right) = \sum_{i=1}^{n} \alpha_{i}T(e_{i})
+$$
+
+Which means that a linear map is defined by its action on the basis vectors of the domain space. The right hand side can be expressed in matrix multiplication notion, where $T(e_{i})$ is mapped to its coordinate vector in the domain vector space for a given basis, as a column in the matrix:
+
+$$
+\sum_{i=1}^{n} \alpha_{i}T(e_{i}) = \begin{bmatrix} T(e_{1}) & T(e_{2}) & \dots & T(e_{n}) \end{bmatrix} \begin{bmatrix} \alpha_{1} \\ \alpha_{2} \\ \vdots \\ \alpha_{n} \end{bmatrix}
+$$
+
+This leads to an isomorphism between the space of linear maps $L(V, W)$ and the space of matrices $M_{m \times n}(F)$, where $m$ is the dimension of $W$ and $n$ is the dimension of $V$. It also leads to a powerful conclusion - a linear map is invertible, and thus bijective, iff its matrix representation is invertible, which is true iff the determinant of the matrix is non-zero.
+
+# Affine Spaces
+
+A vector space deals in vectors, and defines linear combinations of vectors. Thus, we can add two vectors together. However, in geometry we are also intersted in dealing with spaces of points. Moreover, if we think about vectors in terms of Euclidean space as having a magnitude and a direction, we would like to be able to add vectors to points to get other points, and symmetrically we would like to be able to subtract points and get vectors which can be added to or subtracted from each point to get the other point in this space of points.
+
+This leads to the idea of an affine space. An affine space is a set $A$ of points, equipped with a vector space $V$ and an additive map which takes a point $P \in A$ and a vector $v \in V$ and maps it to another point on $A$. For those who fancy their notations, the more precise definition is abbreviated as 
+
+$$
++:A \times V \to A, (a, v) \to a + v
+$$
+
+Such that:
+
+1. Given the zero vector $0 \in V$, $\forall a \in A, a + 0 = a$.
+2. $\forall v, w \in V$ and $\forall a \in A$, $(a + v) + w = a + (v + w)$. This is the associativity of the addition operation. Put plainly,it means that it doesn't matter if we add the vectors together before adding them to the points or add the first vector to the point and then add the second vector to the resulting point - both will result in the same point.
+3. $\forall a, b \in A, \exists v \in V: b = a + v$, and this $v$ is unique.
+
+We define $\text{dim}A$ to be the dimension of $V$.
+
+The third axiom motivatives using $v$ to define the subtraction operation between points: $b \vcentcolon= b - a$, denoted as $\overrightarrow{ab}$, or the translation vector from $A$ to $B$. It can be shown that such vector is unique, and satisfies the following relation:
+
+$$
+a + v = b \iff v = b - a
+$$
+
+In the special case where $b=a$, we get $a+v=a$, however this is only possible if $v=0$ (axiom (1), the right identity), thus we get $a-a=0$.
+
+Consider the following sequence:
+
+$$
+(a+v)-b
+$$
+
+With $a, b \in A$ and $v \in V$. First, let us verify that the sequence is defined: $a+v$ is the addition operation on $A \times V$ and the result is a point $p$ in $A$. Then, the result is $p-b$ which as we have shown determines a unique vector in $V$, thus the result is a vector in $V$, and the sequence is defined. Now, by definition of point subtraction, we know that the result is a vector $u$ such that:
+
+$$
+b+u=a+v
+$$
+
+We can also write $a$ in terms of $b$ and $a$ as such:
+
+$$
+a=b+(a-b)
+$$
+
+Thus we get:
+
+$$
+b+u=(b+(a-b))+v
+$$
+
+By the associative property of affine spaces, we get:
+
+$$
+b+u=b+((a-b)+v)
+$$
+
+However, since the addition operation is bijective, we know that $u=(a-b)+v$, and finally we get:
+
+$$
+(a+v)-b=(a-b)+v
+$$
+
+This immediately leads to the following coclusion: let $a, b, c \in A$, then:
+
+$$
+\vec{ac} = c - a = (b + (c-b)) - a = (b - a) + (c-b) = \vec{ab} + \vec{bc}
+$$
+
+This result is called Chasles' Identity, and holds for every set of three points in $A$. In particular, given $a, b, c, d$, we get:
+
+$$
+\vec{ad} = d - a = (d - c) + (c- a) = \vec{cd} + \vec{ac} 
+$$
+
+As well as:
+
+$$
+\vec{ad} = d - a = (d-b) + (b - a) = \vec{bd} + \vec{ab}
+$$
+
+Which means that $\vec{dc} + \vec{ca} = \vec{db} + \vec{ba}$, which is known as the parallelogram property, since geometrically this relation can be interpreted as $a, b, c, d$ being the vertices of a parallelogram, with $\vec{da}$ being a diagonal.
+
+# Coordinate Systems
+
+Now that we can define a bijective map between points and vectors, and can add vectors to points to get a new point and subtract points to get a vector, we can define a coordinate system on the affine space. A coordinate system on an affine space $A$ equipped with a vector space $V$ is simply a surjective map $V \to R$ that assigns every coordinate vector in $V$ to a point in $A$. The most common example of a coordinate system is carthesian coordiantes, which lie at the heart of analytic geometry.
+
+Carthesian coordinates on an affine plane $A$ equipped with a vector space of dimension $n$ are defined as such: pick an arbitrary point $O \in A$, denoted as the origin, and an orthonormal basis $B$ for $V$. By the third property of an affine space, we know that for every point $P \in A$, there exists a vector $v \in V$ such that $P=O+v$. We define the carthesian coordinates of $P$ to be $[v]_{B}$, the coordinate vector of $v$ with respect to the basis $B$.
+
+Another common coordinate system is polar coordinates, where we take an affine space of dimension $2$ denoted $A^{2}$ equipped with a vector space $V^{2}$ with an orthonormal basis $B=\{e_{1}, e_{2}\}$, and fix some point $O \in A^{2}$ as the origin. Again, every point in $A$ can be expressed in terms of an addition of $O$ and a vector $v \in V^{2}$, but now instead of defininig $P$ to be $[v]_{B}$, we instead use a different bijection - let $r$ be the norm of $v$, and let $\theta$ be the angle between $v$ and $e_{1}$. If the norm is the Eucledian norm, or a similarly defined norm such that it is a function all elements of the n-tuple coordinate vector of $v$, then this defines a bijective mapping, meaning every vector of $V^{2}$ can be expressed in terms of $r, \theta$ once $B$ has been fixed. Similarly, once $O$ has also been fixed, we can define the polar coordinates of $P$ to be the tuple $(r, \theta)$. We can generalize these idea to higher dimensions. Spherical coordinates is the generalization for $\text{dim} V = 3$
+
+# Affine Subspace
+
+We say that a set of vectors $U$ is a vector subspace of a vector space $V$ if $U \subset V$ and $U$ is a vector space itself. For example, given $A=V=\mathbb{R}^{2}$, we have a vector subspace $U=\text{span}((1,1))$, which can geometrically be interpreted as the line through the origin $y=x$ when viewd as an affine space. Consider the line $y=x+1$. It can be expressed as the set of points $L=\{(0+1) + u | u \in U\}$ (where $+$ is the addition on $A$), which is the vector space $U$ translated by the point $(0, 1)$. Is $L$ an affine space? $\forall a \in L$,
+
+$$
+\exists u, a = (0, 1) + u
+$$
+
+For any vector $v \in U$, we get
+
+$$
+a + v = ((0, 1) + u) + v \underset{(2)}{=} (0, 1) + (u + v) \underset{\vec{w}=u+v}{=} (0, 1) + w
+$$
+
+However, since $U$ is a linear subspace, it contains all linear combinations of vectors in it, and specifically $w$, and so by definition of $L$, we get $a + v \in L$. Identify that $L$ is a subset of $A$, and thus the first two axioms of an affine space are satisfied. We have just shown that $\forall u \in U, a \to a + v: L \to L$, satisfying the last axiom, so $L$ is also an affine space associated with vector space $L$. We say that $L$ is an affine subspace of $A$, and we call the associated vector space its *direction*. This leads to the notion of parallelism - we say that two affine subspaces are parallel if they have the same direction.
+
+Formally, we define an affine subspace $B$ of an affine space $A$ associated with a vector space $V$ as a subset of $A$ such, given a point $a \in B$, the set of vectors $U=\{b-a | b \in B\}$ is a vector subspace of $V$, and it is the associated vector space of the affine subspace $B$. By denoting $u=b-a$, we can express $B$ as $B=\{a+u | u \in U\}$, thus another common notation for $B$ is $B=a+U$.
+
+Another example of an affine subspace for $A=V=\mathbb{R}^{3}$ is the $\pi = (0, 0, 1) + \mathbb{R}^{2}$, which can be thought of as the $XY$ plane lifted one unit up along the $z$ axis. It sidrection is $\mathbb{R}^{2}$, and it is parallel to the $XY$ and all other planes which can be expressed as the set of points $a + \mathbb{R}^{2} | a \in \mathbb{R^3}$.
+
+The key takeaway here is that to be able to view the topology of an $n$ dimensional affine space, we need to view it as the subspace of an $n+1$ dimensional affine space.
+
+# Affine Combinations
+
+Consider a linear combination of vectors in $V$:
+
+$$
+v = \sum_{i=1}^{n} \alpha_{i}v_{i}
+$$
+
+We can express this linear combination using a coordinate vector with respect to some basis $B_{1}$. Then, the following holds:
+
+$$
+[v]_{B_{1}} = \sum_{i=1}^{n} \alpha_{i} [v_{i}]_{B_{1}}
+$$
+
+Where the scalar multiplication of a coordinate vector multiplies each element of the coordinate vector by the scalar.
+
+Now, let's express $v$ in terms of a different basis $B_{2}$. We can do this by using a change of basis matrix, which corresponds to some linear map $T_{2}^{1}$, and by linearity:
+
+$$
+[v]_{B_{2}} = T_{2}^{1} ([v]_{B_{1}}) = T_{2}^{1} \left(\sum_{i=1}^{n} \alpha_{i} [v_{i}]_{B_{1}}\right) = \sum_{i=1}^{n} \alpha_{i} T_{2}^{1}([v_{i}]_{B_{1}})= \sum_{i=1}^{n} \alpha_{i} [v_{i}]_{B_{2}}
+$$
+
+This result captures the linear structure of the space: given a set of scalars $\alpha_{1}, \dots, \alpha_{n}$ and a set of vectors $v_{1}, \dots, v_{n}$, then the linear combination defined by these sets is invariant under choice of basis, thus the sum of two vectors in a linear space will also represent the same vector regardless of the chosen basis.
+
+Does this result hold for affine spaces? Let $P_{1}, \dots, P_{n}$ be points in $(A, V)$. Consider a coordinate system with $O$ as the origin. Under this coordinate system, we can uniquely identify evrey point as the vector $\overrightarrow{OP_{i}}$. Consider the point associated with the linear combination of these vectors, which is defined to be:
+
+$$
+P_{O} = O + \sum_{i=1}^{n} \alpha_{i} \overrightarrow{OP_{i}}
+$$
+
+Now, consider choosing a different origin $O'$. We can express the points $P_{1}, \dots, P_{n}$ as $\overrightarrow{O'P_{1}}, \dots, \overrightarrow{O'P_{n}}$. The point associated with the linear combination of these vectors is given by:
+
+$$
+P_{O'} = O' + \sum_{i=1}^{n} \alpha_{i} \overrightarrow{O'P_{i}}
+$$
+
+We are interested in determining when the point $P$ is invariant under the choice of origin. Consider that by Chasles' idenity, we can write
+
+$$
+\overrightarrow{O'P_{i}} = \overrightarrow{OP_{i}} + \overrightarrow{OO'}
+$$
+
+Now we can write:
+
+$$
+P_{O'} = O' + \sum_{i=1}^{n} \alpha_{i} \left(\overrightarrow{OP_{i}} + \overrightarrow{OO'}\right) = O' + \sum_{i=1}^{n} \alpha_{i} \overrightarrow{OP_{i}} + \sum_{i=1}^{n} \alpha_{i} \overrightarrow{OO'} = O' + (\sum_{i=1}^{n} \alpha_{i})\overrightarrow{OO'} + \sum_{i=1}^{n} \alpha_{i} \overrightarrow{OP_{i}}
+$$
+
+The first transition is due to linearity of the vector space, and the second transition is due to the associativity of vector/point addition in the affine space. Denote $K=O' + \sum_{i=1}^{n} \alpha_{i}\overrightarrow{OO'}$, then we can write:
+
+$$
+P_{O'} = K + (\sum_{i=1}^{n} \alpha_{i}) \overrightarrow{OP_{i}}
+$$
+
+Due to the bijectivity of the map, we know that $P_{O}=P_{O'}$ iff $K=O$, which means that we require:
+
+$$
+O = O' + (\sum_{i=1}^{n} \alpha_{i})\overrightarrow{OO'}
+$$
+
+However, we know that this is only true if $(\sum_{i=1}^{n} \alpha_{i})\overrightarrow{OO'} = \overrightarrow{OO'}$, which i only true when
+
+$$
+\sum_{i=1}^{n} \alpha_{i} = 1
+$$
+
+This motivates defining an *affine combination* as a linear combination of vectors in $V$ such that the sum of the scalars is $1$. Indeed, since the point determined by an affine combination is invariant under a choice of origin, we can "forget" the origin and simply denote an affine combination of a set of points as
+
+$$
+g = \sum_{i=1}^{n} \alpha_{i} P_{i}
+$$
+
+This is an improper notion - it is not actually a summation of points (as this operation is not defiend), but instead a summation of the vectors determined by the points under any origin, however it is commonly used to express the fact that the affine combination is a point and depends only on points in $A$. The point $g$ is called the barycenter of $P_{i}$ for the weights $\alpha_{i}$.
+
+Analogous definitions to linear (in)dependence follow naturally - given an affine combination of points, we say that they are affinely dependent if at least one point can be expressed via an affine combination of the others, and afiinely indepndent otherwise.
+
+Now consider another affine combination of points $P_{1}, \dots, P_{n}$ with scalars $\alpha_{1}, \dots, \alpha_{n}$
+
+$$
+a + \sum_{i=1}^{n} \alpha_{i}(P_{i}-a) = a + \sum_{i=1}^{n} \alpha_{i}(P_{i}-b + (b-a)) = a + \sum_{i=1}^{n} \alpha_{i}(P_{i}-b) + (b-a) \sum_{i=1}^{n} \alpha_{i}
+$$
+
+When $\sum_{i=1}^{n}\alpha_{i}=0$, we get
+$$
+\begin{gathered}
+a + \sum_{i=1}^{n} \alpha_{i}(P_{i}-a) = a + \sum_{i=1}^{n} \alpha_{i}(P_{i}-b) \Rightarrow \\
+\sum_{i=1}^{n} \alpha_{i}(P_{i}-a) = \sum_{i=1}^{n} \alpha_{i}(P_{i}-b)
+\end{gathered}
+$$
+
+Thus when the sum of scalars is $0$, the affine combination of the points *uniquely determines a vector*. To summarize, we have two barycenters under affine combinations:
+
+1. When $\sum_{i=1}^{n}\alpha_{i}=1$, the affine combination of points uniquely determines a point, regardless of the point taken as the origin.
+2. When $\sum_{i=1}^{n}\alpha_{i}=0$, the affine combination of points uniquely determines a vector.
+
+## Affine Span and Bases
+
+The notion of an affine combination paves the way for the notation of an affine span. An affine span of a set of points $P=\{P_{1}, \dots, P_{n}\} \in A$ is the minimal set of points such that it contains all affine combinations of $P$:
+
+$$
+\text{span}(P_{1}, \dots, P_{n}) = \{g | g = \sum_{i=1}^{n} \alpha_{i} P_{i}, \sum_{i=1}^{n} \alpha_{i} = 1\}
+$$
+
+W.l.o.g, let's fix $P_{1}$ as an origin. Then we get the following expression for the coordinates of $g$
+
+$$
+\begin{gathered}
+g_{P_{1}} = P_{1} + \sum_{i=1}^{n} \alpha_{i}(P_{i}-P_{1}) = P_{1} + (\alpha_{1}(P_{1}-P_{1}) + \sum_{i=2}^{n} \alpha_{i}(P_{i}-P_{1})) = \\
+P_{1} + (0 + \sum_{i=2}^{n} \alpha_{i}(P_{i}-P_{1})) = P_{1} + \sum_{i=2}^{n} \alpha_{i}(P_{i}-P_{1})
+\end{gathered}
+$$
+
+Notice that for any finite value $k=\sum_{i=2}^{n}\alpha_{i}$, we can set $\alpha_{i}=1-k$ and then we will get $\sum_{i=1}^{n}\alpha_{i}=1$, satisfying the condition for the combination to be affine, which means that $\sum_{i=2}^{n}\alpha_{i}(P_{i}-P_{1})$ is actually a linear combination of the vectors $(P_{i}-P_{1})$, and thus we have shown that the span of an affine space is an affine space with direction $\text{span}(P_{2}-P_{1}, P_{3}-P_{1}, \dots, P_{n}-P_{1})$. Thus, the smallest linear independent subset of vectors of the form $P_{i}-P_{1}$ is the basis of the direction, which motivates the idea of defining an affine base - an affine base is a set of $n$ points $P_{1}, P_{2}, \dots, P_{n}$, such that the set of $n-1$ vectors $P_{2}-P_{1}, P_{3}-P_{1}, \dots, P_{n}-P_{1}$ is a basis of the direction of the affine space.
+
+## Barycentric coordiantes
+
+We've seen that:
+1. An affine span of a set of points is the minimal set of all affine combinations of the points, and is an affine subspace.
+2. An affine combination of points has a unique barycenter regardless of the choice of origin.
+
+This motivates us to define a new coordinate system based on barycenters. Consider a set of affinely independent points $S=\{P_{1}, \dots, P_{n}\} \in A$. Every point in the subspace determined by $\text{span}(S)$ can be expressed as:
+
+$$
+P = O + \sum_{i=1}^{n} \alpha_{i} (P_{i} - O)
+$$
+
+Where $O$ is some point in $\text{span}(S)$, and since $P$ is a barycenter, for any other choice of origin the point $P$ can be expressed using the same scalars. Thus, if we consider an affine subspace, we can define the coordinates of a point $P$ in $\text{span}(S)$ as the n-tuple $(\alpha_{1}, \dots, \alpha_{n})$, and $P$ is uniquely determined by these coordinates regardless of the choice of origin. This representation is called *barycentric coordinates*.
+
+Physically, we can think of barycentric coordinates as the center of mass of a set of $n$ point masses, each assigned mass $\alpha_{i}$.
+
+# Affine Maps
+
+We defined linear maps in a way which preserves the linear structure: $T(\alpha u + v) = \alpha T(u) + T(v)$. We would to define a mapping between affine spaces which preserves the affine structure. We have seen that barycenters are invariant under choice of origin, and that affine combinations span an affine space, so in a sense this invariant captures the essence of the affine structure, which motivates the definition for an affine map.
+
+Given two affine spaces $A \times \vec{A}$ and $B \times \vec{B}$, consider a map $f: A \to B$ such that it preserves barycenters:
+
+$$
+f(a+\sum_{i=1}^{n} \alpha_{i}(p_{i}-a)) = b + \sum_{i=1}^{n} \alpha_{i}(f(p_{i})-b)
+$$
+
+For any $a \in A$ and any $b \in B$, where $\sum_{i=1}^{n} \alpha_{i} = 1$. 
+
+We can construct such a map by combining a linear map $T: \vec{A} \to \vec{B}$ with a translation by some point $b \in B$:
+
+$$
+f(a+v) = b + T(v)
+$$
+
+To prove this claim, we shall show that barycenters are preserved under the map. For every point $p_{i} \in A$, we have
+
+$$
+\begin{gathered}
+f(p_{i})=f(a+(p_{i}-a)) = b + T(p_{i}-a) \Rightarrow T(p_{i}-a)=f(p_{i})-b
+\end{gathered}
+$$
+
+Consider where a barycenter of $p_{1}, \dots, p_{n}$ with weight $\alpha_{1}, \dots, \alpha_{n}$ is mapped to under $f: a+v \to b + T(v)$:
+
+$$
+f(a + \sum_{i=1}^{n} \alpha_{i}(p_{i}-a)) = b + T(\sum_{i=1}^{n} \alpha_{i}(p_{i}-a)) \underset{\text{T is linear}}{=} b + \sum_{i=1}^{n} \alpha_{i}T(p_{i}-a) = (*) \\
+$$
+
+And since $T(p_{i}-a)=f(p_{i})-b$, we get
+$$
+(*) = b + \sum_{i=1}^{n} \alpha_{i}(f(p_{i})-b)
+$$
+
+Thus the barycenter of $p_{1}, \dots, p_{n}$ with weights $\alpha_{1}, \dots, \alpha_{n}$ in $A$ is mapped to the barycenter of the image of these points with the same weights, which is exactly the condition for $f$ to be an affine map.
+
+Notice that
+
+$$
+f(a) = f(a+0_{\vec{A}}) = b + T(0_{\vec{A}}) = b + 0_{\vec{B}} = b
+$$
+
+Thus we can write the affine map as
+
+$$
+f(a+v) = f(a) + T(v)
+$$
+
+We claim that $T(v)$ is unique and does not depend on the choice of $a$. To show this, consider the expression $f(a+v)=f(a)+h(v)$, where $f$ is an affine map, and thus preserves barycenters, and $h$ is a map $\vec{A} \to \vec{B}$. We wish to show that:
+
+1. $h(v)$ is a linear map.
+2. $h(v)$ does not depend on the choice of $a$.
+
+Let's start with proving that $h(v)$ is a linear map. We need to prove that, given $u, v \in \vec{A}$ and a scalar $\alpha \in F$, we get
+
+$$
+\begin{gather}
+h(u+v) = h(u) + h(v) \\
+h(\alpha v) = \alpha h (v)
+\end{gather}
+$$
+
+Since $f$ is an affine map, we can use the associative property of an affine space with respect to addition and get
+$$
+\begin{gathered}
+f(a) + h(u+v) = f(a + (u + v)) = f((a+u) + v) = \\
+f(a+u) + h(v) = (f(a)+h(u))+h(v) = f(a) + h(u) + h(v) \Rightarrow \\
+h(u+v) = h(u) + h(v)
+\end{gathered}
+$$
+
+Which proves $(1)$. To prove $(2)$, observe that
+
+$$
+\begin{gathered}
+a + \lambda v = a + \lambda((a + v) - a) = a + \lambda((a + v) -a) + (1 - \lambda)0_{\vec{A}} = \\
+a + \lambda((a+v) - a) + (1 - \lambda)(a - a)
+\end{gathered}
+$$
+
+Since $\lambda + (1 - \lambda) = 1$, this is an afffine combination of the points $v+a, a$ with resepct to the origin $a$, and the point $a + \lambda v$ is a barycenter. Since $f$ preserves barycenters, we can write
+
+$$
+\begin{gathered}
+f(a + \lambda v) = \\
+f(a + \lambda((a+v) - a) + (1 - \lambda)(a - a)) = \\
+f(a) + \lambda h((a+v)-a) + (1 - \lambda)h(a-a) = \\
+f(a) + \lambda h(v) + (1 - \lambda)h(0_{\vec{A}})=\\f(a) + \lambda h(v)
+\end{gathered}
+$$
+
+Which proves $(2)$, thus we have shown that $h(v)$ is a linear map. Now assume we have chosen some other point $b \in A$. We need to show that the linear maps $h(v), h'(v)$ defined by $f$ with respect to $a$ and $b$ are the same. Let's write these linear maps in terms of $f$:
+
+$$
+\begin{gathered}
+f(b+v) = f(b) + h'(v) \Rightarrow h'(v) = f(b+v)-f(b) \\
+f(a+v) = f(a) + h(v) \Rightarrow h(v) = f(a+v) - f(a)
+\end{gathered}
+$$
+
+Thus we need to show that $f(b+v)-f(b)=f(a+v)-f(a)$. Let's manipulate $b+v$ to get it into a workable form:
+
+$$
+\begin{gathered}
+b + v = (a + (b-a)) + v = \\
+(a + (b - a)) + (((a + v) -a) - (a - a) ) = \\
+((a + v) - a) + (a + (b - a)) = \\
+(a + v) - a + b
+\end{gathered}
+$$
+
+The sum of coefficients is $1-1+1=1$, thus since $f$ preserves barycenters, it is preserved under the affine map and we get:
+
+$$
+\begin{gathered}
+f(b+v) - f(b) = (f(a+v) - f(a) + f(b)) - f(b) = \\
+f(b) - f(a) + f(a+v) - f(b) \underset{\text{by Chasles'}}{=} \\
+f(a+v) - f(a) = h(v)
+\end{gathered}
+$$
+
+Which shows that $h$ does not depend on the choice of $a$. We call this unique linear map $h$ the linear map associated with the affine map $f$.
+
+# Affine Transformations
+
+When an affine map $f$ is a bijective map from an affine space $A^{n} \times V^{n}$ to itself, we call it an *affine transformation*. Affine transformation can be thought about as linear transformations which also translate the associated vector space, and their topolgy is best understood when thinking of them as an affine subspace of the $n+1$ affine space equipped to $V^{n+1}$. In this case, we can write the affine map in augmented matrix form. Consider that we have shown that affine transfromations can be written as
+
+$$
+f(a+v) = b + T(v)
+$$
+
+Where $T$ is a unique linear transformation from $V \to V$, and since we demand $f$ to be a bijection we know that $f$ is invertible and thus $T$ is invertible, thus the matrix $A$ representing $T$ is in $GL(n, F)$ (the general linear group, the group of all square matrices with $n$ rows and elements from $F$ such that their determinant is non-zero). We can lift this to the $n+1$ dimensional space and then express it as a matrix
+
+$$
+\begin{pmatrix}
+f(a+v) \\
+1
+\end{pmatrix}
+=
+\left(
+\begin{array}{c|c}
+A & b \\
+0 & 1\\
+\end{array}
+\right)
+\begin{pmatrix}
+v \\
+1
+\end{pmatrix}
+$$
+
+Where the last column performs the translation which is affine in nature, and $A$ performs scaling and rotation which are linear in nature. This matrix form is widely used in computer graphics, where affine transformations are used to transform objects in 3D space. It is easy to show that affine transformations form a group. We denote this group $\text{Aff}(n, F)$.

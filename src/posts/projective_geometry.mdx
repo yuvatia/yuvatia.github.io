@@ -2,6 +2,8 @@ export const frontmatter = {
     title: 'Projective Geometry',
 };
 
+This post is meant to serve as a somewhat thorough introduction to projective geomety - the geometry of vision. It is heavily based on the excellent [Geometry of Vision](https://www.youtube.com/playlist?list=PLyqSpQzTE6M_bepAWap9JE-i9UiO6-y_f) taught by Prof. Vijay Ravikumar at NPTEL, although some major changes and additional content have been added, especially near the end of the article, tying it all back together to the most practical usage of the subject in computer graphics. This is a long post, and to be able to truly get value from it, you are encouraged to follow along with the exercises and proofs, and to take your time to understand the concepts presented. This is especially relevant for synthetic proofs and constructions, which while I did attempt to the best of my ability to present in a clear manner and to accompany any non-trivial construction with a sketch, are still best understood when attempted by the reader.
+
 ## Euclidean Geometry
 
 One of the first mathematical fields taught to children is that of geometry, specifically Eucledian geometry, laid out by Euclid in *The Elements*. In *Elements*, Euclid first discusses the two dimensional case - plane geometry, and then extends it to three dimensions - solid geometry. In order to properly establish all propositions which describe Euclidean geometry, Euclid introduces a set of axioms, which are taken to be true, and are then used to prove other propositions. One such axiom is that *for any two points, there exists a straight line connecting them*. Note that the axiom does not define what a "point" or a "line" is, they are taken as [primitive notions](https://en.wikipedia.org/wiki/Primitive_notion) - concepts which are not defined by previous concepts. Instead, the axioms describe the relationships between these primitive notions. This distinction lets us change our notion of points or lines, long as the new notions obey the axioms of Euclidean geometry. As such, Euclidan geometry is an [axiomatic system](https://en.wikipedia.org/wiki/Axiomatic_system) - it is a set of primitive notions (for example - line, point, plane) and axioms describing their relationships (for example, the one we presented earlier), used to logically derive theorems.
@@ -736,9 +738,33 @@ Since we forget the origin, we can also say that there is no homogenous coordina
 
 Using homogenous coordinates, it is trivial to show that parallel lines intersect at a single point in $RP^{2}$. In fact, this is remarkbly similar to the calculations we've done when discussing the camera obscura, although we didn't have a proper framework for the calculations at the time.
 
-TODO parllel lines intersect in homogenous coordiantes
+Homogenous coordinates, along with the construction of $RP^{2}$, provide an analytical framework when dealing with projective geometry. For example, we can now provide an analytic proof for the fact that parallel lines intersect under a perspectivity:
 
-affine chart
+Consider a line $R^{3}$, parametrized as $v_{0}+\vec{v}t=(x_{0}+xt,y_{0}+yt,z_{0}+zt)$. In $RP^{2}$, the line is taken to a plane through the origin, such that each point on the plane becomes a projective point, represented by the homogenous coordinate  $[x_{0}+xt:y_{0}+yt:z_{0}+zt]$. By definition of homogenous coordinate, we have:
+
+$$
+p_{t} = [x_{0}+xt:y_{0}+yt:z_{0}+zt] = [\frac{x_{0}+xt}{z_{0}+zt}:\frac{y_{0}+yt}{z_{0}+zt}:1] = 
+[\frac{\frac{x_{0}}{t}+x}{\frac{z_{0}}{t}+z}:\frac{\frac{y_{0}}{t}+y}{\frac{z_{0}}{t}+z}:1]
+$$
+
+In the limit $t \to \infty$, we get:
+
+$$
+\lim_{t \to \infty} p_{t} = [\frac{x}{z}:\frac{y}{z}:1]
+$$
+
+Thus using homogenous coordinates we can see that the line converges to a point $p_{\infty}=[\frac{x}{z}:\frac{y}{z}:1]$, which is independent of the origin of the line $v_{0}$, thus all lines parallel to the original line intersect at the same projective point in $RP^{2}!
+
+## Affine Maps of $RP^{2}$
+
+In $RP^{2}$, we're dealing with projective points which are really lines in $R^{3}$, and projective lines which are planes in $R^{3}$. This notation readily describes the perspectivity itself, but our primary objective is to describe perspective shifts in terms of $R^{3}$ - we would like to define a map from $RP^{3}$ to $R^{3}$ which takes projective points to points and projective lines to lines. While the actual map is fairly intuitive to understand, I would like to be provide some more insight into the algebraic structures that govern it.
+
+### Affine Spaces
+
+TODO side quest to affine spaces
+
+
+ffine chart
 PGL(3, R) SO(3) -> Aff -> PGL(3, R)
 Note on Aff group and the properties preserved (convexity, parallelism, ratios...)
 homography + Fundemental theorem of PGL(3, R)
@@ -746,5 +772,3 @@ orthographic vs perpsective
 central projection matrix in 3D graphics
 
 # References
-
-Geometry of vision
