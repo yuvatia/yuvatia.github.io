@@ -1,5 +1,6 @@
 export const frontmatter = {
     title: 'Projective Geometry',
+    date: '2024-06-02'
 };
 
 This post is meant to serve as a somewhat thorough introduction to projective geomety - the geometry of vision. It is heavily based on the excellent [Geometry of Vision](https://www.youtube.com/playlist?list=PLyqSpQzTE6M_bepAWap9JE-i9UiO6-y_f) taught by Prof. Vijay Ravikumar at NPTEL, although some major changes and additional content have been added, especially near the end of the article, tying it all back together to the most practical usage of the subject in computer graphics. This is a long post, and to be able to truly get value from it, you are encouraged to follow along with the exercises and proofs, and to take your time to understand the concepts presented. This is especially relevant for synthetic proofs and constructions, which while I did attempt to the best of my ability to present in a clear manner and to accompany any non-trivial construction with a sketch, are still best understood when attempted by the reader.
@@ -18,7 +19,7 @@ The axioms of Euclidean plane geometry presented in Elements are:
 
 The last axiom is known as the [parallel postulate](https://en.wikipedia.org/wiki/Parallel_postulate), and can be better understood by considering the following diagram:
 
-TODO parallel postulate image
+![Parallel postulate](/images/00_parallel_postulate.png)
 
 The axiom postulates that if $$\alpha + \beta \lt 180\degree$$, the two white lines will intersect at some point $A$ on the same side of the plane where the angles are considered. In the case where $\alpha + \beta = 180 \degree$, then the sum of the interior angles will never be less than two right angles, and the two lines will never intersect. This is the case when the two lines are parallel.
 
@@ -40,25 +41,25 @@ The governing principles of perspective drawing are as follows:
 
 Consider, for example, attempting to draw a railway track as if the image plane were parallel to the ties. Here's what you'd see in real life you were actually standing in front of the track:
 
-TODO railway track image
+![Railway track](https://upload.wikimedia.org/wikipedia/commons/2/2a/Railroad-Tracks-Perspective.jpg)
 
 Notice how the rails, which are parallel in real life, appear to converge at a single point in the distance. This is the vanishing point of the rails. If you were to draw the track as you see it, you would draw the rails as two lines converging at a single point in the distance. This is the principle of perspective drawing. Also notice how the ties, which are perpendicular to the rails, appear as parallel lines in the image. This is because the ties are parallel to the picture plane, and as such do not seem to converge in our image. One can achieve this effect using only one tie as a starting point using only a straightedge as follows:
 
-TODO railway track drawing
+<video src="/images/02_railway_track_drawing.mp4" controls></video>
 
 The key to achieving this drawing is to realize that parallel lines in Euclidean space intersect at a single point in the projective plane. The choice of auxilary lines should be made clear by considering a top-down view of the track:
 
-Note that this is also a perspective drawing, but now the image plane is parallel to the railway plane, thus no vanishing points are present and parallel lines still appear parallel.
+![Top-down view of a railway track](images/03_railway_track_top_down.png)
 
-TODO top-down railway
+Note that this is also a perspective drawing, but now the image plane is parallel to the railway plane, thus no vanishing points are present and parallel lines still appear parallel.
 
 Since the rails in our drawing have only one edge not parallel to the image plane, we see only one vanishing point. This is known as a *one-point perspective*. If we were to place the image plane at an angle to the railway plane, we would see two vanishing points, one for each rail. This is known as two-point perspective, and is used to draw objects which are not parallel to the image plane. Here's how one can draw the track at an angle:
 
-TODO railway track at an angle
+<video src="images/04_railway_track_at_angle.mp4" controls></video>
 
 Similarly, we can tile a floor starting from an initial trapezoid as follows:
 
-TODO tiling floor
+<video src="images/05_tiling_floor.mp4" controls></video>
 
 Here, the view is also at an angle, meaning no edge is parallel to the image plane. The result are quite convincing.
 
@@ -66,15 +67,15 @@ Now, consider a 3 dimensional object such as a cube. A cube has 3 pairs of paral
 
 1. Front view - the front face is in parallel to the image plane, and as such does not converge, much like our top-down view of the track. As the back face is parallel to the front face, it too does not have any converging edges. The side faces however, are not parallel to the image plane, and as such do converge. Since they are parallel to each other, they converge to the same vanishing point. This is a one point perspective, and can be drawn as follows:
 
-TODO one-point perspective cube
+<video src="images/06_one_point_cube.mp4" controls></video>
 
 2. Side view - the cube is placed on the Euclidean plane perpendicular to the image plane but at an angle. Now, we have two vanishing points on the horizon line attached to the Euclidean plane in our image:
 
-TODO two-point perspective cube
+<video src="images/07_two_point_cube.mp4" controls></video>
 
 3. The cube isn't laying on the ground, but is instead floating in space. Now, all three sets of parallel planes converge to different vanishing points, but now now all edges lie on the same real plane or on a plane parallel to it, and as such we have a family of parallel edges that converge to a different horizon line, belonging to the new plane. This is known as a three-point perspective, and can be drawn as follows:
 
-TODO three-point perspective cube
+<video src="images/08_three_point_cube.mp4" controls></video>
 
 By now, we've seen enough examples of how a perspective can distort the Euclidean space, and how perspective drawing better captures the way we see the world. When attempting to make sense of this new structure, it is a good idea to ask questions about the nature of the transformation - what changes between perspectives? what remains the same? Clearly, angles and lengths are not preserved, meaning this isn't an isometry. However, points and lines are still taken to points and lines, and their meet and join are preserved, yet we have this new property where parallel lines meet at a new point - the vanishing point, which lies on a new line - the horizon line. We will spend the rest of this discussion formalizing this new geometry, and exploring its properties in an attempt to answer these questions and explain our observations.
 
@@ -168,7 +169,7 @@ $$
 
 This means that lines in $R^{3}$ are taken to lines in the projective plane, but parallel lines seem to get closer and closer together the further they are from the origin. The following image illustrates this:
 
-<div align="center"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Railroad-Tracks-Perspective.jpg" alt="Vanishing point" width="300" height="400"/></div>
+![Vanishing point of a railway track](https://upload.wikimedia.org/wikipedia/commons/2/2a/Railroad-Tracks-Perspective.jpg)
 
 The box-with-a-tiny-hole setup we described is called a *camera obscura*, and is the first known camera model. The model described is called the *pinhole camera model*. While easy to reason about, it has one major shortcoming in photography - because the hole is extremely small, very little light enters the box, and the image formed is very dim. This can be accounted for by using materials which respond to light in an accumulative manner, such as film or digital sensors. We then need to *expose* the material to light for some duration of time to receive a better lit image. In photography, this is called *exposure*. While exposure does help, it does not solve the problem of capturing images in a poorly-lit environment. To solve this problem, we need to let more light in, which can be done by widening the hole. This, however, introduces a new problem - now, multiple light rays from the same point enter the box and hit the projective plane at different points, creating a blurry image, a phenomena known as *defocus*. To solve this problem, we need some way of focusing multiple light rays from the same source to the same point on the projective plane, so that we can maintain a sharp image. This is done using lenses - much like the ones we have in our eyes.
 
@@ -220,7 +221,7 @@ We can now identify the vanishing points from our perspective drawing with the p
 
 Another important property of the projective plane that isn't captured in our drawing is the circular nature of lines in $P^{2}$: consider a line $l$ in $P^{2}$. The line is incident with a point at infinity $P_{[l]}$. We can follow the line along two different directions, so it may be tempting to define different points at infinity for each direction, and have two different lines at infinity. This, however, would violate the axioms of a linear space, since we would have two points at infinity incident with the same family of lines, meaning we would have two points which are incident with infinitely many lines, violating the first axiom of a linear space. Instead, we say that the line is incident with $P_{[l]}$ regardless of the direction we choose to follow along, maintaining the axioms of a linear space. This leads to a curious property - every line in $P^{2}$ is a closed curve though its point at infinity - by following the line along one direction, through the point at infinity, we will eventually reach the starting point. Also worth mentioning is the connectivity of regions of the projective plane on different sides of lines. Consider the following image in $R^{2}$:
 
-TODO plane separated by line
+![A line separates the plane into distinct regions](/images/09_plane_separated_by_line.png)
 
 The line clearly separates $R^{2}$ into two not connected regions. However, if we were to interpret this image in $P^{2}$, we actually would be able to move from one side of the line to the other by following the line through the point at infinity. This is another property worth keeping in mind when attempting to understand the structure of $P^{2}$, meaning that the regions shown in the image are in fact still connected in $P^{2}$.
 
@@ -267,7 +268,7 @@ Let's show that $P^{3}$ is a linear space:
 
 Thus proving that $P^{3}$ is a linear space. Note that this isn't a complete proof since we haven't dwelled on the uniqueness on the incidences but rather hand-waved them, however it is pretty straightforward to extend the ideas presented to also show uniqueness. 
 
-### Incidence Relations in $P^{3}$
+### Incidence Relations in P(3, R)
 
 Consider two distinct lines $l_{1}, l_{2} \in P^{3}$:
 
@@ -287,9 +288,7 @@ Now that we have presented the projective space, we can go back to our perspecti
 
 In our drawings, we represented the railway track as a two dimensional object. The track is bounded by two sets of two parallel lines in a rectengular setup in $R^{3}$, all coplanar. We drew the track under three different perspectives:
 
-1. Top-down view - the plane in which the track lies is parallel to the image plane, thus the track is represented as a rectangle in our drawing because all lines are parallel to the image plane. However, in $P^{3}$, the edges do in fact still intersect at a point at infinity. The horizon line in this case is just not visible when looking at the picture plane.
-
-TODO eleborate
+1. Top-down view - the plane in which the track lies is parallel to the image plane, thus the track is represented as a rectangle in our drawing because all lines are parallel to the image plane. However, in $P^{3}$, the edges do in fact still intersect at a point at infinity.
 
 2. One-point perspective view - the image plane is perpendicular to the track and parallel to the ties. The sides are parallel and thus meet at a point at infinity which we called a vanishing point, which is incident with the line at infinity, represented by the horizon line. The horizon line is the line at infinity of the projective extension of the plane in which the track lies.
 
@@ -299,51 +298,49 @@ TODO eleborate
 
 The cube is a 3-dimesional object consisting of 3 pairs of parallel rectengular faces, perpendicular to each other. Indeed, another way to define a cube is by the area bound by the intersection of 3 pairs of parallel, equally spaced planes, with all sets perpendicular to each other. Let us interpret this in terms of $P^{3}$: we have three equivalent classes $[\pi_{1}], [\pi_{2}], [\pi_{3}]$, and their projective extensions add three distinct lines at infinity $l_{[\pi_{1}]}$, $l_{[\pi_{2}]}$, $l_{[\pi_{3}]}$. Note that each edge $e$ of the cube is the intersection of two planes $\pi_{i}, \pi_{j}$ and thus the point at infinity of the edge $p_{[e]}$ is also the intersection of the lines at infinity $l_{[\pi_{i}]}, l_{[\pi_{j}]}$. In the three-point perspective view of the cube, we can indeed spot all these lines at infinity and see that they intersect at points of infinity incident with the mutual edges of the planes of the cube:
 
-TODO three-point perspective with lines at infinity
+![Three-point perspective view of a cube, revisited](images/3_point_persp_revisited.png)
 
 In the two point perspective drawing, we identify two vanishing points. This is because in a two-point perspective, one of the axes of orientation (one of the set of parallel edges) of the cube is perpendicular to the picture plane, and we've already established that perspective drawing does not capture the intersection of such lines in a projective space. The other two vanishing points definite a line at infinity, and are also incident with the other two lines at infinity, however since we cannot identify the third vanishing point we also cannot identify the other two lines at infinity.
 
-TOOD two-point perspective with lines at infinity
+![Two-point perspective view of a cube, revisited](images/2_point_persp_revisited.png)
 
 Finally, in the one-point perspective drawing we only identify one vanishing point because two principal axes of the cube are parallel to the picture plane, and thus we can only identify the point at infinity of one set of parallel edges. However, we can still identify the line at infinity by taking into account that it will be parallel to the picture plane and thus parallel to a non-intersecting set of parallel edges, which we can identify by inspecting a face that does have a pair of parallel edges which coincide with the vanishing point:
 
-TODO one-point perspective with lines at infinity
+![One-point perspective view of a cube, revisited](images/1_point_persp_revisited.png)
 
 ### The Shadow of a Triangle
 
 Consider this perspective drawing, representing a lamp post lighting a sign board made of glass containing a triangle:
 
-TODO shadow of triangle puzzle
+![Shadow of a triangle puzzle](images/xx_shadow_puzzle.png)
 
 You're told that the both the bottom of the lamp post and the bottom edge of the sign board lie on the ground, and that the lamp post and one of the edges of the board, w.l.o.g $cf$, are coplanar. The lamp is shining light at the sign board. We are interested in finding out the shadow of the circle, as viewed from the perspective of the viewer. This is a perspective geometry puzzle. Solving it will lay the foundation for proving a fundemental theorem in projective geometry which we will later use to define a *perspective* or a *perspectivity* in a more mathematical sense.
 
-How do we solve this puzzle? Essentially what we're looking for is the intersection of the ray of light from the lamp post to the each vertex of the triangle with the ground plane. These points will be the extreme points of a polygon which encloses the shadow of the triangle (this is an application of the geometerical optics model), so determining where the ground plane is would be a good start. Since we know that the bottom of the lamp post is on the ground plane, as well as the bottom edge of the board, we have 3 points which are not all collinear that lie on the same plane. Since 3 points, not all collinear, define a plane, we can determine the ground plane. Let's do this by connecting the line from the bottom of the post to the vertice at the ends of the bottom edge of the board:
+How do we solve this puzzle? Essentially what we're looking for is the intersection of the ray of light from the lamp post to the each vertex of the triangle with the ground plane. These points will be the extreme points of a polygon which encloses the shadow of the triangle (this is an application of the geometerical optics model), so determining where the ground plane is would be a good start. Since we know that the bottom of the lamp post is on the ground plane, as well as the bottom edge of the board, we have 3 points which are not all collinear that lie on the same plane. Since 3 points, not all collinear, define a plane, we can determine the ground plane. Let's do this by connecting the line from the bottom of the post to the vertice at the ends of the bottom edge of the board.
 
-TODO ground plane two lines
+![Finding the ground plane](images/shadow_puzzle_ground_plane.png)
 
 These lines span the ground plane. Now, let's first find the shadow of the sign board. We can do this by connecting the lamp post $a$ with the edges of the board $\square_{cdef}$, and finding the points of intersection with the ground plane spanned by $\vec{be},\vec{bf}$. However, since $ab$ and $cf$ and coplanar, we know that $ac$ and $bf$ are also coplanar, and thus by the parallel postulate they must interesect at some point along the continuation of $bf$, let's denote this point as $c'$. Notice that $c'$ lies on the ground plane, thus it is the shadow of $c$ cast by the lamp $a$. By the same argument, $ab$ and $de$ are also coplanar since $cf$ and $de$ are parallel, and thus interesect at some point $d'$ along $be$, which is the shadow of $d$. Finally, $f$ and $e$ already lie on the ground plane, and thus they are they are fixed points of the shadow since they will always be the point of intersection of a light ray through them and the ground plane. Thus, the shadow of the sign board is the polygon $\square_{c'd'ef}$:
 
-TODO shadow of sign board
+![Sign board shadow](images/sign_board_shadow.png)
 
 Now, consider the edges of the triangle $\triangle_{ghi}$. Since the triangle lies on the plane determined by the sign board, and since we are in $P^{3}$ we know that all lines in a plane are incident at some point, meaning that the edges of the triangle interesect with the edges of the board, either at a point in $R^{3}$ or at a point at infinity. Let us extend the edge $ig$, and denote its point of intersection with $fc$ and $cd$ as $i'$ and $g'$ accordingly. In our drawing, the lines clearly intersect, however were the edge of the triangle parallel to these edges of the board we would still have at intersection at a point at infinity. That is to say, the method we follow here will always hold in $P^{3}$, regardless of the shape, orientation and position of the triangle. Now, we wish to find the shadow of $g'$ and $i'$. Since $i'$ lies in $fc$ which lies on the ground plane, $i'$ remains fixed. Now, since $g'$ is incident with $cd$, we know that the light ray takes it to a point on the shadow of $cd$, which is $c'd'$. Denote this point as $g''$:
 
-TODO shadow of i'g'
+![Shadow of i'g'](images/shadow_of_ig.png)
 
 By using the same construction with the triangle edge $gh$, we get the shadow of the line $gh'$, denoted as $g_{s}h$. We know that the point $g$ will be taken to a point along the shadow of $i'g$, so the find $g_{s}$ we need to draw a line from $a$ through $g$ and find its point of intersection with $i'g''$':
 
-TODO finding $h'g_{s}, g_{s}$
+![Shadow of h'g_s and g_s](images/shadow_of_g.png)
 
 By the same argument, we can find the shadow of $i$, denoted as $i_{s}$ - we cast a ray through $i$ and denote its intersection with $i'g''$ as $i_{s}$. The only vertex of the triangle whose shadow we still haven't determined is $h$. We can find it by extedning $ih$ and denoting its point of intersection with the ground plane (and the extended line of $fe$) as $h'$. Now, we know that $ih$ is taken to a $i_{s}h'$, and we know that $h$ is the intersection of $ih'$ and $h'g$, so we can identify $h_{s}$ as the intersection of $i_{s}h'$ and $h'g_{s}$:
 
-TODO identifying $h_{s}$
+![Shadow of h](images/shadow_of_h.png)
 
 If we follow the ray model proposed by geometerical optics, clearly $\triangle_{g_{s}h_{s}i_{s}}$ is the shadow of the $\triangle_{ghi}$ cast by the lamp positioned at point $a$, viewed from the perspective from which the image is drawn. 
 
 ## Desargues' Theorem
 
 Observe that each vertex and its shadow define a straight line which is also incident with the point $a$. We say that the triangles are *in perspective from a point*, and we call $a$ the *center of perspecivity*. Also, and perhaps less intuitively, if we extend the respective edges of the two triangles, we will notice that they intersect at three collinear points. When we have two triangles such that the intersection of the extension of their edges are collinear, we say that they are *in perspective from a line*, and we call the line passing through these points the *axis of perspectivity*. In the case of our shadow drawing puzzle, the axis of perspectivity is the line passing through $fe$, which is also the intersection of the planes on which the triangles lie.
-
-TODO axis and point of perpsecitvity in our puzzle
 
 Desargues' theorem is a theorem in projective geometry which states that *two triangles are in perspective from a point iff they ae in perspective from a line*. The theorem holds for any projective space and also holds for the projective plane as we have constructed it but in general only holds for planes which are [Desarguesian](https://en.wikipedia.org/wiki/Projective_plane#Desarguesian). Since we built our projective planes in Euclidean space from Euclidean planes, we needn't worry about this and can in fact prove the theorem geometrically in the two-dimensional case, however it is easier to prove the theorem in the three-dimensional case. In fact, we have provided a sketch of a proof in the previous section.
 
@@ -353,51 +350,53 @@ Consider two non-coplanar triangles $\triangle_{ABC}$ and $\triangle_{abc}$ in $
 
 Consider the lines $AB$ and $ab$. Since they are in perspective from a point, they are coplanar on some projective plane, and thus are incident at some point $P_{AB}$. However, since $AB$ and $ab$ also lie on $\pi_{1}$, $\pi_{2}$ repsectively, we know that $P_{AB}$ lies on $l$. Similarly, $BC$ and $bc$ are also co-planar due to the triangles being in perspective and interesect at some point $P_{BC}$ on $l$. Finally, $AC$ and $ac$ will also intersect at some point $P_{AC}$ along $l$. $P_{AB}$, $P_{BC}$ and $P_{AC}$ all lie on $l$, thus $\triangle_{ABC}$ and $\triangle_{abc}$ are in perspective from a line with the axis of perspectivity being the line of intersection between $\pi_{1}$ and $\pi_{2}$.
 
-TODO desargues 3d point -> line
+![Desargues' theorem](images/desargues_theorem.png)
 
 Consider the inverse: let $\triangle_{ABC}$ and $\triangle_{abc}$ be non-coplanar lying on $\pi_{1}$ and $\pi_{2}$ repsectively be in perspective from the line $l$ which is the intersection of $\pi_{1}$ and $\pi_{2}$. It is trivial to show that in this setup, the respective edges are also distinct and coplanar and thus span a plane. In total, we have three planes associated with each respective pair of edges $\pi_{AB}$, $\pi_{BC}$ and $\pi_{AC}$. Since we are in $P^{3}$, every pair of planes intersect over some line $l$, so we have $\pi_{AB}$ and $\pi_{BC}$ intersecting over $l_{1}$ and $\pi_{AB}$ and $\pi_{AC}$ intersecting over $l_{2}$. Again since we are in $P^{3}$, we have $l_{1}$ and $l_{2}$ incident at a single point $P$. Since $P$ is incident with both $l_{1}$ and $l_{2}$, it is also incident with all three planes, and thus is the point of intersection of all three planes. Consider the geometrical meaning of the intersection of each pair of planes: since the planes were constructed from two non-coplnar triangles, we have $\pi_{AB}$ and $\pi_{AC}$ both sharing the same line $Aa$, meaning $l_{2}$ is in fact $Aa$. Similarly, we can show that $Bb$ and $Cc$ are also lines of intersection of the other possible plane combinations. This means that $P$ is the intersection of $Aa$, $Bb$ and $Cc$, which by definition makes the triangles in perspective from the point $P$, proving the inverse.
-
-TODO desargues 3d line -> point
 
 ### Two-Dimensional Case
 
 The two-dimensional case is more involved. We will use a proof which relies on being able to "lift" the triangles to 3D space. Note that this proof relies on the projective plane being embedded in a three-dimensional projective space, which is not always the case in more abstract or discrete cases. The idea behind lifting is to lift one corresponding vertex of each triangle off the plane in which both triangles reside, making sure the lifted vertices remain in perspective from the same point/line as the co-planar setup (depending on the direction of the proof we wish to prove), then using Desargues' theorem in 3D which we have already proven to find an axis/point of perspectivity for the lifted triangles, then project it back to the plane. Here's an illustration of the process of lifting two coplanar triangles through some point in space $P$:
 
-TODO lifting drawing
+![Lifting coplanar triangles](images/desargues_2d_lift.png)
+
+Notice that $\triangle_{ABC}$ and $\triangle_{abc}$ are coplanar, yet via lifting the points $A$ and $a$ the triangles $\triangle_{A'BC}$ and $\triangle{a'bc}$ are not coplanar, and thus are in perspective from a line by our proof for the 3D case. It can be shwon that the original triangles $\triangle_{ABC}$ and $\triangle_{abc}$ are in perspective from the same line. We will not provide a proof for the coplanar case.
 
 ### In Perspective Drawing
 
 Recall our perspective drawing of a tiled floor. The initial configuration is this:
 
-TODO tiled floor initial configuration
+![initial quadrilateral](images/xx_tiled_floor_initial.png)
 
 We then extended the edges $AC$ and $BD$ and denoted their meet as $Y$ and the edges $AB$ and $CD$ and denoted their meet as $X$. We then considered the line passing through $XY$ and declared it a representation of the line at infinity due to the fact that the initial parallelogram repesents a square in $R^{3}$. To find the next tiles, we extended the diagonal $AD$ until it intersected with $XY$ at some point $P$:
 
-TODO tiled floor with points XPY
+![Tiled floor with horizion line](images/xx_tiled_floor_xpy.png)
 
 We then reasoned that since the tiled floor consists of rows of aligned squares, the lines $CP$ and $BP$ are also diagonals of the neighboring tiles and thus parallel to $AD$ in $R^{3}$ so they must also meet $XY$ at $P$, marking their intersection with $BY$ and $CX$ as $B'$ and $C'$, respectively. Finally, we used these points to find the last remaining points of the neighboring tiles:
 
-TODO neighboring tiles found
+![Neighbors of initial tile found](images/xx_tiled_floor_neighbors.png)
+
+We can repeat the last few steps to tile the rest of the floor
+
+![Tiled floor](images/xx_tiled_floor_final.png)
 
 We can employ Desargues' theorem to better understand the incidence relations represented by the drawing. Notice, for example, that $\triangle_{ABC}$ and $\triangle_{DB'C'}$ are in perspective from the point $P$, meaning they are also in perspective from some line, and indeed we identify that they are in-perspective from the line $XY$. Consider the triangles $\triangle_{C'LC}$ and $\triangle_{DCA}$. Clearly they are in perspective from the line $XY$ and thus must be in perspective from some point, and indeed we can identify that they are in perspetive from the point $Y$. Indeed, Desargues' theorem is a powerful tool in understanding the incidence relations of objects in a projective space.
 
 ## Perspectivities
 
-We would like to extend the concept of being "in perspective from a point" beyond triangles. Consider two planes $\pi$, $\pi'$ in $P^3$ and some point $O$ not incident on either plane. A map $T: \pi \to \pi'$ is called a **perspectivity centered at $O$** if $\forall x \in \pi: $ $x, T(x)$ and $O$ are collinear. Consider the lamp post drawing from earlier:
+We would like to extend the concept of being "in perspective from a point" beyond triangles. Consider two planes $\pi$, $\pi'$ in $P^3$ and some point $O$ not incident on either plane. A map $T: \pi \to \pi'$ is called a **perspectivity centered at $O$** if $\forall x \in \pi: $ $x, T(x)$ and $O$ are collinear. 
 
-TODO perspectivity such that $\pi'$ is the shadow of $\pi$
-
-This drawing models the shadow of $\pi'$ on $pi$ by the ray model formed by a light source. We've seen that the triangles are in perspective from the point $a$, but does this drawing also describe a perspectivity map? In other words, do all lines from $a$ through $\pi'$ intersect $\pi$ at some point? The answer, as we soon shall see, is yes. For now, let's look at a few more examples.
+Consider the lamp post drawing from earlier, this drawing models the shadow of $\pi'$ on $\pi$ by the ray model formed by a light source. We've seen that the triangles are in perspective from the point $a$, but does this drawing also describe a perspectivity map? In other words, do all lines from $a$ through $\pi'$ intersect $\pi$ at some point? The answer, as we soon shall see, is yes. For now, let's look at a few more examples.
 
 Consider the camera-obscura setup we presented in our discussion of geometrical optics. We used the setup to model the core underlying prinicple of a camera, taking the tree from the projected space, henceforth *domain* space and projecting it to the image plane. In our construction, we used lines passing through the tiny hole in the box, then continuing to hit the image plane. Clearly, by our definition of a perspectivity, this setup is a perspectivity centered at the hole. Whereas in the previous example we've seen a projectivity whose center which lies on the same side of both planes, in this example we see a projectivity cenetered at a point which lies in the halfspace between the two planes, and we interpreted the result as the image formed by a camera. Notice how in this can the orientation of the domain plane is inverted when projected to the image plane.
 
 Let us consider one last example. Consider the following setup:
 
-TODO persepctivity similar to lamp post but without a triangle (now on ground) and with an eye in place of the lamp
+![Viewing a triangle on the ground plane](images/eye_viewing_triangle.png)
 
 This setup is almost identical to the lamp post setup, but instead of a lamp we have an eye and instead of a tirangle on the sign board we have a triangle on the ground. We use the eye as the center of perspectivity but now we use the ground plane as the domain plane and the sign board as the image plane. By sending rays from the eye toward the vertices of the triangle on the ground plane, we can identify that the rays interesect the image plane, forming the image of the triangle. We can interpret this as the image formed by the eye when looking in the direction of the image plane.
 
-We see that perspectivity maps can be interpreted as shadows and as images formed by the camera or the eye. These interpretations provide a good intuition, but as we have stated before they can be quite misleading when dealing with projective spaces since they still make describing FOO FOO FOO
+We see that perspectivity maps can be interpreted as shadows and as images formed by the camera or the eye. Be cautious though - these interpretations still do not capture the full essence of a projective space - we cannot properly view points or lines at infinity at either plane, only their images under perspecitivites that map them to points and lines in real Euclidean space.
 
 ### Perspectivities are well-defined
 
@@ -415,17 +414,17 @@ Thus, we have proven that perspectivities are well-defined, and are bijective.
 
 ### Perspectivities centered at infinity
 
-We have shown that perspective maps are defined in $P^{3}$. This means that perspectivities can either be centered at a point in $R^{3}$ or at a point at infinity. If the center of perspectivity is a point at infinity, then by construction all lines incident with it must be parallel to each other, thus a perspectivity centered at infinity looks like this:
+We have shown that perspective maps are defined in $P^{3}$. This means that perspectivities can either be centered at a point in $R^{3}$ or at a point at infinity. If the center of perspectivity is a point at infinity, then by construction all lines incident with it must be parallel to each other, thus a perspectivity centered at infinity looks like this (the dotted lines represent that the lines meet at a shared point at infinity):
 
-TODO parallel perpsecitvity
+![Parallel perspectivity](images/parallel_perspectivity.png)
 
 Such perspectivity is called a *parallel perspectivity*. By examining the drawing we can observe that such perspectivity seems to preserve angles and distances, unlike perspectivities centered at a point in $R^{3}$, which are called *centeral perspectivities*.
 
 ## Projectivities
 
-In the beginning of this journey we set out to explore the properties of perspective shifts. So far, perspectivity maps in $P^{3}$ are the most promising framework we have presented to discuss perspective shifts. However, in order to be able to discuss the properties that change under perspective shifts, we need to have a framework that lets us relate between different perspectives. Consider the following example of two viewers looking at the same railway track from different positions:
+In the beginning of this journey we set out to explore the properties of perspective shifts. So far, perspectivity maps in $P^{3}$ are the most promising framework we have presented to discuss perspective shifts. However, in order to be able to discuss the properties that change under perspective shifts, we need to have a framework that lets us relate between different perspectives. Consider the following example of two viewers looking at the same railway track from different positions (note - the drawing wasn't carefully constructed so it is not perspectively accurate and meant only for illustrative purposes):
 
-TODO railway 2 viewers pi' pi''
+![Two viewers looking at the same railway track](images/railway_track_two_viewers.png)
 
 We have two perspectivities centered at two different, non co-planar points, mapping the same domain plane to two different image planes. We would like to be able to discuss the relation between these planes. One way to do this would be to relate to define a map from one image plane to the other and analyze it. We've seen how perspective maps can be used to represent a perspective view of a plane, so perhaps it would be nice to be able to relate the two image planes via a perspective. Let's attempt to introduce a perspectivity from $\pi'$ to $\pi''$, centered at some point $P$. Consider a line $l$ in the original domain plane. The line is taken to $l'$ in $\pi'$ and to $l''$ in $\pi''$. We would be interested in a perspectivity that takes $l'$ to $l''$. Let us also consider another point $X$ in $\pi$ not on $l$, taken to $X'$ in $\pi'$ and $X''$ in $\pi''$. Through any two points on the line $l$ and the point $X$ we can create a triangle in $\pi$, which will be taken to a triangle in $\pi'$ and in $\pi''$. Our perspectivity centered at $P$ should take the triangle from $\pi'$ to $\pi''$, meaning the triangle should be in perspective from the point $P$. By Desargues' these triangles are also in perspective from a line. In particular, $l''$ and $l'$ should meet at some point on the axis of perspectivity defined by the perspective map. Consider however the case where $l'$ and $l''$ are skew lines. In this case, they do not meet, thus they are not in perspective from a line, contradicting our assumption that there exists a perspectivity map from $\pi'$ to $\pi''$, which is rather unfortunate.
 
@@ -441,6 +440,8 @@ Let $l$ and $l'$ be two distinct lines in $P^{3}$. Let $A$, $B$ be two distinct 
 
 In the previous section, we have proven that there is no perspectivity from $l$ to $l'$ if they are skew lines in a projective space. However, by chaining perspectivities, we can create a projectivity that does exactly that. Now we no longer assume $l$ and $l'$ are coplanar, meaning $AA'$ and $BB'$ do not necessarily meet. However, we can still connect any two points by a straight line. Recall also that two non-skew lines are coplanar. Consider the following construction:
 
+![Construction of a projectivity defined by two points on two non-coplanar lines](images/1d_projectivity_ab.png)
+
 1. Connect $A$ to $B'$ via a line, denoted $m$.
 2. $m$ and $l$ are incident on $A$ and thus coplanar.
 3. $m$ and $l'$ are incident on $B'$ and thus coplanar.
@@ -455,13 +456,11 @@ T(B)=\Gamma_{2}(\Gamma_{1}(B))=\Gamma_{2}(B')=B'
 \end{gathered}
 $$
 
-Clearly, this construction satisfies our requirement. It is illustrated by the following illustration:
-
-TODO illustration AB to A prime B prime 1d
+Clearly, this construction satisfies our requirement.
 
 Now, consider sets of three points $A, B, C$ on $l$ and $A', B', C'$ on $l'$. Can we construct a projectivity from $l$ to $l'$? Let's start with the case where $l$ and $l'$ are coplanar. We can't use the same construction as before, since there is no guarantee that $AA'$, $BB'$ and $CC'$ are all incident at the same point. Instead, consider the following construction, illustrated here:
 
-criss-cross construction
+![criss-cross constrution](images/criss_cross_construction.png)
 
 1. Connect $A$ to $B'$ and $B$ to $A'$. The two lines are coplanar and so must interesect at some point, denoted $P_{AB}$.
 2. Connect $B$ to $C'$ and $C$ to $B'$. Again, they must intersect at some point $P_{BC}$.
@@ -480,13 +479,13 @@ We call this a *criss-cross construction* around $B$. Now, consider the case whe
 
 In total, we needed 4 perspectivities. Can we do better? We know that the lower bound is at least 2 perspectivities in the non-coplanar case. Consider the following construction, illustrated here:
 
-TODO 1d puzzle hard
+![mapping A to A' B to B' C to C'](images/1d_projectivity_abc.png)
 
-1. Connect $A$ to $'C'$ via a line, denoted $m$.
+1. Connect $A$ to $C'$ via a line, denoted $m$.
 2. Connect $A$ to $A'$ via a line, denoted $k$.
 3. Denote a point along $k$ as $P$.
 4. Connect $C'$ to $P$.
-5. $Connect $B'$ to $P$.
+5. Connect $B'$ to $P$.
 6. Note that $B'P$ and $m$ are coplanar, meaning $B'P$ intersects $m$ at some point $B''$.
 7. Consider the perspectivity centered at $P$ from $l'$ to $m$: it takes $A'$ to $A$, $B'$ to $B''$ and $C'$ to $C'$.
 8. Connect $B''$ to $B$.
@@ -565,7 +564,7 @@ Recall the question we ended the section regarding 1D projectivities with: consi
 
 One famous theorem in projective geometry is Pappus' Hexagon theorem, which states the following: given two distinct lines $l$ and $l'$ in $P^{2}$ and distinct points $A, B, C$ on $l$ and $A', B', C'$ on $l'$, the pairs of lines through $AB'$ and $BA'$, $AC'$ and $CA'$, and $BC'$ and $CB'$, all interesect at points $P_{AB}, P_{AC}$ and $P_{BC}$ respectively, and $P_{AB}, P_{AC}$ and $P_{BC}$ are collinear. It is illustrated in the following sketch:
 
-TODO pappus theorem
+![Pappus' Hexagon Theorem](images/pappus_theorem.png)
 
 We can easily prove it using the 1D fundemental theorem (abbreviated as 1DFT). The idea here is to use two criss-cross constructions and prove that the intermediate line (which we called $m_{B}$ is our introduction of this construction) is the same for both constructions. Recall that in our criss-cross construction around $B$, we denoted the line through $P_{AB}$ and $P_{BC}$ as $m_{B}$. We can use the same construction around $C$ and get the line $m_{C}$ defined as the line through $P_{AC}$ and $P_{BC}$. To prove the theorem, we need to show that $m_{B}$ is the same as $m_{C}$.
 
@@ -579,21 +578,21 @@ Let us return to the setting where we presented projectivities - namely the two 
 
 Given two plane $\pi$ and $\pi'$ in $P^{3}$ and two ordered sets of points $\{A, B, C, D\} \subset \pi$ and $\{A', B', C', D'\} \subset \pi'$, where in each set no three points are collinear (so both sets can span the plane), there exists a unique projectivity from $\pi$ to $\pi'$ taking $\{A, B, C, D\}$ to $\{A', B', C', D'\}$.
 
-TODO illustration ftpg(2d)
+![Fundemental theorem of 2D projective geometry](images/fundemental_theorem_2d.png)
 
 ### Existence
 
-Consider the lines $AB$, $CD$. The lines are coplanar and distinct so they are incident at some point $E$. Similarly, consider $A'B'$ and $C'D'$, which are incident at some point $E'$ by the same argument. By the 1D version of the fundemental theorem, we know that there exists a projectivity from $CD$ to $C'D'$ taking $C, D, E$ to $C', D', E'$, and while the 1D projectivity is unique (in the sense that the map from $CD$ to $C'D'$ under these conditions is unique), the same is not true with regards to where the projectivity takes the rest of the plane. It is trivial to find one such perspectivity from $\pi$ to some plane $\pi^{*}$ such that $\pi^{*} \ne \pi'$, which would of course contain the line through $C'D'$. This projectivity takes $A, B$ to points $A^{*}, B^{*} \in \pi^{*}$. However since projectivities preserve incidence relations we have $A^{*}B^{*}$ incident with $C'D'$ at $E'$. Since $A'B'$ and $A^{*}B^{*}$ are incident at $E'$ they are coplanar and we can construct a perspectivity from $\pi$ to $\pi'$ centered at $A^{*}B' \cap A'B^{*}$, as illustrated:
+Consider the lines $AD$, $BC$. The lines are coplanar and distinct so they are incident at some point $E$. Similarly, consider $A'D'$ and $B'C'$, which are incident at some point $E'$ by the same argument. By the 1D version of the fundemental theorem, we know that there exists a projectivity from $BC$ to $B'C'$ taking $B, C, E$ to $B', C', E'$, and while the 1D projectivity is unique (in the sense that the map from $BC$ to $B'C'$ under these conditions is unique), the same is not true with regards to where the projectivity takes the rest of the plane. It is trivial to find one such perspectivity from $\pi$ to some plane $\pi^{*}$ such that $\pi^{*} \ne \pi'$, which would of course contain the line through $B'C'$. This projectivity takes $A, D$ to points $A^{*}, D^{*} \in \pi^{*}$. However since projectivities preserve incidence relations we have $A^{*}D^{*}$ incident with $B'C'$ at $E'$. Since $B'C'$ and $A^{*}D^{*}$ are incident at $E'$ they are coplanar and we can construct a perspectivity from $\pi$ to $\pi'$ centered at $A^{*}D' \cap A'D^{*}$, as illustrated:
 
-TODO existence from pi to pi prime
+![existence of projection between non-coplanar quadrilateral](images/existence_ftpg2.png)
 
-Notice that by the definition of a perspectivity, the line over which the planes intersect is fixed, thus the perspectivity takes $A^{*}$ to $A'$, $B^{*}$ to $B'$, $C'$ to $C'$ and $D'$ to $D'$. By composing the projectivity from $\pi$ to $\pi^{*}$ with this perspectivity from $\pi^{*}$ to $\pi'$, we get a projectivitiy $\pi \to \pi'$ such that $\{A, B, C, D\}$ gets taken to $\{A', B', C', D'\}$, thus showing the existence of such projectivity.
+Notice that by the definition of a perspectivity, the line over which the planes intersect is fixed, thus the perspectivity takes $A^{*}$ to $A'$, $D^{*}$ to $D'$, $C'$ to $C'$ and $B'$ to $B'$. By composing the projectivity from $\pi$ to $\pi^{*}$ with this perspectivity from $\pi^{*}$ to $\pi'$, we get a projectivitiy $\pi \to \pi'$ such that $\{A, B, C, D\}$ gets taken to $\{A', B', C', D'\}$, thus showing the existence of such projectivity.
 
 ### Four Fixed Points Theorem
 
 Consider a projectivity from $\pi$ to itself which fixes four points $A, B, C, D$, no three of which collinear. Again we begin by extending $AB$ and $CD$ until they meet at some point $E$, and $AD$ and $BC$ until they meet at some point $K$.
 
-TODO four fixed points theorem setup
+![Setup for the four fixed points theorem proof](images/four_fixed_points_theorem_setup.png)
 
 Since the projectivity maps lines to lines and it maps $AB$ to a line through $AB$ and $CD$ to a line through $CD$ (the somewhat odd wording is intentional - projectivities don't preserve lines so until we show that the projectivity acts as the identity on those lines we cannot assume that the line is preserved in its entirety including distances between points, but rather just that the line as a set gets taken to itself as a set), however since their intersection is preseved under a projectivity we also get $E$ on $AB$ taken to $E$, meaning we have three fixed points along $AB$, and similarly three fixed points along $CD$, thus by the three fixed points theorem both lines are fixed pointwise (i.e. each point along each line gets taken to itself). By the same argument we can show that $AD$ and $BC$ are fixed pointwise.
 
@@ -611,7 +610,7 @@ One of our main goals in our discussion of projective geometry is understanding 
 
 Consider an ordered set of 4 collinear points $A, B, C, D$ in $P^{3}$.
 
-TODO 4 fours cross ratio
+![cross ratio](images/cross_ratio.png)
 
 Consider a signed segment length scheme, where $AB=-BA$. Consider the ratio
 
@@ -627,7 +626,7 @@ It is fairly trivial to show that the cross ratio is injetive - if $(A, B;C, D)=
 
 Consider an ordered set of 4 points $A, B, C, D$ on a line $l$ in $P^{3}$, and some point $P$ not collinear with the points. Connect $P$ to $A, B, C, D$, and denote these lines as $a, b, c, d$ respectively. Let $h$ be the size of the line from $P$ perpendicular to $l$.
 
-TODO dual notation of cross ratio sketch
+![dual notation of the cross-ratio](images/cross_ratio_dual.png)
 
 We define the cross-ratio of the lines $a, b, c, d$ by the cross ratio of the sine of the signed angels between these lines (meaning that $\angle APB = -\angle BPA$) as follows:
 
@@ -704,13 +703,13 @@ This is a linear fractional function that greatly resambles a mobius transform. 
 
 Consider our construction of the projective plane $P^{2}$. We constructed $P^{2}$ as $R^{2} \cup l_{\infty}$, where $l_{\infty}$ is the set of all points at infinity associated with each family of parallel lines. As we have seen, such constuction is hard to visualize and reason about - as we have seen, lines have a circular property, and also the points at infinity seem somewhat arbitrary and detached from our regular notion of points. Indeed, the construction we have used is not very nice from an analytical standpoint. Let's try to shift our perspective: recall that, by the fundemental theorem of 2D projective geometry, a perspectivity is uniquely defined by four vertices of a quadrilateral, thus the entire projective plane is determined by these 4 points, and these 4 points are the intersection of the projective plane with lines passing through the center of perspectivity. It is tempting, then, to think of a point under a perspectivity as lines through the center of perspectivity. Indeed, for any two planes $\pi_{1}, \pi_{2}$, the intersections of a line $l$ through the center of perspectivity with the planes determine where the perspectivity takes the point, so from the center of perspectivity the points are in fact identical.
 
-TODO perspectivity revisited
+![Perspectivities as lines through the origin](images/perspectivity_revisited.png)
 
 Let us attach cartesian coordinates to $R^{3}$ such that the origin is at the center of perspectivity. Under this construction, lines through the center of perspectivity are lines through the origin. Consider two affine planes in $R^{3}$ (planes which do not pass through the origin), and let $l$ be a line through the origin. Denote the points $X$ and $X'$ as the intersection of the line with the planes (we will handle the case where the line is parallel to one of the planes in a bit, let's ignore it for now). By definition, the perspectivity maps $X$ to $X'$, which motivates us to define a new object - the projective point - which is a line in $R^{3}$ passing through the origin. Similarly, we wish to define a projective line as a set of projective points. We define the projective line as a plane in $R^{3}$ though the origin. Consider that the intersection of two planes in $R^{3}$ is over a line, or the empty set, thus this definition is only natural. We say that a projective point and a projective line are incident if the projective point is contained within the projective line, and say that two projective lines are incident over a projective point if the planes they represent intersect over a line through the origin (which is a projective point).
 
 This new structure is still incomplete, as we still haven't dealt with the points at infinity. How can we express the points at infinity and the line at infinity under this construction? Consider the following illustration of a perspectivity of some line:
 
-TODO perspectivity ground plane until parallel
+![Following a line under a perspectivity](images/tracing_a_line_under_perspectivity.png)
 
 As we tend towards infinity (in either direction), we see that the line through the center of perspectivity becomes more and more parallel to the line, until the lines are parallel in $R^{3}$ and thus do not interesect. Observe that regardless of the direction along the line we choose to take, the line through the origin ends up being the same. If we were to parametrize the line along which we are following as $v_{0}+\vec{v}t$, we could see that as $t \to \pm \infty$, the projective point ends up being the line through the origin $\vec{v}$. This is exactly the projective point which matches the illusive point at infinity, and indeed in the projective space $P^{3}$ the line represented by the projective point and the line on the plane will intersect at a point at infinity since they are parallel. The line at infinity, then, is achieved by the projective line that is the plane through the origin parallel to the affine plane being examined under the perspectivity (altenatively, we can say that it is in fact the subject affine plane with the translation removed, which is in fact a vector space). If this paragraph reads a bit too handwavy then don't worry, we' ll formalize these arguments later and prove them. For now, appreciate the fact that assuming these arguments do hold, then this new construction is in many ways more natural and more attainable than the extended Euclidean plane we have discussed before - in this new structure, points and lines at infinity are no different than any other projective point and projective line in $R^{3}$. Also, the circular nature of lines in a projective space is captured nicely and naturely by this construction.
 
@@ -755,20 +754,53 @@ $$
 
 Thus using homogenous coordinates we can see that the line converges to a point $p_{\infty}=[\frac{x}{z}:\frac{y}{z}:1]$, which is independent of the origin of the line $v_{0}$, thus all lines parallel to the original line intersect at the same projective point in $RP^{2}!
 
-## Affine Maps of $RP^{2}$
+## Projective Maps
 
-In $RP^{2}$, we're dealing with projective points which are really lines in $R^{3}$, and projective lines which are planes in $R^{3}$. This notation readily describes the perspectivity itself, but our primary objective is to describe perspective shifts in terms of $R^{3}$ - we would like to define a map from $RP^{3}$ to $R^{3}$ which takes projective points to points and projective lines to lines. While the actual map is fairly intuitive to understand, I would like to be provide some more insight into the algebraic structures that govern it.
+Observe that the cross ratio and collinearities are the only properties preserved and projectivities, which motivates defining projective maps - maps from $P \to P'$ where $P, P'$ are both projective spaces - as maps which preserve the cross ratio and are collineations. We have already shown a projective map between two 1 dimensional projective planes - the mobius transform $\mathbb{C} \to \mathbb{C}$ which can also map $P^{1} \to P^{1}$, which is represented by a matrix from the group $PGL(2, R)$. We can expand this notion to 2 dimensional projective spaces, by taking a matrix from the group $PGL(3, R)$, such that:
 
-### Affine Spaces
+$$
+A = 
+\begin{pmatrix}
+a & b & c \\
+d & e & f \\
+g & h & 1
+\end{pmatrix}
+$$
 
-TODO side quest to affine spaces
+We will show that $A$ maintains the structure of $RP^{2}$. To show this, consider a line through the origin in $R^{3}$. Since a line through the origin is a vector space, and since $A$ is a linear transformation, the image of the line through the origin under the transfromation $A$ is also a line through the origin, which means that projective points get taken to projective points. A similar argument shows that projective lines are taken to projective lines, and it is trivial to check that $A$ preserves collineations in $RP^{2}$ (meaning that it preserves incidence relations of planes and lines through the origin in $R^{3}$), thus $A$ is a projective map from $RP^{2} \to RP^{2}$.
 
+Recall that an affine transformation $A^{2} \to A^{2}$ is a $3 \times 3$ matrix of the form
 
-ffine chart
-PGL(3, R) SO(3) -> Aff -> PGL(3, R)
-Note on Aff group and the properties preserved (convexity, parallelism, ratios...)
-homography + Fundemental theorem of PGL(3, R)
-orthographic vs perpsective
-central projection matrix in 3D graphics
+$$
+\left(
+\begin{array}{cc|c}
+a & b & t_{1} \\
+c & d & t_{2} \\
+0 & 0 & 1
+\end{array}
+\right)
+$$
 
-# References
+Where $(t_{1}, t_{2})$ denotes the translation. From this, it is clear that $\text{Aff}(2, R) \subset PGL(3, R)$. This can trivially be generalized to higher dimensions to show that $\text{Aff}(n-1, R) \subset PGL(n, R)$.
+
+## Affine Maps of RP(2, R)
+
+Since $\text{Aff}(2, R) \subset PGL(3, R)$, we can map projective spaces to affine spaces. However, since affine spaces maintain parallelism, the hyperplane at infinity must be removed from the projective space. This is done by taking a hyperplane through the origin parallel to the affine space, and removing it from the projective space. 
+
+For example, mapping $RP^{2}$ to the affine plane $z=1$ can be done by removing the line at infinity $z=0$, which remains fixed under the affine matrix:
+
+$$
+\begin{pmatrix}
+a & b & t_{1} \\
+c & d & t_{1} \\
+0 & 0 & 1
+\end{pmatrix}
+[x:y:0]
+=
+[x':y':0]
+$$
+
+However, since any other projective point can be written as $[x:y:1]$ under homogenous coordinates, it is easy to see that the map takes all other projective points to point in the affine plane, thus the map is a bijection between $RP^{2}/\{z=0\}$ and the affine plane $z=1$. This provides us with a nice way of viewing projective lines and points as lines and points in a way that is more familiar to us. In fact, our perspective drawing accurately captures this structure. This also provides us with a nice way of reasoning about points at infinity - points at infinity can now be visualized as lines in the associated vector space of the affine plane $z=1$, which is the $XY$ plane.
+
+# Soon
+orthographic vs perpsective and central projection matrix in 3D graphics

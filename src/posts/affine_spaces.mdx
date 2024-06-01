@@ -1,5 +1,6 @@
 export const frontmatter = {
-    title: "Affine Spaces"
+    title: "Affine Spaces",
+    date: "2024-06-01"
 };
 
 # Vector Spaces Overview
@@ -445,7 +446,7 @@ f(a+v) - f(a) = h(v)
 \end{gathered}
 $$
 
-Which shows that $h$ does not depend on the choice of $a$. We call this unique linear map $h$ the linear map associated with the affine map $f$.
+Which shows that $h$ does not depend on the choice of $a$. We call this unique linear map $h$ the linear map associated with the affine map $f$. Since linear maps preserve parallelism, it can be shown that affine maps preserve parallelism as well. Let $V$ be the direction of an affine space $A$, under an affine map $f: A \to B$, $a + V$ is mapped to $b + T(V)$, and since $T(V)$ maintains parallelism of $V$, we get that $f$ preserves parallelism.
 
 # Affine Transformations
 
@@ -475,4 +476,4 @@ v \\
 \end{pmatrix}
 $$
 
-Where the last column performs the translation which is affine in nature, and $A$ performs scaling and rotation which are linear in nature. This matrix form is widely used in computer graphics, where affine transformations are used to transform objects in 3D space. It is easy to show that affine transformations form a group. We denote this group $\text{Aff}(n, F)$.
+Where the last column performs the translation which is affine in nature, and $A$ performs scaling and rotation which are linear in nature. This matrix form is widely used in computer graphics, where affine transformations are used to transform objects in 3D space. It is easy to show that affine transformations form a group. We denote this group $\text{Aff}(n+1, F)$, and it is easy to see that $\text{Aff} \subset \text{GL}$ We can view this matrix as a linear motion $A$ followed by a translation $b$. An affine matrix with $A=0$ is called a *pure translation*, and it performs the equivalent operation of mapping $V$ to $b+V$. When $b=0$, the affine matrix is simply a linear transformation, which means that $\text{Aff}^{n}$ contains all linear transformations in $n-1$ dimensions, for example $SO(2)$ is a subgroup of $\text{Aff}^{3}$ when lifted to 3D space.
