@@ -1,0 +1,12 @@
+name: Spellcheck
+on: [push]
+jobs:
+  spellchecker-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GitHub Spellcheck Action
+        uses: rojopolis/spellcheck-github-actions@0.38.0
+        with:
+          source_files: README.md
+          task_name: Markdown
+          output_file: spellcheck-output.txt

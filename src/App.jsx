@@ -184,7 +184,8 @@ const importAllPosts = async () => {
     const postsWithFrontmatter = postsModules.map(module => {
         return { frontmatter: module.frontmatter, toc: module.tableOfContents, Post: module.default };
     });
-    return postsWithFrontmatter;
+    const nonWipPosts = postsWithFrontmatter.filter(post => !post.frontmatter.wip);
+    return nonWipPosts;
 };
 
 

@@ -1,0 +1,146 @@
+export const frontmatter = {
+    title: "Polygon Mesh",
+    date: "2024-06-10",
+    wip: true
+};
+
+# Convex Decomposition
+
+bla
+
+# Art Gallery Problem
+
+The art gallery problem is a classic problem in [computational geometry](https://en.wikipedia.org/wiki/Computational_geometry). Consider a top-down view of an art gallery
+
+![Art gallery problem setup]()
+TODO art gallery problem
+
+A gallery has valuable art pieces, so it must be guarded at all time. For this purpose, we use cameras (the original formulation of the problem involves guards instead of cameras) anchored at specific points in the gallery, which are free to rotate but cannot move. What is the minimum number of cameras needed to cover the entire gallery? Thhe problem we have presented is the art gallery problem.
+
+First, we need to decide on a mathematical model for the problem. For simplicity, we model the art gallery as a simple polygon, such that the dges of the polygon are walls that the camera cannot see through. A simple polygon is a polygon whose boundary does not intersect itself and has no holes. In other words - it is a polygon which has no loops and (by the Jordan curve theorem) separates the plane to two distinct regions - the interior and the exterior, separated by the boundary of the shape, as illustrated in the following sketch
+
+TODO simple polygon and maybe non-simple polygon interior exterior boundary
+
+Note that both convex and concave polygons satisfy these conditions and thus are simple polygons. Simple polygons have $n > 2$ vertices and $e$ edges such that $n=e$. Since we are not making any assumptions about the shape of the polygon other than it being simple, we wish to provide a general upper bound on the number of cameras in terms of $n$.
+
+Let's first explore the problem domain. Given a simple polygon $P$, we say that it is convex iff for every two points $a, b \in P$ (where by $a \in P$ we mean that $a$ is not on the exterior of $P$, meaning it is either in the interior of $P$ or on the boundary $\partial P$), the line segment $l: ta+(1-t)b | t \in [0, 1]$ is contained in $P$. Consider a camera placed at some point $p$ inside the room:
+
+TODO camera in convex polygon
+
+We assume that a camera is free to rotate around, so for simplicity we can assume that a camera has a $360 \degree$ field of view. A point is visible to the camera if light can travel from it to the camera. If we use the geometrical optics model, this is the same as saying that the line connecting the point to the camera is not incident with any wall. Since the walls are the boundary of the polygon, we model the visibility of a point $q$ from a point $q$ as
+
+$$
+\forall p, q \in P,
+\text{visibile}(p, q) = 
+\begin{cases}
+    \text{1} & l: \{tp + (1-t)q | t \in [0,1]\} \subseteq P \\
+    \text{0} & \text{otherwise}
+\end{cases}
+$$
+
+If the polygon $P$ is convex, then by definition of convexity the line between every two points in $P$ is also contained in $P$, so every point in the room is visible to any other point in the room, which means that in the convex case, we only need 1 camera to cover the entire room, positioned at any point in $P$. In the concave case, however, that is not true - a line between two points sometimes passes through the exterior of the polygon, which means that they are not visibile to each other, so in the general case we almost always need more than 1 camera.
+
+$P$ need not be convex for us to be able to guard it with 1 camera. Consider the following star polygon
+
+TODO star polygon
+
+We can observe that every point in $P$ is visibile from the point $p$ at the center of the shape, so only one camera is needed to guard a start shaped gallery, even though it is not convex. The star polygon is an example of a [star-shaped polygon](https://en.wikipedia.org/wiki/Star-shaped_polygon), which is a generalization of a polygon which contains a point from which the rest of the polygon is visible. Every convex polygon is star-shaped, however not every concave polygon is star-shaped. Consider the following polygon
+
+TODO 6 vertices polygon which requires two cameras, with two points and lines
+
+This shape is known as a *comb polygon*. Consider the vertices $A, B$. For $A$ to be visibile, a camera must be placed in the triangle formed by the edges incident with $A$ and the base of the polygon. However, for $B$ to be visible, a camera must be placed in the triangle formed by the edges incident with $B$ and the base of the polygon. Since the two triangles do not overlap, we need at least two cameras to guard this 6-vertices polygon. This pattern can be extended repeatedly to create a polygon that requires an arbitrary number of cameras to guard. Consider the following comb polygon
+
+$TODO comb polygon with 5 triangles
+
+Using a similar argument, we can show that this 15-vertices polygon requires at least 5 cameras. In general, we see that such comb polygons have $3k$ vertices and require at least $k$ cameras to guard, which shows that the lowest upper bound on the number of cameras needed to guard an $n$-gon is $\lceil \frac{n}{3} \rceil$.
+
+Now that we have gained some intuition on the problem, let's come up with a strategy to approach the general case.
+
+TODO general case again
+
+We have seen that star-shaped polygons always require a single camera, so one strategy would be to attempt to break the polygon into star-shaped polygons. One way to do this would be to decompose the polygon into convex polygons. For example, consider the following decomposition of the shape shown above
+
+TODO convex decompostion of general case
+
+We can guard each convex polygon with a single camera stationed at any point inside the polygon. Consider a set of convex polygons with a shared vertex $v$. Since $v$ is in all of the polygons, all the convex polygons can be guarded using a single camera stationed at $v$. Using this observation, we can smartly place cameras on shared vertices and end up with the following setup
+
+TODO show how it looks
+TODO lower bound on cameras, count vertices
+
+However, decomposing a simple polygon into general convex polygons is difficult. Instead, let's try to decompose the polygon into the simplest convex polygon - triangles. A triangle is by definition convex, so we can employ the same strategy (of placing a camera on shared vertices of triangles) and analyze the resulting setup. However, there is an underlying assumption here - that every simple polygon can be broken down into triangles. This is known as plygon triangulation, and in the next section we will prove that the assumption is indeed correct.
+
+## Polygon Triangulation
+
+One simple proof that a triangulation always exists for a simple polygon is a proof by induction. We will actually prove two statements:
+
+1. Every simple polygon has a triangulation.
+2. Every simple polygon with $n$ vertices can be triangulated using $n-2$ triangles.
+
+Consider a simple polygon with $n$ vertices. If $n=3$, then the polygon is a triangle and is already triangulated with $3-2=1$ triangles, providing the basis for our proof by induction. Next, we assume the statement holds for all polygons with $n-1$ vertices where $n>3$.
+
+Consider a simple polygon $P$ with $n$ vertices. As we will prove below, every simple polygon has a convex internal angle (that is, an internal angle whose measure is less than $180 \degree$). Consider the convex vertex $v$ (the vertex associated with the convex internal angle) and its neighbors $u, w$, all in $P$. Consider the triangle $\triangle_{uvw}$. Since it is a triangle, the sum of angles is $180 \degree$, which means that the sum of any two angles is less than that, thus the sum of angles $\angle_{uvw}+\angle_{vuw} < 180 \degree$, and by the parallel postulate the lines $uw$ and $vu$ meet on the side of the plane on which those angles are. Specifically, this means that the line $\overline{uw}$ is not an external diagonal to $P$, so there are two options left: either $uw$ is an internal diagonal of $P$, or it crosses the boundary of $P$. 
+
+If $\overline{uw}$ is an internal diagonal of $P$, then $\overline{uvw}$ is a triangle and we are left with an $n-1$-gon (we remove $v$), and by the induction hypothesis we are done. In total, this triangulation adds 1 triangle to the total count for the $n-1$ case, which by hypothesis is $(n-1)-2=n-3$, so in total we have $n-2$ triangles, which proves the second statement.
+
+TODO uw as internal diagonal
+
+If $\overline{uw}$ crosses the boundary of $P$, then there must be a vetex of $P$ in $\triangle_{uvw}$ other than $u, v, w$. We prove this by contradiction: assume that there is no vertex of $P$ in $\triangle_{uvw}$ other than $u, v, w$. We know that some point $p \in \partial P$ is also in $\triangle_{uvw}$. Clearly the point cannot lie on $\overline{uv}$ or $\overline{wv}$ since that would contradict $u, w$ being neighbors of $v$, thus the point is either in the interior of the triangle or on $uw$, or there are multiple boundary points both on $uv$ and in the interior. 
+
+If $p \in \overline{uw}$ and there is no boundary point in the interior, then clearly $p$ is the end of a line segment of $\partial P$, and thus is a vertex of $P$. If $p \in \text{int}({\triangle_{uvw}})$, since $\partial P$ is connected there must be a segment of $\partial P$ in $\triangle_{uvw}$. If no vertex of $P$ is in the interior of the triangle, then the part of the boundary inside it is a single line segment, and thus maintains its direction. However, since we know that there are more vertices in $P$, this line segment must eventually meet another line segment at another vertex, which would have to be outside $\triangle_{uvw}$ if no vertex of $P$ is inside it, but this neccesarily means that the line segment on which $p$ lies must intersect with one the edges of $\triangle_{uvw}$ before meeting the vertex outside $P$, which contradicts the assumption that $P$ is a simple polygon and thus does not intersect with itself, thus if $\overline{uw}$ crosses the boundary of $P$ then there must be a vertex of $P$ either inside $\triangle_{uvw}$ or on $\overline{uw}$ that is not $u$ or $w$.
+
+We have shown that there must be at least one vertex of $P$ in $\triangle_{uvw}$ other than $u, v, w$. Since there could be more than one, we proceed as follows: out of all vertices of $P$ in the triangle, we take the one closest to $v$, denoted $x$. Through $x$ we draw a line parallel to $\overline{uw}$ (which exists by Playfair's), which intersects $overline{uv}$ at a point $y$ and $overline{uw}$ at a point $z$, and consider the triangle $\triangle_{vyz}$. By the same argument to the one we used for $\triangle_{uvw}$, we can show that if $\overline{yz} \notin \text{int}(P)$, then there must be a vertex of $P$ in $\triangle_{vyz}$. However, this contradits our choice of $x$ as the closest vertex to $v$, so we must have $\overline{yz} \in \text{int}(P)$, and specificially we have $\overline{vx} \in P$. Since $v$ and $x$ are vertices of $P$, this makes $\overline{vx}$ an internal diagonal of $P$, which splits $P$ into two polygons: one with $m$ vertices, including $v$, $x$ and $w$, and one with $n-m+2$ vertices, including $v, x$ and $u$.
+
+$$
+3 \leq m \leq n-1 \quad \text{and} n-m+2 \leq n-1
+$$
+
+Thus by the induction hypothesis, both polygons can be triangulated using $m-2$ and $(n-m+2)-2=n-m$ triangles, which adds up to $n-2$ triangles. Combining both triangulations, we get a triangulation of $P$ with $n-2$ triangles, completing our proof by induction.
+
+This result provides us with an upper bound for the art gallery problem - since a triangle is convex, each triangle can be guarded with a single camera, and in general $n-2$ cameras would always suffice to guard any simple polygon with $n$ vertices. However, since the triangulation results in vertices with shared edges and common vertices, we can do better than that by placing cameras on common vertices, as we have suggested in our initial examination of the problem. We will explore this idea more carefully in the next section.
+
+## Every Simple Polygon has a Convex Internal Angle
+
+We have used the fact that every simple polygon has a convex internal angle in our proof of the existence of a triangulation. We will now prove this statement via contradiction. Consider a simple polygon $P$ with $n$ vertices, and assume that none of the internal angles is convex. Since every simple polygon is bound (by the Jordan curve theorem), we can construct a circle $C$ such that $P$ lies entirely in its interior. Choose the vertex closest to the circumference of $C$. Denote that vertex $A$.
+
+TODO every simple polygon has a convex internal angle
+
+TODO TODO
+
+# Dual Graph of a Triangulation
+
+Consider a triangulation $T_{P}$ of a simple polygon $P$. Observe that each edge of each triangle in the triangulation is either a part of $\partial P$, in which case it is exclusive to that triangle, or an interior diagonal of $P$, in which case it is shared with an adjacent triangle, by our construction. We can construct a graph $G_{T_{P}}$ from this triangulation in the following way:
+
+1. Each triangle in the triangulation is a vertex $f^{*}$ in $G_{T_{P}}$.
+2. Each interior diagonal shared by two triangles $f_{1}, f_{2}$ becomes an edge $e=\{f_{1}^{*}, f_{2}^{*}\}$ in $G_{T_{P}}$.
+
+We call $G$ the dual graph of the triangulation $T_{P}$. Since each triangle has 3 sides, each vertex in the dual graph is connected to at most 3 other vetices, thus the vertex degree is at most 3. Furthermore, we observe that the graph is connected - 
+
+TODO
+
+the argument goes like this:
+0. In every graph, sum(degrees of vertices) = 2(edges count). This is true since every edge is counted twice in the sum of degrees of vertices.
+1. The graph G is connected - easy to show since T is a trinagulation of a simple polygon
+2. Removing a single vertex from G (a triangle of P) would make it disconnected
+3. Thus G is a tree
+5. We show 3 coloring exists by induction. First, it is easy to prove for $n=3$. Assume it holds for $n-1>3$. Now for $n$ - we always have an ear we can clip by the theorem, and since it is connected via an edge we just pick the third color. QED. 
+4. A tree is acyclic. thus there are $v=n-2$ vertices and $v-1=n-3$ edges. We wish to show that there exists at least two vertices of degree 1 in G. Consider a vertex of G. We know that deg(v) is at least 1 since it is a connected graph and at most 3. Consider the case where all vertices have deg 2, then we have sum degrees=2v however we know sum degrees=2e=2(v-1)=2v-2, thus we must have at least two vertices with degree 1. These are leafs, but also ears of the polygon. So we have: 1 - two ears theorem, and 2 - 3-coloring theorem. As we will now show
+
+# 3-Coloring Exists
+
+# Two ears theorem
+
+todo 
+
+
+
+foo foo
+
+# Convex Hulls
+
+# Mesh representations
+
+DCEL, vertices & faces
+
+# Point in Mesh
+
+# Convex Hull

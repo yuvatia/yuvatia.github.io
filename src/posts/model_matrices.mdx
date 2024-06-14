@@ -1,0 +1,92 @@
+export const frontmatter = {
+    title: "Model Matrices",
+    date: "2024-06-10",
+    wip: true
+};
+
+
+# Rigid Motions
+
+Rigid bodies move in a way which maintains their rigidity - they maintain their shape and do not deform. In physics, a rigid body is modeled as a collection of point masses that are connected by distance constraints, that is - the distance between any two points is constant. A rigid motion of some rigid body $A$ is a map that preserves the rigid structure. That is, for any two point masses $a, b \in A$, a rigid transformation $f$ must satisfy $f(b) \cdot f(a) = b \cdot a$, where $\cdot$ is the inner product.
+
+Consider the affine transformation $f=b+Ax$, thus an affine transformation is a rigid transformation if $A$ preserves the inner product, which is an orthogonal matrix. As we have seen in our discussion of rotations and the special orthogonal groups, orthogonal matrices represent either a rotation when $\det A = 1$, and then $A \in \mathbb{SO}^{n}$, or a reflection when $\det A = -1$. Note that the identity matrix is also orthogonal, and so we have that in an affine space, a rigid motion is either:
+
+1. A reflection
+2. A rotation
+3. A translation
+4. Any combination of the above
+
+We can now identify the set of all rigid motions in $\mathbb{R}^{n}$ as the set of all affine transformations whose linear transfromation is an orthogonal matrix. Then, the general form of a rigid transformation is given by
+
+$$
+\left(
+\begin{array}{c|c}
+A & b \\
+0 & 1
+\end{array}
+\right)
+$$
+
+From this form we can easily retrieve the translation vector $b$ (it is the last column of the matrix), and the linear part $A$. Also, since reflections do not preserve orientation, we can restrict our attention to the case where $A \in \mathbb{SO}^{n}$. Then, we can decompose $A$ to any of the non-matrix representations of rotations we have seen before, such as Euler angles, quaternions, or axis-angle, using techniques we have covered in our discussion of rotations.
+
+# Polygon Meshes
+
+In computer graphics, we tend to represent shapes using polyhedral objects. These polyhedral
+
+![Dolphin mesh](https://upload.wikimedia.org/wikipedia/commons/f/fb/Dolphin_triangle_mesh.png)
+
+blabla take a rigid motion and use it to move a body made of vertices in the world
+
+# Scaling
+
+Scaling drops the determinant restriction and thus effectively adds back $n$ degrees of freedom (3 in the case of 3 dimensional case).
+
+Recall that the columns of a matrix are the basis vectors of the space that the matrix operates on. Thus, a matrix that represents a rigid body transformation must have orthonormal columns. This is because the basis vectors of a space must be orthogonal to each other and have a length of 1. blabla scale
+
+# Model Matrix
+
+TRS
+
+# Decomposing the Model Matrix
+
+aaa
+
+# Projecting
+
+projections essentially give us $n$ more DOFs, and so we are left with a single constraint re the final element but it isnt really a constraint since we can just divide by it under homogenous coordinates
+
+$$
+(AB)_{ij} = \sum_{k=1}^{n} A_{ik}B_{kj} =
+\begin{cases}
+A_{ii}B_{ij} & \text{A is diagonal} \\
+A_{ij}B_{jj} & \text{B is diagonal} \\
+\end{cases}
+\Rightarrow
+AB = BA
+$$
+
+Consider the squared sum of a column of the product matrix $AB$ where $A$ is orthogonal
+$$
+\begin{aligned}
+\left(\sum_{i=1}^{n} (AB)_{ij}\right) ^{2} = \\
+\left(\sum_{i=1}^{n} A_{ij}B_{jj} \right) ^{2} = \\
+\left(B_{jj} \sum_{i=1}^{n} A_{ij} \right)^{2} \underset{A \text{ orthogonal}}{=} \\
+B_{jj}^{2}
+\end{aligned}
+$$
+
+Thus we can retrieve the scale matrix by taking the positive square root (since a negative scale along some axis means that the scaling factor also changes orientation and thus is not a pure scale) of the squared sum of a column of the product matrix.
+
+$$
+\det(AB) = \det(A) \det(B) = \det(A) \prod_{i=1}^{n} B_{ii}
+$$
+
+rigid motion definition + proof
+affine augmentation of SO(3) is rigid motions without reflections
+stretching the axes using scale matrices, prove that they scale, show det = volume scaling factor
+inverse scale matrix
+scale first, then rotate+translate
+retrieving translation from model matrix
+retrieving scale from model matrix
+retrieving rotation from model matrix
+and what of projections? we are still dealing with isometries..
