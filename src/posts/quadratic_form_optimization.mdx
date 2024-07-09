@@ -1,0 +1,116 @@
+export const frontmatter = {
+    title: "Quadratic Optimization",
+    date: "2024-07-09",
+    wip: false,
+    tags: ["math", "optimization", "eigenvalue"]
+};
+
+In this short entry we will prove a nice result which related the eigenvalues and eigenvectors of a symmetric matrix to the minimum of its quadratic form. This result is useful in data clustering and spectral graph drawings, among other fields.
+
+# Quick Overview
+
+Let $M$ be an $n \times n$ matrix. An **eigenvalue** of $M$ is a scalar $\lambda$ such that $\exists v \neq 0$ such that $Mv = \lambda v$. This vector $v$ is called an **eigenvector** of $M$ corresponding to $\lambda$ and we denote it $v_{\lambda}$. If there exists multiple such vectors $v$ for the same $\lambda$, then the set of all such vectors is called the **eigenspace** of $M$ corresponding to $\lambda$. The **geometric multiplicity** of $\lambda$ is the dimension of the eigenspace of $M$ corresponding to $\lambda$. The **spectrum** of $M$ is the set of all eigenvalues of $M$.
+
+A matrix is **symmetric** if $M = M^{T}$. If $M$ is symmetric then its eigenvectors are orthogonal and its eigenvalues are real (if $M$ is real).
+
+It is a well known fact that given a square matrix $M$ with $n$ rows and a vector $x$ with $n$ elements, $A$ has a **quadratic form** $x^{T}Mx$ such that
+
+$$
+x^{T}Mx = \sum_{i=1}^{n} \sum_{j=1}^{n} M_{ij}x_{i}x_{j}
+$$
+
+If $M_{ij} = \begin{cases} 0 & i \neq j \\ a_{i} & i = j \end{cases}$ with some $n$-dimensional vector $a$, then the quadratic is of the form
+
+$$
+x^{T}Mx = \sum_{i=1}^{n} a_{i}x_{i}^{2}
+$$
+
+Every matrix has an [eigendecomposition](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix) such that
+
+$$
+M = Q \Lambda Q^{-1}
+$$
+
+Where $\Lambda$ is a diagonal matrix where $\Lambda_{ii} = \lambda_{i}$ for some ordering on the eigenvalues of $M$ and $Q$ is a matrix where the columns are the eigenvectors of $M$ (with the $i$th column being the eigenvector corresponding to $\lambda_{i}$, and if there are multiple eigenvectors for the same eigenvalue, then the columns are linearly independent and all columns corresponding to the same eigenvalue span its eigenspace).
+
+If $M$ is symmetric, then we have
+
+$$
+M = Q \Lambda Q^{T}
+$$
+
+Such that $Q=Q^{T}$ (i.e. $Q$ is an orthogonal matrix).
+
+# Minimum of a Quadratic Form
+
+Consider the following expression for an $n \times n$ *symmetric* matrix $M$ with a variable $n$-dimensional vector $x$
+
+$$
+x^{T} M x
+$$
+
+we wish to find the smallest value of this expression subject to $x$ being a unit vector, so we have an optimization problem
+
+$$
+\min_{||x|| = 1} x^{T}M x
+$$
+
+Since $M$ is symmetric, we have $M=Q \lambda Q^{T}$, so
+
+$$
+x^{T} M x = x^{T}(Q \Lambda Q^{T}) x = (x^{T}Q) \Lambda (Q^{T} x) = (Q^{T} x)^{T} \Lambda (Q^{T} x)
+$$
+
+Consider the vector $Q^{T}x$, we have
+
+$$
+||Q^{T}x||^{2} = (Q^{T}x)^{T} (Q^{T}x) = x^{T} \underbrace{QQ^{T}}_{Q^{T}=Q^{-1}} x = x^{T} x = ||x||^{2} = 1
+$$
+
+So $||x||=1$ implies $||Q^{T}x||=1$, which means we can express this as a minimization problem over $Q^{T}x$ instead of $x$. Denote $y=Q^{T}x$, then we have
+
+$$
+\min_{||x|| = 1} x^{T} M x = \min_{||y|| = 1} y^{T} \Lambda y
+$$
+
+But now we have the quadartic form of a diagonal matrix, which is
+
+$$
+y^{T} \Lambda y = \sum_{i=1}^{n} \lambda_{i} y_{i}^{2}
+$$
+
+Let $\lambda_{k}=\min\{\lambda_{0}, \lambda_{1}, \dots, \lambda_{n-1}\}$, now we have
+
+$$
+\sum_{i=1}^{n} \lambda_{i} y_{i}^{2} \geq \lambda_{k} \sum_{i=1}^{n} y_{i}^{2} = \lambda_{k} ||y||^{2} = \lambda_{k}
+$$
+
+But this minimum is attained when $y_{i} = \begin{cases} 1 & \lambda_{i}=\lambda_{k} \\ 0 & \text{otherwise} \end{cases}$, so we have the following
+
+$$
+\min_{||x|| = 1} x^{T} M x = \min_{||y|| = 1}y^{T} \Lambda y = \lambda_{k}
+$$
+
+with $\lambda_{k}$ being the smallest eigenvalue of $M$. Let's work out the $x$ vector which attains the minimum. Since $M$ is symmetric we have $Q^{-1}=Q^{T}$ so
+
+$$
+y = Q^{T} x \implies x = Q y
+$$
+
+But $y$ is a vector of zeros except for $y_{k}=1$, so $Qy$ selects the $k$-th column of $Q$, but this is an eigenvector corresponding to $\lambda_{k}$ since $Q$ is the matrix of eigenvectors of $M$, so we have
+
+$$
+\min_{||x|| = 1} x^{T} M x = \lambda_{k} \quad \text{with} \quad x = v_{\lambda_{k}}
+$$
+
+What happens if $x$ is not a unit vector? then we can rewrite this optimization problem as
+
+$$
+\min_{x} \frac{x^{T}Mx}{x^{T}x}
+$$
+
+Which is equivalent to the previous problem.
+
+**Corollary**: If $M$ has all its eigenvalues non-negative, then its quadratic is strictly non-negative.
+
+**Proof**: Follows immediately from the result that the minimum of the quadratic form is $\lambda_{k}$ which is the smallest eigenvalue.

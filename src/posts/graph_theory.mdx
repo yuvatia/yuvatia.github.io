@@ -5,6 +5,8 @@ export const frontmatter = {
     // wip: true
 }
 
+TODO intro
+
 # Motivation
 
 A chessboard is an $8 \times 8$ grid of squares. A knight is a chess piece that moves in an L-shape, two squares in one direction and one square in a perpendicular direction. The knight's tour problem is an old mathematical problem, with written records dating back to the [9th century AD](https://en.wikipedia.org/wiki/Rudrata#Solving_Knight's_Tour_Problem), which is stated as follows: given an empty chessboard and a knight placed on one of the squares, construct a sequence of moves such that the knight visits every square exactly once. This sequence is called a knight's tour. Here's one such tour:
@@ -1719,13 +1721,33 @@ $$
 L_{G} = D_{G} - A_{G}
 $$
 
+**Theorem**: The laplacian matrix is positive semi-definite.
+
+**Proof**: Considering again the definition of $L_{G}$ as $\partial \partial^{T}$, we have that for all $x \in \mathcal{V}$ the quadratic form of $L$ Is
+
+$$
+x^{T}Lx = x^{T}(\partial \partial^{T}) x = (\partial^{T}x)^{T}(\partial^{T}x) = ||\partial^{T}x||^{2} \geq 0
+$$
+
+Where the minimum of $0$ is attained iff $x$ is the zero vector, so $L_{G}$ is positive semi-definite, which means that all its eigenvalues are non-negative.
+
+**Fact**: The quadratic form of a laplacian for some vector $x \in \mathcal{V}$ is of the form
+
+$$
+x^{T}Lx = \sum_{\{v_{i}, v_{j}\} \in E} (x_{i} - x_{j})^{2}
+$$
+
+This can be arrived at directly by considering the definition of the laplacian and expanding the quadratic form, or by recalling that the quadratic form of a matrix $M$ is equivalent to $\sum_{i=1}^{n} \sum_{j=1}^{n} M_{ij}x_{i}x_{j}$.
+
 This matrix will be very useful for us moving forward, so it is worth considering how different orderings of the vertices and edges sets change it. The laplacian is:
 
 1. Symmetric (as the difference of symmetric matrices)
 2. The sum of every row and every column of $L_{G}$ is zero. This stems from the fact that for every row and column, the only positive value is the degree of a vetex and the only negative values are $-1$ and they appear once for every neighbor of the vertex, so in total we have $\sum = \text{deg}(v) + (-1)\text{deg}(v) = 0$.
 3. $L_{G}$ has $\lambda_{0}=0$ as an eigenvalue with eigenvector $\mathbf{1}$, where $\mathbf{1}$ is the vector of all ones. This is because by $(2)$ the sum of every row and column is zero, so the sum of every row and column of $L_{G}\mathbf{1}$ is zero, so $\mathbf{1}$ is an eigenvector of $L_{G}$ with eigenvalue 0.
-4.  $L_{G}$ is singular since it has 0 as an eigenvalue.
-7. The laplacian is indepdent of the orientation we pick for the edges in constructing the boundary matrix $\partial$.
+4. The geometric multiplicity of $\lambda_{0}=0$ is the number of connected components in $L_{G}$. This is because if $G$ is not connected then we can write the laplacian for each connected component of $G$ which will have eigenvalue 0 with eigenvector all ones, but then if we project this vector back to $\mathcal{V}$ we will have a vector which, multiplied by the laplacian, will only take into account the rows and columns of the laplacian of the subgraph, which will add out to zero.
+5.  $L_{G}$ is singular since it has 0 as an eigenvalue.
+6. The laplacian is indepdent of the orientation we pick for the edges in constructing the boundary matrix $\partial$.
+7. All eigenvalues of $L_{G}$ are non-negative.
 
 ## Boundary Matrix Similarity
 
@@ -1831,7 +1853,7 @@ Which gives a system of linear equations $L\vec{p}=\vec{c}$ where $\vec{c}$ and 
 **Proof**: Let $y=Lx$, then this expression is equivalent to $y \cdot \mathbb{1}$, which is the same as the sum of all entries of $y$. Now, we have $L=D-A$, and we have seen that $Ax$ is a vector whose $i$-th entry is the sum of all values in $x$ at indices corresponding to neighbors of the $i$-th vertex in the graph. Similarly, we have $Dx$ as a vector where the $i$-th entry is the degree of the $i$-th vertex times its corresponding value in $x$. So we have
 
 $$
-[Lx]_{i} = [(D-A)x]_{i} = \text{deg}(v_{i})x_{i} - \sum_{j \in N(v_{i})} x_{j}
+[Lx]_{i} = [(D-A)x]_{i} = \text{deg}(v_{i})x_{i} - \sum_{\{i, j \} \in E(G)} x_{j}
 $$
 
 Consider the following combinatorical argument: each vertex $v_{i}$ is the neighbor of $\text{deg}(v_{i})$ vertices, so in the sum of all such $[Lx]_{i}$ we expect it to appear exactly $\text{deg}(v_{i})$ times with a negative sign and exactly 1 time with a positive sign but multiplied by $\text{deg}(v_{i})$, but this means that the sum of all entries related to $v_{i}$ is zero, but since $v_{i}$ is any vertex we have $\sum_{i=0}^{n-1}[Lx]_{i}=0$, which completes the proof.
@@ -1964,12 +1986,147 @@ $$
 
 In this section, we show how the algebraic treatment of graphs as vector spaces provides new ways to calculate the image of a planar drawing of a graph. We will see that these images can be found by solving a system of linear equations, and we will see that we can also find a linear planar embedding using this method for every planar graph.
 
-## Spectral Embeddings
+## Spectral Drawings
 
-TODO
+Let $G$ be a graph with laplacian $L$. Assume we wanted to separate the vertices of $G$ into *clusters*. Informally, a *cluster* is a group of objects that are more similar to each other than to other groups (clusters). In the context of a graph, a cluster is a group of vertices which are more connected in the group than outside the group, i.e. there are more edges between vertices in the cluster than between a vertex in the cluster to a vertex outside the cluster. A good clustering is one which minimizes the number of edges coming out of the cluster. If $G$ is disconnected, then we can take its connected components as clusters, which by a previous result is easy to find algebraically as the non-trivial eigenvectors corresponding to the eigenvalue 0 of the laplacian. What about the case where $G$ is connected?
+
+Recall that the quadratic form of the laplacian with some vector $x \in \mathcal{V} \cong \mathbb{R}^{n}$ is equivalent to the sum of the squares of the differences between $x_{i}, x_{j}$ pairs such that $\{v_{i}, v_{j}\} \in E(G)$. This means that by minimizing this sum, we minimize the total difference between connected vertices. If we think of the vector $x$ as a vector of coordinates along the real line $\mathbb{R}$, then these squares are really the squared distance between two connected vertices on the real line, which means that this operation will, in general, group vertices which are connected closer together, which nicely corresponds to our notion of a cluster.
+
+Generally speaking, this is the least squares problem, but recall that we got this form by the quadratic form of the laplacian, which is symmetric positive semi-definite, so we can use a result presented in a separate discussion about viewing the quadratic form of a matrix as an optimization problem where we've seen that the solution to the minimization problem is the eigenvector corresponding to the smallest eigenvalue of the matrix, and that the minimal value is the eigenvalue itself. However, since $L$ is positive semi-definite, this eigenvalue is always 0, which means that all vertices will be clustered together, which is not what we want, so if we also add the constraint that the distance be non-zero we have that the second smallest eigenvalue $\lambda_{1}$ is the optimal value with the corresponding eigenvector $v_{\lambda_{1}}$ being the optimal solution, such that $v_{\lambda_{{1_i}}}$ corresponds to the coordinate of the $i$-th vertex on the real line in the clustering. We call this a **spectral clustering** (since we use the spectrum of $L$ to perform the clustering).
+
+How can we used this for drawings? Recall that a desirable property of a drawing is that it minimizes the number of crossings, and that we are mostly interested in planar drawings. We can take a spectral clustering based on two non-zero eigenvalues of the laplacian (normally the two smallest non-zero eigenvalues), which will give us projections of the vertices into two orthogonal lines (since the eigenvectors of a symmetric matrix are orthogonal), which is a space isomorphic to the plane $\mathbb{R}^{2}$. Since in a way this clustering clusters connected vertices together, we can expect that by considering a drawing where the vertices are projected onto a point whose coordinate pair is the pair of coordinates associated with the vector on each line will generally not have many crossings. This is a **spectral drawing**.
+
+More formally, a **spectral drawing** of a graph is realized by taking two eigenvectors $v_{\lambda_{1}}, v_{\lambda_{2}}$ of $L_{G}$, usually those associated with the two smallest positive eigenvalues of $L_{G}$, and defining a map $f: V(G) \to \mathbb{R}^{2}$ such that
+
+$$
+f(v_{i} \in V(G)) = (v_{\lambda_{{1}_i}}, v_{\lambda_{{2}_i}})
+$$
+
+A Spectral drawing algorithm is described in the following pseudocode (lines need to be added in later between connected pairs of vertices)
+
+```python
+def get_vertex_positions(g: Graph) -> List[Tuple[float, float]]:
+    L = laplacian(g)
+    eigvals, eigvecs = eig(L)
+    eigvecs = eigvecs[:, 1:3]
+    return [(x, y) for x, y in eigvecs]
+```
+
+Since eigenvectors are unit vectors the coordinates will be between -1 and 1, so we can scale them to fit the desired drawing size.
 
 ## Tutte Embedding
 
-TODO
+We start our discussion of tutte's embedding with a thought experiment. Consider a system of point masses in $\mathbb{R}^{2}$ connected with springs. Recall from classical mechanics that a system is in equilibrium if the sum of forces acting on each particle adds up to zero, in which case the system's velocity is constant and so from some inertial frame of reference the system is in static equilibrium (all particles have velocity zero).
 
-statement of algorithm in python, prove that solution exists, show that it is an embedding
+Now, recall that Hooke's law states that the restoring force exerted by the string on a mass pulling one of its ends is
+
+$$
+F_{s}=-k\Delta x
+$$
+
+Where $k$ is a non-zero constant characteristic of the spring material and $\Delta x$ is the displacement vector of the spring. Let the number of point masses in our system be $n$, and let $x_{0}, x_{1}, \dots, x_{n-1}$ be an ordered set of the position vector of the point masses at some time $t=0$, and let $m_{i} \sim m_{j}$ be a binary relation on the point masses defined by whether or not the two point masses are connected via a spring, then the sum of restoring forces acting on one point mass at position $x_{i}$ is given by
+
+$$
+\sum_{j} F_{s_{i}} = -k \sum_{m_{i} \sim m_{j}}(x_{j}-x_{i})
+$$
+
+In an equilibrium state, we have
+
+$$
+\sum_{j} F_{s_{i}} = 0 \overset{k \neq 0}{\implies} \sum_{m_{i} \sim m_{j}}{x_{j}-x_{i}} = 0
+$$
+
+And in general we have
+
+$$
+\sum_{i} \sum_{j} F_{s_{i}} = 0 \implies \sum_{i}\sum_{m_{i} \sim m_{j}}(x_{j}-x_{i}) = 0
+$$
+
+At any time $t$ we can view this system as a graph $G$ whose vertices are the point masses (while preserving the ordering) and the edges are the springs, and we can associate labels to the point masses correspong to their position at $t$ and then the edges are naturally asssigned the difference in position of their vertices. Let $L_{G}$ be the laplacian of this graph and let $x$ be the position vector. Recall that we have seen that
+
+$$
+[Lx]_{i} = \text{deg}(v_{i})x_{i} - \sum_{\{i, j\} \in E(G)} x_{j}
+$$
+
+Which can be rearranged as
+
+$$
+[Lx]_{i} = \sum_{\{i, j \} \in E}(x_{j}-x_{i})
+$$
+
+But this is exactly the expression which must be 0 for all $i$ if the system is in equilibrium, so we have
+
+$$
+\text{system in equilibrium} \iff Lx = 0
+$$
+
+Which is a laplacian system. As we know, this system does not necessarily have a solution other than the trivial solution where $X=0$, but in that case the system will "collapse" into a single point, which is not a very interesting equilibrium state. However, if we pin down some of the point masses (by applying a force external to the system such that they are held in place), we have that for these pinned masses the sum of spring forces acting on them internally does not have to add up to zero (because we apply an external force which keeps them in place). Consider an ordering where these point masses are the first $k$ point masses, and $x_{0}, \dots, x_{k-1}$ be the positions that these points are kept in (you can think of it as a set of position constraints on the system), then the system of equations for an equilibrium state becomes
+
+$$
+\left(\begin{array}{c|c}
+L_{1}^{T} & Q_{T} \\
+\hline
+Q & L_{1}
+\end{array}\right)
+\begin{pmatrix}
+x_{0} \\ \dots \\ x_{1} \\ \hline x_{k} \\ \dots \\ x_{n}
+\end{pmatrix}
+=
+\begin{pmatrix}
+\vert \\
+? \\
+\vert \\
+\hline
+\vert \\
+0 \\
+\vert
+\end{pmatrix}
+$$
+
+Which has a luplacian sub-system
+
+$$
+L_{1} \begin{pmatrix}x_{k} \\ \dots \\ x_{n} \end{pmatrix} = -Q \begin{pmatrix}x_{0} \\ \dots \\ x_{k-1} \end{pmatrix}
+$$
+
+With a unique solution
+
+$$
+\begin{pmatrix} x_{k} \\ \dots \\ x_{n} \end{pmatrix} = -L_{1}^{-1}Q \begin{pmatrix}x_{0} \\ \dots \\ x_{k-1} \end{pmatrix}
+$$
+
+Which means the the state can reach an equilibrium state. Note that the position "vector" is in fact an $n \times 2$ matrix since each entry $x_{i}$ consists of two coordinates in $\mathbb{R}^{2}$, so the solution is a planar linear drawing of the graph corresponding to the mass-spring system. In fact, we can take any graph and model it as a spring-mass system and solve the sub-laplacian system to get a drawing.
+
+Let $G$ be a 3-connected planar graph and let $C$ be a cycle in the graph which bounds its outer face, then the following algorithm produces a planar linear drawing of $G$ (by taking the positions and then adding line segments between vertices that are incident with the same edge)
+
+```python
+def get_vertex_positions(G: Graph, C: Graph) -> List[Tuple[float, float]]:
+    x_out = to_circle_points(len(C.vertices()))
+    inner_vertices = G.vertices().minus(C.vertices())
+
+    L = laplacian(G)
+    L1 = L[inner_vertices][:,inner_vertices]
+    Q = L[inner_vertices][:,C.vetices()]
+
+    L1_inverse = L1.inverse()
+    x_in = L1_inverse @ Q @ x_out
+
+    return [*x_out, *x_in]    
+```
+
+Where `to_circle_points` takes a number $k$ and returns $k$ distinct points on the boundary of a circle, and the subscript operators slice the matrix into sub-matrices. Here's an example of a planar linear drawing of a 3-connected planar graph drawn using this algorithm
+
+TODO tutte embedding image
+
+Clearly this is a linear embedding of this graph. Turns out that this is in fact always the case for 3-connected planar graphs (and if the graph weren't 3-connected we could complete it to a maximal planar graph and then discard the points all vertices added to the graph were mapped to and also remove all edges added to the graph to make it 3-connected). This is called a **Tutte embedding** or a **spring embedding**.
+
+**Theorem - Tutte's spring theorem**: The planar linear drawing we described always produces a planar linear *convex embedidng* for every planar 3-connected graph $G$.
+
+A **convex embedding** is an embedding in which each face is a convex polygon, i.e. a polygon that has not internal angle whose measure is greater than $180$ degrees. In a convex embedding, every line
+
+
+TODO prove this lemma
+
+## Refererences
+
+[The Smallest Eigenvalues of a Graph Laplacian](http://blog.shriphani.com/2015/04/06/the-smallest-eigenvalues-of-a-graph-laplacian/)
