@@ -1,0 +1,581 @@
+export const frontmatter = {
+    title: "Graph Theory, Part 2: Topology",
+    date: "2024-07-12",
+    summary: "Continuing our discussion on graph theory, we discuss the topology of graphs",
+    tags: ["graph-theory"]
+    // wip: true
+}
+
+The previous post discussed graphs mostly as a combinatorical object. In this post, we discuss the topology of a graph, ending with a statement and proof of Fary's Theorem.
+
+# Drawing a Graph
+
+Next, we wish to rigorously define drawings of a graph. We have already seen quite a few of those, and we have seen how a good drawing of a graph can provide a lot of insight which is not obvious by simply looking at a set representation of a graph. For example, it is easy to determine if a graph is connecteed or not, and if a graph has cycles, simply by looking at a drawing. However, there are many different ways in which a graph can be drawn, some more useful than others. Also, as is often the case in math, drawing may provide false intuition, so we need to be careful when drawing conclusions about a graph from a drawing. It is of interest to us to study the properties of drawings of graphs, what they can teach us about a graph, and how they interact with graph isomorphism. Since in drawings of a graph we don't necessarily care about, for example, whether an edge is straight or not, we need a framework which is less strict than classical geometry. As it turns out, the correct framework for studying drawings of graphs is topology. As a motivating example, consider the following drawings. All of them are drawings of the same graph, yet they are all very different visually:
+
+![Three drawings of the same graph](images/graph_theory/19_three_drawings_of_same_graph.svg)
+
+In the next section, we will define some basic concepts from topology at a very shallow level, so then apply those concepts on graphs.
+
+## Basic Topology
+
+A **topology** on a set $X$ is a collection of subsets of $X$ which are called **open sets** which satisfy the following properties:
+1. The empty set and $X$ itself are open.
+2. Any union of open subsets of $X$ is an open subset of $X$.
+3. Any finite intersection of open subsets of $X$ is an open subset of $X$.
+
+We call the set of open subsets a $X$ the topology on $X$. A subset of $X$ is a **closed set** if its complement with respect to $X$ is an open set.
+
+A **topological space** is a set whose members are called *points* and a topology. An example of a topological space is the generalized Euclidean space $\mathbb{R}^{n}$, which will be the topological space we use throughout our discussion. In $\mathbb{R}^{n}$, a set $X$ is *open* iff it is a union or finite intersection of open balls, where an open ball is the set of points  $\{x | ||x-c|| \lt r \}$ for some $r \in \mathbb{R}^{n}$ and $\forall c \in \mathbb{R}^{n}, c \gt 0$.
+
+A *function* in a topological space is a mapping $f: X \to Y$ where $X$, $Y$ are sets. A function is *continuous* if the preimage of an open set is open, i.e. if $\forall S \subseteq Y, f^{-1}(S) \subseteq X$ is an open set. Note that this definition is analogous to the definition of continuity in analysis: consider a function $f$, the epsilon-delta definition of continuity is
+
+$$
+\forall \epsilon \gt 0, \exists \delta \gt 0, \forall x \in X, |x-c| \lt \delta \implies |f(x)-f(c)| \lt \epsilon
+$$
+
+Observe that both the image $f(x)-f(c)$ and the preimage $x-c$ are open balls and thus are open sets.
+
+Below is a collection of classical results on continous functions in a topological space, stated without proof (but one can easily prove these results from first principles in an analogous manner to the proofs of these results presented in analysis courses):
+1. The identity function is continuous.
+2. A composition of continuous functions is continuous.
+3. Constant functions are continous.
+4. Linear and affine functions are continous.
+5. If $f$ is a continous bijection, then $f^{-1}$ exists and is also a continous bijection.
+
+In topological spaces, we require that morphisms be governed by continous functions, thus the definition of a topological isomorphism between two topological spaces $X$ and $Y$, called a **homeomorphism**, is defined as a pair of continous functions $f: X \to Y$ and $g: Y \to X$ s.t. $g \circ f$ is the identity on $X$ and $f \circ g$ is the identity on $Y$:
+
+$$
+X \cong Y \iff \exists f: X \to Y, g: Y \to X \text{ s.t.} f \circ g = \text{id}_{Y}, g \circ f = \text{id}_{X}
+$$
+
+As an example, consider the following drawing of a circle inside a square. We can map the circle to the square via a projection by drawing a line from the center of the circle through some point on the circumference of the circle, this line intersects the square at a single point. We can do this for every point in the circle. Similarly, we can construct a function from the square to the circle by connecting a line from any point on the square to the center of the circle and mapping it to the intersection of the line with the circle. This is a *projection*, as we have discussed in detail in the discussion on projective geometry. We state without proof that these functions are inverses of each other and are continous (this is easy to verify - work out the closed-form expression of each function and check that we get the identity functions by composing them, and verify that they are a composition of continous functions and thus continous), thus a square and a circle are homeomorphic in the topological sense.
+
+![A circle and a square are homeomorphic](images/graph_theory/20_homeomorphism.svg)
+
+A notorious example of a homeomorphism is that between a donut and a coffee cup, this is due to the existence of continous functions which map a donut to a coffee cup and vice versa.
+
+## Geometric Realization
+
+A **geometric realization** is a mapping of a graph $G$ to a topological space $G \to \mathbb{R}^{n}$, where $|V|=n$. In a geometric realization, vertices are taken to points representing basis vectors and edges are taken to straight lines between the points. For some ordering of $V$, we assign an index for each vertex and denote the vertex with index $i$ as $v_{i}$. Let $b_{i}$ be the $i$-th basis vector of the chosen basis of $\mathbb{R}^{n}$, then we map $v_{i}$ to $b_{i}$, thus the coordinate vector of $v_{i}$ is $\vec{v}$ s.t. $v_{k}= \begin{cases} 0 & k \neq i \\ 1 & k = 1 \end{cases}$, and we map the edges $\{v_{i}, v_{j} \}$ to the set of points that make up the line segments $\overline{b_{i}b_{j}}$ to construct the geometric realization of $G$:
+
+$$
+\text{geom}(G) = \underbrace{\big( \bigcup_{i \in [:n]}b_{i} \big)}_{V\text{ as points}} \bigcup \underbrace{\big( \bigcup_{i, j \in E}\overline{b_{i}b_{j}} \big)}_{E \text{ as lines}}
+$$
+
+Using a line segmenent parameterization, we can also write
+
+$$
+\text{geom}(G) = \bigcup_{i, j \in E} \{tb_{i} + (1-t)b_{j} | t \in [0, 1] \}
+$$
+
+A geometric realization exists in a topological space, and it is a graph invariant up to a homeomorphism. To prove this, we need to show that $G \cong H$ implies $\text{geom}(G) \cong \text{geom}(H)$. Let $f: G \to H$ be a homomorphism. If $V(G)$ and $V(H)$ are finite, we can express the image of $f_{V}$ via matrix multiplication using a permutation matrix:
+
+$$
+M \in \mathbb{R}^{|V(G)| \times |V(H)|}, M_{ij} = \begin{cases} 1 & f_{V}(v_{i}) = v_{j} \\ 0 & \text{otherwise} \end{cases} \\
+$$
+
+Consider a member $x \in \text{geom}(G)$. We have $x=b_{i} + t(b_{j}-b_{i})$ for some $i, j, t \in E$. Consider the function $f^{*}$ on $\text{geom}(G)$, defined as
+
+$$
+f^{*}(x) = Mx
+$$
+
+$f^{*}$ is linear and thus continous. Expanding on $f^{*}$, we have
+
+$$
+Mx = M(tb_{i} + (1-t)b_{j}) = tMb_{i} + (1-t)Mb_{j} = (*)
+$$
+
+Clearly $Mb_{i}$ maps a basis vector corresponding to $v_{i}$ in $\text{geom}(G)$ to a basis vector $b'_{i}$ corresponding with $v'_{i}$ in $\text{geom}(H)$, so we have
+
+$$
+(*) = tb'_{i}+(1-t)b'_{j} \in \text{geom}(H)
+$$
+
+So $f^{*}$ is a map from $\text{geom}(G)$ to $\text{geom}(H)$ which maps every point in the geometric realization of $G$ to a point in the geometric realization of $H$, thus it is a (topological) homomorphism. This is true for any homomorphism $f: G \to H$. We denote this mapping as the geometrical realization of the homomorphism $f$ - $\text{geom}(f)$. A couple of useful facts about $\text{geom}(f)$ are that, if $f$ is the identiy on $G$, we have $M=I$ and $f^{*}(x)=Ix=x$, so we have
+
+$$
+\text{geom}(\text{id}_{G}) = \text{id}_{\text{geom}(G)}
+$$
+
+Also, given two homomorphisms $f: G \to H$ and $g: H \to G$, we have the image of $f$ represented by some matrix $A_{n \times m}$ and the image of $g$ represented by some matrix $B_{m \times n}$, so the composition of the geometric realizations is given by
+
+$$
+\text{geom}(f \circ g) = A(Bx)=(AB)x = \text{geom}(f) \circ \text{geom}(g)
+$$
+
+If $G \cong H$, then we have $g \circ f = \text{id}_{G}$ and $f \circ g = \text{id}_{H}$, so we have
+
+$$
+\begin{gathered}
+\text{geom}(g) \circ \text{geom}(f) = \text{geom}(g \circ f) = \text{geom}(id_{G})=\text{id}_{\text{geom}(G)} \\
+\text{geom}(f) \circ \text{geom}(g) = \text{geom}(f \circ g) = \text{geom}(id_{H})=\text{id}_{\text{geom}(H)}
+\end{gathered}
+$$
+
+Thus we have a homeomorphism $\text{geom}(G) \cong \text{geom}(H)$ via $\text{geom}(f)$ and $\text{geom}(g)$, meaning that the geometric realization is a graph invariant up to a homeomorphism. The inverse, however, is *not* true - $G \cong H$ does not imply $\text{geom}(G) \cong \text{geom}(H)$. As an example, take the path graphs $P_{2}$ and $P_{3}$, which do not have the same number of vertices thus are clearly not isomorphic, however their geometric realizations are homeomorphic - consider $\text{geom}(P_{2})$ which consists of a single line segment $\overline{b_{0}b_{1}}$, we have $\text{geom}(P_{2})=tb_{0}+(1-t)b_{1}$ for $t \in [0, 1]$. Consider the midway point $t=\frac{1}{2}$, and the line segments $\mathcal{l}_{1}: t \in [0, \frac{1}{2}]$ and $\mathcal{l}_{2}: t \in [\frac{1}{2}, 1]$. $\text{geom}(P_{3})$ consists of two lines $\overline{b'_{0}b'_{1}}, \overline{b'_{1}b'_{2}}$. We can construct a bijective linear maps $f_{1}: \mathcal{l}_{1} \to \overline{b'_{0}b'_{1}}$ and  $f_{2}: \mathcal{l}_{2} \to \overline{b'_{1}b'_{2}}$ by mapping the endpoints of the line segments to the endpoints of the line segments in $\text{geom}(P_{3})$, note that this takes the midpoint to $b'_{1}$ and $b_{0} \to b'_{0}$, $b_{1} \to b'_{1}$. Consider the map $f(t) = \begin{cases} f_{1}(2t) & t \in [0, \frac{1}{2}] \\ f_{2}(2t-1) & t \in [\frac{1}{2}, 1] \end{cases}$, clearly $f_{1}(1)=f_{2}(0)$ so $f$ is well-defined in $t=\frac{1}{2}$ and is continous bijective since it consists of piecewise continous bijective functions that are continous in the intersection point, thus $f$ is a homeomorphism, thus $\text{geom}(P_{2}) \cong \text{geom}(P_{3})$ via $f$.
+
+Since the geometric realization of a graph lives in high-dimensional space, it is hard to visualize. We wish to bring it down to a lower dimenisonal space to make it easier to grasp. To do this, we will use a similar method to the one we used to prove that a square and a circle are homeomorphic - we will project the $n$ dimensional realization to lower dimensional space.
+
+## Embeddings
+
+In all the graph drawings we have examined so far, we took the vertices to points and the edges to curves. Now that we have a rigorous notion of a geometric realization of a graph in $|V|$-dimensional space, we can provide a more rigid definition for a drawing of a graph. A **drawing** of $G$ is a continous map $f$ from $\text{geom}(G)$ to $\mathbb{R}^{d}$. A **planar drawing** is a drawing with $d=2$. An **embedding** is an injective drawing, i.e. every point in the geometric realization of $G$ is taken to a single point in the drawing, which means that no two points in $\text{geom}(G)$ are taken to the same point, which means that the drawing has no crossing edges. A **planar embedding** is an embedding with $d=2$. 
+
+Any graph can be embedded in 3-dimensional space by picking a set of $n$ points to serve as the vertices such that no 4 of them are coplanar, and thus no pair of lines through points in the set are coplanar, then using a linear map to map the geometric realization of the vertices to the points. The map is linear so it is continous, and clearly no edges can cross because the edges are taken to line segment between the points which cannot cross due to no 4 points being coplanar. However, not all graphs admit a planar embedding. A graph which admits a planar embedding is called *planar*.
+
+If $f$ is a embedding of $G$, then the image of $f: \text{geom}(G) \to \mathbb{R}^{d}$, denoted $\text{Im}(f)$, is homeomorphic to $\text{geom}(G)$. To prove this, consider $f'$ to be the corestriction of $f$ to $\text{Im}(f)$ (instead of $\mathbb{R}^{d}$), thus $f'$ is surjective. Since $f'$ is a corestriction of an embedding, and an embedding is injective, we have $f'$ injective and surjective, thus it is a bijection. We presented as a fact that if $f$ is bijective and continous, then there exists an inverse function $f^{-1}$ that is also a continous bijection (this is a generalization of the inverse function theorem from analysis), so we have $f \circ f^{-1}=\text{id}_{\text{Im}(f)}$ and $f^{-1} \circ f = \text{id}_{\text{geom}(G)}$, thus $\text{Im}(f) \cong \text{geom}(G)$.
+
+*Corollary*: If $f$ and $g$ are two functions $ \text{geom}(G) \to \mathbb{R}^{d}$ such that $\text{Im}(f)$ and $\text{Im}(g)$ embeddings of $G$ then we have $\text{Im}(f) \cong \text{Im}(g)$. This is because homeomorphism is a transitive property, since the composition of continous bijective functions is also continous.
+
+These two results mean that all topological information about a graph is preserved in all its embeddings. In fact, we have already seen a topological characteristic of a graph - whether it is connected or not, and the amount of connected components it has. All embeddings below are embeddings of the same graph, meaning they are homeomorphic:
+
+![K4 homeomorphism](images/graph_theory/05_k4_two_ways.svg)
+
+## Topological Minors
+
+Recall the definition of a graph subdivision: $H$ is a subdivision of $G$ if $H$ can be constructed by $G$ by a sequence of (0 or more) edge subdivisions. We have seen that $\text{geom}(P_{2}) \cong \text{geom}(P_{3})$, and clearly we can construct $P_{3}$ from $P_{2}$ via an edge subdivision (up to an isomorphism). We wish to study the relation between a homeomorphism and graph subdivision.
+
+Consider a graph $G$ and an edge $e \in G$. Let $H$ be the graph formed by the subdivision of $e$. We define the following map $f: \text{geom}(G) \to \text{geom}(H)$:
+
+$$
+f(x) = \begin{cases}
+x & x \notin \text{Im}(\text{geom}_{G}(e)) \\
+h(x) & x \in \text{Im}(\text{geom}_{G}(e)) 
+\end{cases}
+$$
+
+with $h: \text{geom}(G) \to \text{geom}(H)$ restricted to $\text{geom}_{G}(e)$ and the codomain restricted to $\text{Im}(\text{geom}_{H}(\{e', e'' \}))$ where $e', e''$ are the edges resulting from the subdivision of $e$, such that $x$ is expressed using a line segment parameterization $x(t)$. We have already constructed such function $h$ when showing that the geometric realizations of $P_{2}$ and $P_{3}$ are homeomorphic, and we have seen that $h$ is continous bijective. Clearly $f$ is bijective thus it is a homeomorphism, thus $H$ is homeomorphic to $G$ under $f$. Let $H$ be a graph subdivision (not necessarily induced by a single subdivision) of $G$. Assume by induction that the $\text{geom}(G) \cong \text{geom}(H)$ holds up to $n$ subdivisions, then subdivide $H$ again to form $H'$. By our argument, we have that the geometric realizations of $H'$ and $H$ and homeomorphic, however we also have that the geometric realizations of $H$ and $G$ are homeomorphic, thus by the transtive property of homeomorphisms, we have that the geometric realizations of $H'$ and $G$ are homeomorphic, proving the following result:
+
+**Theorem**: If $H$ is a graph subdivision of $G$, then $\text{geom}(H) \cong \text{geom}(G)$.
+
+Consider the case where $\text{geom}(G) \cong \text{geom}(H)$, can we say anything about the relation between the graphs in terms of a subdivision?
+
+Consider that the homeomorphism must take line segments (representing edges) to line segments, and points to points, however the orientation of the lines needn't be preserved, which is why we can take two line segements which do not belong to the same line and map them to two line segments which do belong to the same line, and vice versa (this is basically what we did to show that a subdivision of a graph is homeomorphic to the geometric realization of the graph). Consider a vertex of $G$, which under the homomorphism is taken to a point in the geometric realization of $H$, while maintaining incidence relations, note however that it doesn't necessarily go to a geometric realization of a vertex of $H$ - if a point is incident with exactly two line segments, we can take it to a point on a line segment which the two line segments are mapped to, as we did when constructing the homeomorphism $\text{geom}(P_{2}) \to \text{geom}(P_{3})$, thus if $\text{deg}_{G}(v) = 2$ and $\text{geom}_{G}(v)$ is incident with 2 edges not on the same line, it is not guaranteed that $f(\text{geom}_{G}(v))$ is incident with 2 edges not on the same line. However, consider a vertex of any other degree $k$, then since incidence relations are preserved, the point it is mapped to must also be incident with $k$ line segments. If $k=0$, then the homomorphism takes $\text{geom}_{G}(v)$ to a geometric realization of a vertex of $H$ which is also of degree 0 since the only way a point can be incident with 0 line segments is if it is a geometric realization of an isolated vertex in the graph. Similarly, if $k=1$, it must be mapped to an edge of a line segment which is also only possible if $\text{deg}_{H}(v)=\text{deg}_{G}(v)=1$. For $k=2$, we have shown that this is not the case (in non-formal terms, if $k=2$ the vertex can either be mapped to a vertex of degree 2, a set of vertices of degree 2 via a sequence of subdivisions, or to a point along an edge and thus "removed" via a smoothing which is the inverse of a subdivision). If $k \gt 2$, then the only way for it to be incident with more than 2 edges is if it is a realization of a vertex of $H$ incident with $k$ line segments not all co-incident, because otherwise it can't be an end of all those line segments simultanously. This can be proven by the following geometric argument: let $L=\{\mathcal{l_{1}, \dots, l_{k}}\}$ be the set of all line segments that have $p$ as one end in $\text{geom}(G)$. Let $\{\mathcal{l'_{1}, \dots, l'_{k}}\}$ be the images of these lines in $\text{geom}(H)$ under the homeomorphism $f$. Since incidence relations are preserved, $f(p)$ must be an end of all three line segments. Assume that $f(p)$ is not the geometric realization of a vertex of $H$, then it is the geometric realization of an edge $e$ such that $f(p) \in \text{geom}_{H}(e)$, with $f(p)$ not an end of the line segment, however this would mean that $\text{geom}_{H}(e) \notin f(L)$, which means that $f(p)$ is incident with $k+1$ edges, but since $f$ is a homeomorphism $f(p)$ and $p$ should be incident with the same number of lines, thus we have a contradiction, which means that if $k \gt 2$, then the homeomorphism takes $v$ to a realization of a vertex of $H$ with degree $k$. To summarize, we have:
+
+**Theorem**: If $G$ and $H$ are graphs such that $f: \text{geom}(G) \cong \text{geom}(H)$, and $U=\{v \in V(G) | \text{deg}(v) = k, k \neq 2 \}$, then $f$ maps $\text{geom}_{G}(U)$ to a set of points $\text{geom}_{H}(U')$ such that $U' \subseteq V(H)$ are vertices of $H$ such that $\deg_{H}(u' \in U') = \deg_{G}(u \in U)$ for all matching $u, u'$.
+
+**Corollary**: If $G$ and $H$ are graphs such that $f: \text{geom}(G) \cong \text{geom}(H)$, and $v$ is a vertex of degree 2, then $f$ takes the geometric realization of $v$ to the image of a path (possibly empty) of vertices of degree 2.
+
+From these, we draw a stronger conclusion: let $\text{geom}(G) \cong \text{geom}(H)$, then there exists a graph $K$ that is a subdivision of $G$ and $H$ up to an isomorphism.
+
+To prove this, recall the theorem we just presented - for all vertices of $G$ with degree not 2, the homeomorphism between the geometric realizations forces a correspondence to vertices of $H$ with the same degree, and for all vertices of $G$ with degree 2 it forces a correspondence to paths of (internal) vertices of degree 2, such that the vertices at the beginning and the end of the path are corresponding vertices between $G$ and $H$ due to the homeomorphism and to them having degree other than 2, thus we can find such corresponding paths between the graphs by considering the starting and ending vertex. Take $G$ as a starting graph. For each pair of corresponding paths, take the maximum number of vertices, then subdivide the corresponding path in $G$ until it has that number of vertices. The result is a subdivision of $G$. Similarly, starting from $H$, do the same. The result is a subdivision of $H$. But now both subdivisions are isomorphic, proving the theorem.
+
+A graph is a **topological minor** of $H$ if $H$ contains a subgraph isomorphic to a subdivision of $G$. To illustrate this definition, consider the following graph
+
+![K4 subdivision](images/graph_theory/21_k4_subdivision.svg)
+
+Identify that it is a subdivision of $K_{4}$ where all non-number vertices are vertices introduced via subdivisions. Next, consider this graph $G$ and it subgraph connected via the red edges
+
+![K4 topological minor](images/graph_theory/21_k4_topological_minor.svg)
+
+This subgraph is the same $K_{4}$ subdivision we have just seen (albeit under a different drawing), so we see that $G$ has a subgraph isomorphic to a subdivision of $K_{4}$, so we say that $K_{4}$ is a topological minor of $G$.
+
+Topological minors are a powerful tool in characterizing graphs with certain properties, via the method of forbidden graphs, which is a method of defining a family of graphs by another family of graphs that it must not contain as subgraphs. For example, a forest is defined as an acyclic graph, which is the same as saying that a forest is a graph that does not have a cycle graph as a subgraph. Topological minors are extremely useful in this method since they essentially condense a family of subdivisions into a single "root" graph, so instead of defining a class of graphs by an infinite number of graphs, we can define a class of graphs using a finite number of graphs and their topological minors. For example, we can show that a graph is a forest iff it contains no topological minor of $C_{3}$: any cycle graph $C_{k}$ with $k \geq 3$ is a closed path of vertices with degree 2, thus any cycle $C_{k \gt 3}$ is a subdivision of $C_{3}$ (which is the smallest simple cycle), so it has $C_{3}$ as a topological minor. A graph is cyclic iff it has a subgraph isomorphic to $C_{k}$, but any cycle has $C_{3}$ as a topological minor, so a graph is cyclic iff it has a $C_{3}$ as a topological minor.
+
+# Linear Drawings
+
+When drawing a graph, we map the geometric realization of a graph to $\mathbb{R}^{d}$ via a continous map which takes line segments of the geometric realization to curves in $\mathbb{R}^{d}$. We are often interested in drawing that take line segments of $\text{geom}(G)$ to line segments in $\mathbb{R}^{d}$. Such drawings are called **linear drawings**. This can be achieved via a *linear map* $f: \text{geom}(G) \to R^{d}, f(x)=Mx$ for some $M \in \mathbb{R}^{d \times n}$. If $f$ is injective, then $f$ is a **linear embedding**. $M$ takes every basis vector of $\mathbb{R}^{n}$, which is used as the coordinates of a vertex in $\text{geom}(G)$, to a point in the embedding, so we can write $M$ explictly as a matrix whose columns are the coordinates of the points $p_{0}, p_{1}, \dots, p_{n-1}$ expressed with respect to a basis of $\mathbb{R}^{d}$, this yields $n \times d$ constraints, which means that $M$ is well defined:
+
+$$
+M = 
+\begin{pmatrix}
+\vert & \vert & \vert & \vert \\
+[p_{0}] & [p_{1}] & \dots & [p_{n-1}] \\
+\vert & \vert & \vert & \vert
+\end{pmatrix}
+$$
+
+The notion of a linear drawing lets us define geometric objects such as a polygon in topological terms.
+
+A **simple polygon** is the image of a linear *embedding* of a cycle $C_{n}$ on the plane. Let $P: \text{geom}(C_{n}) \to \mathbb{R}^{2}$ be injective, then we define $\text{Im}(P)$ to be the simple polygon. Convince yourself that this is consistent with other definitions of a simple polygon: a simple polygon is a polygon with no crossings or holes. If we think of the polygon as an embedding of a graph, then the edges of the polygon correspond to the edges of a graph, furthermore the edges of the polygon form a cycle, and since the polygon has no holes only one cycle is formed, so it is the drawing of a cycle, and since the edges of a polygon are straight it is a linear drawing, and since the polygon has no edge crossings the drawing is injective so it is an embedding, and since a polygon resides on a plane it is a planar embedding. We will use *simple polygon* and *polygon* interchangeably.
+
+A **polygonal path** is the image of a linear embedding of a path $P_{m}$ on the plane. Let $L: \text{geom}(P_{m}) \to \mathbb{R}^{2}$ be injective, then we define $\text{Im}(L)$ to be a polygonal path. Two points $a, b$ in a topological space are **path-connected** if there exists a polygonal path from $\text{Im}(a)$ to $\text{Im}(b)$ under the embedding, and it is an equivalence relation - if $a, b$ are path-connected then $b, a$ are path connected since travel is allowed in both directions so it is symmetric, $a$ is connected to itself via a path that consists only of the image of $a$ so it is reflexive, and if $a, b$ and $b, c$ are path connected then we can concatenate the paths and get $a, c$ path-connected via a path. We call the equivalence class formed by this equivalence relation *path-connected components*. Observe that a polygonal path corresponds to a path in the graph (since a path is homomorphic to $P_{m}$), and that a path-connected component corresponds to a connected component in the graph.
+
+The [Jordan curve theorem](https://en.wikipedia.org/wiki/Jordan_curve_theorem), which we will use but not prove, states the following: a Jordan curve $C$ is a homeomorphism of the circle in $R^{2}$. Consider $\mathbb{R}^{2} \setminus C$, the theorem states that it consists of exactly two path-connected components, one of which is bounded (called the *interior*) and the other unbounded (called the *exterior*), with $C$ being the boundary of each component. A *boundary* in topology is a set such that any open ball around any point of the boundary is not entirely in the interior or the exterior. Proof of the Jordan curve theorem tend to use the following lemma, which we will also use (sometimes implictly): in a neighborhood of a point that lies on a curve we can always find two paths along the curve on different sides of the curve.
+
+![Jordan curve theorem](images/graph_theory/22_jct.svg)
+
+A **face** of a linear plannar embedding of a graph $G$ is a path-connected component of $R^{2} \setminus \text{Im}(f_{G})$ where $f_{G}$ is a linear embedding of $G$. By the Jordan curve theorem (JCT), every simple polygon divides the plane to two path-connected components, thus every simple polygon divides the plane to two faces - the inner face (which is the image of the [convex combination](https://en.wikipedia.org/wiki/Convex_combination) of the ends of the edges, i.e. the vertices of the polygon, with the edges removed, thus it is bounded) and the outer face, which is unbounded. To illustarte this idea, consider the following embedding of a graph $G=(V(C_{4}), E(C_{4}) \cup \{0, 2 \})$
+
+![Faces of a linear plannar embedding](images/graph_theory/23_c4_linear_planar_embedding.svg)
+
+Observe that the embedding consists of two simple polygons with a shared edge and no crossings, so by the Jordan curve theorem we have that the first polygon splits the plane to two faces, the inner face and the outer face, with the second polygon laying entirely on the outer face of the first polygon (in this embedding). Now, again by the JCT on the other polygon, it divides the outer face of the face polygon to an inner and outer face, so in total we have 3 faces.
+
+However, we can show a more powerful result here by using the JCT and the fact that this is an embedding: consider $G$ as described. $G$ contains exactly 2 subgraphs of isomorphic $C_{3}$ - $G_{1}$ with vertices $\{0, 1, 2 \}$ and $G_{2}$ with vertices $\{2, 3, 0 \}$. For $\text{Im}(f_{G})$ to be an embedding, $\text{Im}(f_{G_{1}})$ and $\text{Im}(f_{G_{2}})$ must have no edge crossings. Since $\text{Im}(f_{G_{1}})$ is a polygon, it separates $\mathbb{R}^{2}$ to two faces. Let $p$ be a point in the embedding of $G_{2}$. If $p$ is on the boundary of the embedding of $G_{1}$, then it is incident with an edge of $G_{1}$, but since this is an embedding the edges must not cross, so either $p$ is a shared vertex of $G_{1}$ and $G_{2}$ or it belongs to an embedding of a shared edge of $G_{1}$ and $G_{2}$, otherwise it is either on the inner face or the outer face of the embedding of $G_{1}$. Consider two points $p_{1}, p_{2}$ in the embedding of $G_{2}$. Assume that $p_{1}$ and $p_{2}$ are on different faces of $G_{1}$, but since they are points on the polygon they must be path connected, but from the JCT the two faces are disconnected and may only be connected via the boundary, so the path must cross the boundary, but this means that we have a crossing, contradicting the assumption that this is an embedding, so for any two points in the embedding of $G_{1}$ they must be on the same face of the embedding $G_{2}$ or on the polygon (boundary) $G_{2}$, which means that $G_{2}$ lies entirely outside one of the faces of $G_{1}$. Now, by the JCT, the embedding of $G_{2}$ splits the face on which it lies to 2 faces, so it either splits the inner face of $G_{2}$ to 2 faces, or the outer face of $G_{2}$ to 2 faces, but regardless we will always have 3 faces. 
+
+This proof can be generalized to show that in an embedding of a 4 vertex graph that has a subgraph isomorphic to $C_{3}$, the image of any such subgraph under the embedding is a face, so we say that this result is a topological invariant of linear embeddings of the graph - any linear embedding of such graph with have its number of faces equal to the number of $C_{3}$ subgraphs it contains plus 1, if such an embedding exists. A related result can also be proven in the same method - let $G$ be a graph with 4 vertices and a subgraph isomorphic to $C_{3}$, and let $\overline{G}$ be a linear embedding of $G$, then the image of $C_{3}$ under the embedding is a boundary of a face. To prove this, we consider the embedding of the subgraph isomorphic to $C_{3}$ and then use a similar argument to show that for the drawing to be an embedding then the fourth vertex and all edges incident with it must lie at the complement of one of the faces, if they lie at the complement of the outer face then the drawing of $C_{3}$ is a boundary of the outer face and if they lie at the complement of the inner face then $C_{3}$ is the boundary of an inner face.
+
+In fact, a stronger result is true:
+
+**Theorem**: Let $G$ be a graph with $n$ vertices with a cycle subgraph isomorphic to $C_{n-1}$, then for every planar embedding $\phi: \text{geom}(G) \to \mathbb{R}^{2}$, the image of the embedding of the subgraph bounds a face.
+
+Consider the image of the cycle, clearly the embedding is a polygon so by JCT it bounds a face and splits the plane to two path-connected components, the inner face and the outer face. Let $\phi$ be a planar embedding of the graph, then the embedding of the only vertex not in the cycle and all the edges incident with it (which are also not in the cycle) must not cross any of the edges of the polygon, so by the same argument as before the point must lie either in the inner face of the polygon, in which case the polygon is the boundary of the outer face, or on the outer face, in which case the polygon is the boundary of the inner face. In any case, it is the boundary of a face.
+
+## Outerplanarity
+
+A graph is called **outplanar** if there exists a planar embedding of the graph such that all the vertices of the graph lie on the outer face. For example, cycles are outplanar, since they are taken to a single polygon so all the vertices lie on the outer face.
+
+**Theorem**: An acyclic graph is outerplanar.
+
+Let $G$ be acyclic, then $G$ has no cycles, then no planar embedding $\phi$ of $G$ contains a polygon, so every two points in $\mathbb{R}^{2} \setminus \text{Im}{\phi}$ are path-connected, so there is only one path-connected component in embedding, which is the outer face, thus every vertex is embeddded on the outer face, so $G$ is outerplanar.
+
+**Theorem**: $K_{4}$ is not outerplanar.
+
+$K_{4}$ has 4 $C_{3}$ subgraphs (since all vertices are connected so we have $\binom{4}{3}=4$ $C_{3}$ subgraphs), and each subgraph can be extended to $K_{4}$ by introducing another vertex incident with all vertices of the $C_{3}$ subgraph (via connecting edges). $K_{4}$ has 4 vertices, so by a previous result every $C_{3}$ subgraph is taken to a face with the fourth vertex being either in the interior or the exterior of the face, but this argument is true for every 3 vertices of $C_{3}$, such there does not exist a set of 4 vertices of $C_{3}$ that all lie on the same boundary, so there does not exist an embedding in which all 4 vertices of $C_{3}$ lie on the outer face, thus $K_{4}$ is not outerplanar.
+
+![A planar (but not outerplanar) drawing of K4](images/graph_theory/24_k4_planar.svg)
+
+**Theorem**: $K_{2, 3}$ is not outerplanar.
+
+A cycle must visit every vertex once except for the first and the last vertex. $K_{2, 3}$ is a complete bipartite graph, so it consists of 2 groups of vertices $U, |U|=2$ and $W, |W|=3$ such that any vertex of $u$ is connected to all vertices in $w$ and only those, and vice versa. A cycle subgraph must begin and end with the same vertex and must not use the same edge twice. Since we need to start and end at the same vertex, and the graph is bipartite, the cycle must be of even length (because every edge we add to the path take us from one vertex set to the other and we wish to begin and and at the same set). Since vetices and edges must be unique, the maximal cycle is that which visits all vertices of the subset that has the smaller cardinality, so in $K_{2, 3}$ a maximal cycle is a subgraph of $C_{4}$. These cycles can start and end at any vertex of the larger subset, so in total we have 3 $C_{4}$ subgraphs (we can, of course, start from the group with smaller cardinality, but these cycles are isomorphic and only differ in the choice of 2 vertices from the larger subset of vertices, which again gives $\binom{3}{2}=3$ such subgraphs), and introducing the last vertex not in $K_{2, 3}$ completes the subgraph to $K_{2, 3}$. By a previous result, we know that each such $C_{4}$ sugraph is taken to a face under any planar embedding of the graph, with the last vertex either inside or outside the face, and this vertex must belong to $W$. However, since $|W|=3$ and there are 3 such subgraphs, each with a unique vertex $w \in W$ s.t. $w$ is not in the subgraph, we have that there does not exist an embedding of $K_{2, 3}$ in which all vertices of $W$ bound the same face by the same argument as before, thus $K_{2, 3}$ is not outerplanar.
+
+![Planar (but not outerplanar) drawing of K2,3](images/graph_theory/25_k2_3_planar.svg)
+
+Outplanarity deals with an embedding and faces, so it is a *topological* property as well as a graph property, so it makes sense to expect that it will be a topologicla invariant. Indeed, if $\text{geom}(G) \cong \text{geom}(H)$ under some homeomorphism $\psi$ and $\phi$ is an outplanar embedding of $G$, we can compose $\psi^{-1}: \text{geom}(H) \to \text{geom}(G)$ and $\phi$ and get $\phi \circ \psi^{-1}: \text{geom}(H) \to \mathbb{R}^{2}$ an embedding that puts all vertices of $H$ on the outer face, so $H$ is outerplanar, meaning outplanarity is a topological invariant. However, recall that if $G$ is a subdivision of $H$ then the geometric realizations of the graphs are homeomorphic, so we have
+
+**Theorem**: If $G$ is a subdivision of $H$ and $G$ is outerplanar, then $H$ is outerplanar.
+
+From this, it immediately follows that if $G$ is a graph that contains a $K_{4}$ or a $K_{2, 3}$ topological minor, then it is not outerplanar (because as we have shown these graphs are not outerplanar and if $G$ contains a them as a topological minor then they are a subdivision of $G$ so $G$ is also not outerplanar), so if $G$ is outplanar then it does not contain a $K_{4}$ or $K_{2, 3}$ topological minor, which begs the question - is the converse also true?
+
+Consider a graph $G$ which does not contain a $K_{4}$ or $K_{2, 3}$ topological minor, we will later present Kuratowski's theorem which lets us show that such graph $G$ is planar. Assume $G$ is not outerplanar. Since it is not outerplanr, there exists no planar embedding of $G$ in which all vertices lie on the outer face. Recall that faces are bound by cycles, and since $G$ is not outerplanar by a previous result it is not acyclic and must bound at least 1 inner face. Consider a planar embedding $\phi$ which maximizes the number of vertices $U \subset G(V)$ in $G$ s.t. $\phi(U)$ that lie on the outer face, thus we have a subset of $Z \subseteq U$ that is a cycle graph that bounds the inner face. Let $v$ be a vertex in $G(V) \setminus U$ such that $v$ is in an inner face in the embedding. Consider the connectivity between $Z$ and $v$. We have 4 cases, illustrated here and detailed below:
+
+![Cases breakdown for outerplanarity characteristic proof](images/graph_theory/26_outerplanarity_proof_cases.svg)
+
+1. $v$ is not connected to $Z$ via any path, but then $v$ belongs to a different connected component $C \subset G(V)$ that lies in the interior of the face bound by $Z$, so we can move $C$ to the outer face and have a new embedding with more vertices on the outer face, contradicting that this is a maximal embedding, so this case is not possible.
+2. $v$ is connected to a vertex of $Z$ via a single path, but again this means that $v$ is not connected to any other vertex of $Z$ through the path so no vertex in the path has an edge which connects to any other vertex of $Z$ so we can simply move the path to the outer face, contradicting that this is a maximal embedding, so this case is also not possible.
+3. $v$ has two disjoint paths to $Z$, so it is connected to two vertices $u, w \in Z$, but then if $\{u, w \}$ is an edge in the cycle that bounds the face, we can simply move the path to the other side of the face and get an embedding with more vertices on the outer face, but since this is a maximal embedding that can't be the case, so a $u, w$ must not be consecutive, but since they both belong to a cycle they must be connected by two internally disjoint paths, so there must exist two other vertices $a, b$ such that both are members of the two internally disjoint $u, w$ paths. But now we have 5 vertices $v, u, w, a, b$ such that $v, a, b$ are each connected to $u, w$ via a path, and no two vertices of each group is internally connected to another vertex of the same grup via a path that does not contain a vertex from the other group. Consider the subgraph that consists of all these paths: clearly it is a subdivision of $K_{2, 3}$, which contradicts the fact that $G$ does not contain a $K_{4}$ or $K_{2, 3}$ subgraph, so $G$ must be outerplanar.
+4. $v$ has three or more disjoint paths to $Z$, so it is connected to at least three vertices $a, b, c \in Z$, but if we consider the subgraph which contains these three paths, clearly it is a subdivision of $K_{4}$ since $a, b, c$ are all connected to each other via paths in the boundary and are also all connected to $v$, which means that $G$ has $K_{4}$ as a topological minor, which is a contradiction, so $G$ must be outerplanar.
+
+Which proves the converse, and in conclusion we have shown that
+
+**Theorem**: A graph $G$ is outerplanar if and only if it does not contain $K_{4}$ or $K_{2, 3}$ as a topological minor.
+
+## Euler Characteristic
+
+In the setting of planar embeddings, we defined the notion of a face. A face arises from a graph under some embedding, and is a topological object. The same graph can be embedded in different ways which give rise to faces whose boundary consists of the embedding of different vertices and edges of the graph. This motivates a discussion about what properties of a face are topological invariant, i.e. preserved under a homeomorphism.
+
+As a warm up, consider the graph $G=(V, E)$ and the value $|V|-|E|$. As we have seen, $|V|$ and $|E|$ are graph invariants, so they are preserved under a graph isomorphism, which means that the value of $|V|-|E|$ is also a graph invariant. Let $G'$ be the result of an edge subdivision of $G$, so we have $|V'|=|V|+1$ and $|E'|=|E|+1$, which gives $|V'|-|E'|=|V|-|E|$, and in general we can show by induction on the number of subdivisions that if $H$ is a graph subdivision of $G$, $|V_{H}|-|E_{H}|=|V_{G}|-|E_{G}|$. Recall that a graph subdivision maintains the topological structure since we have $\text{geom}(H) \cong \text{geom}(G)$, so we can say that $|V|-|E|$ is a topological invariant.
+
+Let's see some examples: let $C_{K}$ be a cycle. Indeed we have $n$ vertices and $n$ edges in a cycle, so we have $|V|-|E|=0$ for all cycles graphs. Let $G$ be a tree, then we have $|V|-|E|=1$ for all trees. In fact, we can prove a stronger result for a tree: A connected graph $G$ is a tree iff $|V_{G}|-|E_{G}|=1$. To prove the converse, consider that $|V_{G}|-|E_{G}|=1$ can be rearranged as $|E_{G}|=|V_{G}|-1$, an by the sixth equivalent condition we presented in the section on trees, this is true if and only if $G$ is a tree (since we also assumed that $G$ is connected).
+
+The key idea here was to observe that subdividing an edge, which is a homeomorphism (to be precise, this is a misuse of the term, since a homeomorphism is defined on a topological space, but we often think of a graph as its geometric realization or as the image of a particular embedding, so it is tempting to misuse notations for bravity when what we mean is clear), and also preserves $|V|-|E|$ since it adds one edge (by adding two and substracting one) and one vertex, so it is a topological invariant. What happens when we split a face? Well, splitting a face is possible by adding an edge that connects two vertices on the boundary of the face, which breaks the face to two faces bound, thus adding 1 face to the embedding and 1 edge to the graph. Let $\phi$ be an embedding of a planar graph (it is important that the graph be planar, otherwise we cannot properly define faces). Consider $e(G, \phi) = |V_{G}|-|E_{G}|+|F_{\phi}|$, where  $|F_{\phi}|$ is the number of faces in the (image of the) embedding. By subdividing a face, we create a new graph $G'$ such that:
+
+$$
+e(G', \phi) = |V_{G}|-(|E_{G}|+1)+|F_{\phi}|+1 = |V_{G}|-|E_{G}|+|F_{\phi}| = e(G, \phi)
+$$
+
+Which means that $e$ is invariant under face subdivision, but it is still dependent on the embedding $\phi$.
+
+Recall that adding an edge either connects two components, or creates a cycle, which means that if $G$ has $k$ components and we add an edge to construct $G'$, then either $G'$ has $k-1$ components, or it has a new cycle not in $G$. Consider the topological implication of adding an edge: consider the embedding of a graph which has $k$ connected components, then the image of planr embedding has $k$ path-connected components as well. When we add an edge to $G$, the edge is taken to a curve in the embedding, whose ends are two points which are the images of two vertices of the graph under the embedding. Recall the lemma we mentioned without proof when presenting the JCT: in a neighborhood of a point that lies on a curve we can always find two paths along the curve on different sides of the curve. Consider such point on the curve that is the image of the added edge under the embedding. The two sides of the edge are either path-connected, or they are not. If they are path-connected, then the by the JCT both lie on the same face and no new face was introduced. Otherwise, again by the JCT, the curve is part of a boundary between two faces, so it split an existing face and thus introduced a new face. The former is a topological interpretation of an edge that connects two components, and the latter is a topological interpretation of an edge that adds a cycle.
+
+**Theorem**: Let $G$ be a planar graph with $k$ connected components, and let $\phi$ be some planar embedding of $G$, then
+
+$$
+e(G ,\phi) = |V_{G}| - |E_{G}| + |F_{\phi, G}| = 1 + k
+$$
+
+For every planar embedding $\phi$, which means that $e$ is not dependent on $\phi$ and we can actually view $F$ as a topological property of the graph, and not of a particular planar embedding, and instead write:
+
+$$
+e(G) = |V| - |E| + |F| = 1 + k
+$$
+
+This result is known as the [Euler characteristic](https://en.wikipedia.org/wiki/Euler_characteristic), or Euler's Formula (in the plane), and is a topological invariant: recall that $|V|-|E|$ is a topological invariant, so if the theorem is true then the Euler characteristic can be expressed as $|V| - |E| = 1 + k - |F|$, and since the lhs is a topological invariant the rhs must also be at topological invariant. Since the theorem shows that the number of faces in a planar graphs depends only on the graph, then it is also a graph property and a graph invariant.
+
+We prove the theorem by induction on $|E(G)|$. When $|E(G)|=0$, we have no cycles so no Jordan curves and so only a single face (the outer face) for any embedding, and we have $|V|$ isolated vertices, each a connected component, so we have $|V|=k$ and in general we have $|V|-|E|+|F|=|V|+1=k+1$. We construct the graph incrementally by adding a single edge each time. For some $|E(G)|=n$, the last edge introduced, denoted $e$, resulted in either:
+
+1. Connecting two components and maintaining the number of faces.
+2. Creating a cycle and maintaining the number of components, and adding a face.
+
+As we proved earlier. Denote $G'=G \setminus \{e\}$, by the induction hypothesis $e(G')=k_{G'}+1$. In the first case, we have:
+$$
+e(G)= |V(G')| - (|E(G')| + 1) + |F_{\phi, G'}| = e(G') - 1 = k_{G'} + 1 - 1 = k_{G'}
+$$
+And also
+$$
+k_{G} = k_{G'} - 1 \Rightarrow k_{G'} = k_{G} + 1
+$$
+
+So we have:
+$$
+e(G) = 1 + k_{G}
+$$
+
+Which completes the induction. In the second case, we have:
+
+$$
+e(G) = |V(G')| - (|E(G')| + 1) + (|F_{\phi, G'}| + 1) = |V(G')| - |E(G')| + |F_{\phi, G'}| = e(G') = 1 + k_{G'} \underset{k_{G'}=k_{G}}{=} 1 + k_{G}
+$$
+
+Which completes the induction, so in both cases we show that the theorem is true by induction.
+
+Another common form in which the formula is presented is
+
+$$
+n - m + f = 1 + k
+$$
+
+Where $n=|V|, m=|E|, f=|F|$. If the graph is connected, then $k=1$, and we have
+
+$$
+n - m + f = 2
+$$
+
+## Maximal Planar Graphs
+
+Using Euler's characteristic, we can find a tight upper bound on the number of edges and number of faces a planar graph with $|V|=n$ can have. This gives us a simple $O(1)$ test that, when a graph fails it, can tell us that a graph is non-planar.
+
+A **maximal planar graph** is a planar graph such that connecting any two vertices in $G$ not already connected will result in a non-planar graph.
+
+A **triangulation** is an embedding of a planar graph in which every face is bound by 3 edges. This also means that the planar graph is *connected*. For example, the following graph is a triangulation of $K_{4}$
+
+![Triangulation of K4](images/graph_theory/24_k4_planar.svg)
+
+**Theorem**: If a planar graph $G$ is maximal then its embedding is a triangulation.
+
+*Proof*: Assume that $G$ is a maximal planar graph with an embedding that is not a triangulation. A face is bound by a cycle, so if the embedding is not a triangulation at least one face has to be bound by at least 4 (images under an embedding of) edges. Consider such simple $n$-gonal face in $\mathbb{R}^{2}$, with $n \gt 3$. For every simple polygon in the plane, a triangulation exists (this is a geometric result which we prove in a different entry discussing the art gallery problem) by means of internal diagonals, which when viewed as a graph are edges that connect two vertices on the boundary of the polygon, but since the embedding is maximal we shouldn't be able to add such edges, which means that everty face is a triangle, which means that the embedding of a maximal planar graph is a triangulation.
+
+If an embedding of a graph is a triangulation, then every face consists of 3 edges, but since every edge is shared by two faces (which can also be the outer face), we have $\frac{2|E|}{3}$ faces for such graph, so a maximal planar graph has $\frac{2m}{3}$ faces, where $m$ is the number of edges of the graph. Now, by the Euler characteristic, we have:
+
+$$
+\begin{gathered}
+n - m + f \underset{G \text{ is connected}}= 2 \\
+n - m + \frac{2m}{3} = 2 \\
+3n - m = 6 \\
+m = 3n - 6 \\
+\end{gathered}
+$$
+
+Similarly, if we wish to express $f$ in terms of $n$, we get
+$$
+\begin{gathered}
+n - \frac{3f}{2} + f = 2 \\
+2n - f = 4 \\
+f = 2n - 4
+\end{gathered}
+$$
+
+Let $G$ be a planar graph on $n$ vertices, not necessarily maximal, then we can add edges to $G$ to make it the maximal graph on $n$ vertices, which has $3n-6$ edges as we have shown, which means that $G$ must not have more than $3n-6$ edges if it is planar. Similarly, a maximal planar graph has maximal faces, so in total we have
+
+**Theorem**: If $G$ is a planar graph, then
+
+$$
+\begin{gathered}
+m \leq 3n - 6 \\
+f \leq 2n - 4
+\end{gathered}
+$$
+
+**Corollary**: If $G$ is a planar graph, then it must have a vertex with degree strictly less than 6 (otherwise we have $m \geq 3n$ which contradicts the theorem).
+
+Using this result, we can easily verify that $K_{5}$ is non-planar, which would be more difficult to prove constructively and would require careful use of the JCT.
+
+**Theorem**: $K_{5}$ is non-planar.
+
+**Proof**: $K_{5}$ has 5 vertices and $\binom{5}{2}=10$ edges, but the upper bound on the number of edges a planar graph with 5 vertices is $3 \cdot 5 - 6 = 9$, so $K_{5}$ is non-planar.
+
+We can also talk about the connectivity of a maximal planar graph $G$ with at least 4 vertices: since we know that the image of $G$ under a planar embedding is a triangulation, and we have $f=2n-4$ and $3n-6$ which means that adding a vertex to a maximal planar graph (that has at least 3 vertices) adds 2 faces and 3 edges, so we can build a maximal planar graph on $n$ vertices incrementally by adding vertices and 3 edges connected to other vertices in the graph. Consider the maximal planar graph on 3 vertices, which is a triangle $K_{3}$. Next, we add a vertex while maintaining the maximal property of the graph, which as we have seen means connecting the vertex to 3 existing vertices in the graph, which in this case means connecting it to every vertex of $K_{3}$. Since all vertices of $K_{3}$ are connected to each other, and are also each connected to the newly added vertex, we have that the maximal planar graph on 4 vertices is 3-connected. Assume that this holds for a maximal planar graph with $n-1$ vertices, and add a vertex to get the maximal planar graph on $n$ vertices. It is connected to the rest of the graph via 3 distinct vertices, and since the rest of the graph is 3-connected (by the induction hypothesis), we can remove 2 such vertices and still find a path between the new vertex and every other vertex of the graph, which means that the maximal planar graph on $n$ vertices is (at least) 3-connected by induction, so we have
+
+**Theorem**: If $G$ is a maximal planar graph, and $|V(G)| \gt 3$, then $G$ is 3-connected.
+
+**Corollary**: If $G$ is a planar graph, then it must have at least 4 vertices with degree strictly less than 6.
+
+**Proof**: By the handshake lemma we have that the sum of degrees is $2m$. We also have $m \leq 3n-6$, which means that the sum of degrees cannot be greater than $6n-12$. By the last theorem, we have $G$ is 3-connected so by a previous result we have $\delta G \geq 3$, so the lower bound on the sum of vertices is $3n$. If $G$ has at most 3 vertices with degree 5 or less, then we have a lower bound on the sum of degrees of $6(n-3)+3 \delta 6 \geq 6(n-3) + 3 \cdot 3$, which is $6n-9$, which is greater than the upper bound of $6n-12$, which is a contradiction.
+
+# Planar Graphs
+
+## Well-Connected Planar Graphs
+
+A graph is planar if it has an injective drawing $\phi: \text{geom}(G) \to \mathbb{R}^{2}$. In the last section, we presented a few necessary (but not sufficient) conditions that a graph must meet if it is planar. In planar embeddings, we can discuss the faces of a graph that arise from the image of a planar embedding, and have shown that the number of faces is a topological invariant. We have also seen that a cycle graph is taken to a boundary of a face, and if a graph $G$ has cycle subgraphs such that only one vertex of the graph is not a part of the cycle then the cycle is taken to the boundary of a face, inner or outer, in the image of the embedding. However in the general case, it is not necessarily true that a cycle is taken to the boundary of a face. Consider for example this embedding of a graph on 5 vertices:
+
+![The C3 subgraph of this graph is not the boundary of any face](images/graph_theory/26_c3_subgraph_doesnt_bound_face.svg)
+
+Clearly $\{0, 1, 2 \}$ form a $C_{3}$ subgraph, and its image is a Jordan curve in $\mathbb{R}^{2}$, but it is not the boundary of a face in the embedding - clearly any point along the image of the embedding of the edge $\{0, 4 \}$ is also not in $\mathbb{R}^{2} \setminus \text{Im}(\phi)$, so the actual boundary of the inner face of the graph is $\{0, 1, 2, 0, 4 \}$, which is a tour but not a cycle since it visits vertex $0$ twice. However, if we were to move the image of $\{0, 4\}$ to the outer face, then the image of this $C_{3}$ subgraph would be the boundary of an inner face.
+
+This is to be expected, since the proper setting to talk about faces is in the image of the embedding, and it depends on the embedding, but as we know from Euler's characteristic it sometimes makes sense to talk about faces in the context of a graph, which motivates us to ask if there exist certain restrictions on a graph that, if a graph satisfies, lets us talk about properties related to the faces of a planar embedding as a graph property.
+
+Let $G$ be a 2-connected graph, and let $\phi$ be a planar embedding of $G$. Consider a face of $G$ in the embedding, and suppose some face is not bounded by an embedding of a cycle. Let $\partial F$ be the boundary of the face. Since $\partial F$ bounds a face, we can walk along it on either side and eventually get to the starting point since the two sides should be path-connected components. As we walk along the boundary, we keep track of every point that is the image of a vertex of the graph. Eventually, we will have reached the starting point. Consider the sequence of vertices we accumulated - if no vertex is repeated, then the boundary is the image of a cycle, contradicting our assumption, so this case is not possible. If the boundary is not the image of a cycle, then it must be the image of a tour, so a vertex must be visited more than once. Consider each subpath that starts and ends with the same vertex recursively until you find such subpath that does not have any such subpaths of its own. We are guaranteed to find one such subpath, because we know that the boundary is connected so eventually the path must connect back to the starting vertex (since we are dealing with finite graphs). This subpath is connected to the rest of the image of the embedding via that vertex, but since it is a closed curve by the JCT is separates the plane to two distinct path-connected components, which means that this vertex is a cut vertex, which means that $G$ is not 2-connected, which is a contradiction. Similarly, if $\phi$ is a planar embedding of a graph $G$ such that every face in $\text{Im}(\phi)$ is bounded by a cycle, then we assume by contradiction that $G$ is not 2-connected, so there exists two sets of vertices $U, W \subset V(G)$ such that $U \cap W = \{v \}$ for a single $v \in V(G)$, which means that the image of the subgraphs imbued by $U, W$ under the embedding meet at $\phi(v)$, but that means that there exists a boundary walk in $\Im(\phi)$ that walks which passes through $v$ twice, which is a contradiction, so $G$ must be 2-connected.
+
+**Theorem**: $G$ is a 2-connected planar graph if and only if for any embedding $\phi$ of $G$, the faces of $\text{Im}(\phi)$ are bound by cycles of $G$.
+
+However, if $G$ is a 2-connected planar graph, it is still not clear *which* cycles of $G$ bound faces of the image of the embedding. Consider the following example of two embeddings of the same graph
+
+![Two embeddings of the same graph where different cycles bound different faces](images/graph_theory/27_same_graph_different_faces.svg)
+
+Observe that while $G$ is 2-connected and while all faces of each embedding are bound by cycles of $G$ and $|F|$ is invariant as expected, the cycles that bound each face are not the same, and in fact are not even of the same length. We are interested in determining when a cycle bounds a face.
+
+A subgraph $S \subseteq G$ is **not-separating** if $G \setminus S$ is connected. A cycle subgraph $C \subseteq G$ is an **induced cycle** if $\forall u, v \in C$, $\nexists e = \{u, v \}$ such that $e \in E(G) \land e \notin E(C)$, i.e. no edges between two non-consecutive vertices of the cycle exist in the graph (we call such edges *diagonals* or *chords*, so we may also define an induced cycle as a chordless cycle).
+
+**Theorem**: Let $G$ be 3-connected and planar, and let $\phi$ be an embedding of $G$ such that $\underline{G}=\text{Im}(\phi)$. A cycle $C$ of $G$ bounds a face in $\underline{G}$ if and only if it is a non-separting induced cycle of $G$.
+
+To prove the theorem, we require the following lemmas:
+
+**Lemma 1**: If $G$ is a 3-connected planar graph and a cycle of $G$ bounds a face, then it is an induced cycle.
+
+**Proof**: Assume not, then there exists two non-consecutive vertices $u, v \in V(C)$ such that they are adjacent in $G$, which also means that $|V(C)| \gt 3$ because $C_{3} \cong K_{3}$ which is the complete graph on 3 vertices so no edges can be added without making it not-simple, so there also exists two vertices $a, b \in V(C)$. Consider an $(a, b)$-path in $G$. Since $G$ is 3-connected, by Megner's we can find 3 such paths so by the pigeonhole principle at least one of those paths does not pass through $u$ or $v$, but then we consider the vertices $a, b, u, v$: $u$ and $v$ are adjacent by assumption and the Megner's we have a path from $a$ to $b$ which does not go through $u, v$. Since $C$ is a cycle and $a, b, u, v$ all lie on the cycle we can find w path from $u$ to $a$ which does not pass through $b$ and from $u$ to $b$ which does not pass through $a$, and we can find similar paths for $v$, but that would mean we have $K_{4}$ as a topological minor, and since all vertices bound the same face that would imply that $K_{4}$ is outerplanar, which is a contradiction, so the cycle must be induced. This proof is illustrated below:
+
+![Sketch of the lemma](images/graph_theory/28_if_a_cycle_bounds_a_face_it_is_induced.svg)
+
+**Lemma 2**: If $G$ is a 3-connected planar graph that has a cycle $C$ that bounds a face, then the cycle is non-separating.
+
+**Proof**: Let $u, v$ be two vertices of $G$ not in the cycle. By Megner's theorem, there exist three internally disjoint paths from $u$ to $v$. If one of these paths does not pass through a vertex of the cycle, then $u, v$ are connected in $G \setminus C$. Assume that all 3 paths pass through $C$. Let $a, b, c$ be three distinct vertices in $C$ such that each appears in an internally disjoint $(u, v)$-path $p_{1}, p_{2}, p_{3}$. But now we have each of $a, b, c$ connected via an internally disjoint path to each of $u, v$, so we have a $K_{2, 3}$ topological minor as illustrated below, but then $C$ can't be a face, which is a contradiction.
+
+![Sketch of the lemma](images/graph_theory/29_if_cycle_bounds_a_face_it_is_non_separating.svg)
+
+**Lemma 3**: If $G$ is a 3-connected planar graph that has a cycle $C$ that is non-separating and induced, then it bounds a face in any planar embedding of $G$.
+
+**Proof sketch**: If $C$ is non-separating and induced, then we can find an embedding such that all vertices of $G$ are either inside or ourside of the image of $C$ under the embedding, which means that either the interior of $\phi(C)$ or the exterior of $\phi(C)$ has no points of $\text{Im}(\phi)$, so $C$ bounds a face.
+
+**Proof of the theorem**: Lemma 3 proves the *only if* direction. To prove the *if* direction, let $G$ be 3-connected and planar with a cycle $C$ that bounds a face in a planar embedding of $G$. By Lemma 1, it is an induced cycle. By lemma 2, it is also non-separating, which completes the proof. 
+
+This means that for 3-connected planar graphs, we can identify the edges that bound the faces in the image of the embedding just by detecting induced cycles in the graph, which is a graph property and in fact a graph invariant as we have seen, which lets us think of a face as a graph property and not just as a property of the image of an embedding.
+
+**Theorem**: $K_{3, 3} is non-planar.
+
+**Proof**: First, observe that by removing any two vertices from $K_{3, 3}$ we end up with eiher $K_{1, 3}$ or $K_{2, 2}$, both complete bipartite so they are connected, so $K_{3, 3}$ is 3-connected. Assume $K_{3, 3}$ is planar, then any non-separating and induced cycle of $K_{3, 3}$ bounds a face. $K_{3, 3}$ has 9 such cycles (one for each $K_{2, 2}$ subgraph which is non-separating and isomorphic to $C_{4}$), so $K_{3, 3}$ has 9 faces if it is planar, but by Euler's formula we have an uuper limit of the number of faces $f \leq 2n -4=2 \cdot 6 - 4 = 8$, so $K_{3, 3}$ is non-planar.
+
+## Crossing Number
+
+Recall that a planar graph is a graph which can be drawn in the plane without any (images of) edges crossing, i.e. via an injective drawing. If a graph is non-planar, it is still desirable to consider the minimal number of crossing needed for a planar drawing of the graph, since such drawings are tidier and more pleasing. Consider the following drawing of $K_{5}$:
+
+![A planar drawing of K5 with one crossing](images/graph_theory/30_k5_one_crossing.svg)
+
+This is a linear drawing of $K_{5}$ with a single crossing, and as we have proven $K_{5}$ is non-planar, so this is a proof without words that the minimal number of crossings required for a planar drawing of $K_{5}$ is 1. We wish to study this topological property.
+
+To aid in our study, we define a **non-degenerate drawing** as a drawing $\phi: \text{geom}(G) \to \mathbb{R}^{2}$ as a drawing such that:
+$$
+\begin{gather}
+\forall x \in \mathbb{R}^{2}, | \phi^{-1}(x) | \leq 2 \\
+\forall x \in \text{Im}(\phi(V(G))), |\phi ^{-1}(x)| = 1 \\
+\end{gather}
+$$
+
+$(2)$ means that $\phi$ with the restriction to $V(G)$ is injective, and $(1)$ means that no more than 2 points of $\text{geom}(G)$ are mapped to the same point in the drawing. $(1)$ combined with $(2)$ mean that at most 2 edges of $G$ are allowed to cross in under $\phi$, and no crossing on vertices is allowed. Any degenerate drawing can be mapped to a non-degenerate drawing (we will not prove this claim, but you should intuitively be able to believe that this can be achieved by slightly bending the curves the edges are taken to to avoid crossings which violate these conditions, or by slightly moving the edges in case of a linear drawing until no condition is violated).
+
+We define a **crossing** in a non-degenerate drawing as a point $x \in \mathbb{R}^{2}$ such that $|\phi^{-1}(x)|=2$. The **crossing number** of a graph $G$, denoted $cr(G)$, is the minimal number of crossings in a non-degenerate drawing of $G$. We denote it by $\text{cr}(G)$. By defining the crossing number as the minimal number of crossings, we give ourselves the freedom of not having to discuss the crossing number of a particular embedding and so this is a graph property and not a topological property of a particular embedding. For example, the crossing number of a planar graph is $0$.
+
+**Lemma**: If $G \subseteq H$ then $\text{cr}(G) \leq \text{cr}(H)$.
+
+**Proof**: Let $phi: \text{geom}(H) \to \mathbb{R}^{2}$ be the non-degenerate drawing whose number of crossings is $\text{cr}(H)$. Since $G$ is a subgraph of $H$, there exists an injective homomorphism $f: G \to H$, whose geometric realization is given by $\text{geom}(f): \text{geom}(G) \to \text{geom}(H)$ and is also injective (we discussed the geometric realization of a homomorphism in the section on geometric realizations). Consider $\phi \circ \text{geom}(f): \text{geom}(G) \to \mathbb{R}^{2}$, which is a composition of continous functions and thus continous so it is a drawing. Furthermore, we have
+
+$$
+\begin{gathered}
+|(\phi \circ \text{geom}(f))^{-1}(x)| = |\text{geom}(f)^{-1}(\phi^{-1}(x))| \underset{(*)}{\leq} |\phi^{-1}(x)| \underset{(**)}{\leq} 2 \\\\
+(*) \quad \text{geom}(f) \text{ is injective} \\
+(**) \quad \phi \text{ is non-degenerate}
+\end{gathered}
+$$
+
+and
+
+$$
+\begin{gathered}
+\text{Im}(\phi \circ \text{geom}(f))_{V(G)} = \phi(\text{Im}(\text{geom}(f)_{V(G)})) \underset{(*)}{\subseteq} \text{Im}(\phi)_{V_{H}} \\\\
+(*) \quad \text{geom$(f)$ takes geometric realization of vertices of $G$ to vertices of $H$}
+\end{gathered}
+$$
+
+So $\psi = \phi \circ \text{geom}(f)$ is a non-degenerate drawing of $G$. Let $y$ be a crosing of $\psi$, then we have $\psi^{-1}(y) = 2$, and from the first result we have $\psi^{-1}(y) \leq \phi^{-1}(y)$, so $y$ is also a crossing of $\phi$, so the number of crossings in $\psi$ is less than or equal to the number of crossings in $\phi$, so we have a non-degenerate drawing of $G$ such that it has a less or equal number of crossings to that of the crossing number of $H$, and this number must be greater or equal to the crossing number of $G$ since the crossing number of $G$ is minimal, so we have $\text{cr}(G) \leq \text{cr}(H)$, which completes the proof.
+
+**Corollary**: If $G \subseteq H$ and $G$ is non-planar then $H$ is non-planar. This is because $\text{cr}(G)=0$ iff $G$ is planar, so if $G$ is non-planar $\text{cr}(G) \gt 0$, but we also have $\text{cr}(H) \geq \text{cr}(G)$ so it is also greater than 0 and so $H$ is also non-planar.
+
+**Theorem**: Let $H$ be a graph, then $\text{cr}(H)$ is both a graph invariant and a topological invariant.
+
+**Proof**: First we prove that the crossing number is a graph invariant. Suppose $G \cong H$, then we have an injective homomorphism $f: G \to H$, and by the lemma we have $\text{cr}(G) \leq \text{cr}(H)$, but we also have an injective homomorphism $g: H \to G$ so by the lemma $\text{cr}(H) \leq \text{cr}(G)$, so we have $\text{cr}(G) = \text{cr}(H)$, so $\text{cr}(H)$ is a graph invariant. 
+
+To prove that it is also a topological invariant, suppose we have two graphs $G, H$ such that $\text{geom}(G) \cong \text{geom}(H)$ under an homeomorphism $f$, and w.l.o.g assume that $|V(G)| \geq |V(H)|$. Let $\phi: \text{geom}(G) \to \mathbb{R}^{2}$ be a non-degenerate drawing of $G$ with $\text{cr}(G)$ crossings. Since the geometric realizations are homeomorphic, the drawing is also a drawing of $H$ that maps vertices of $H$ of degree other than 2 to vertices of $G$ by a previous result, and vertices of degree 2 to paths with internal degree 2 of $G$, however since these paths have internal degree 2, they can be drawn as a straight line so in a non-degenerate drawing with minimal crossings they can not be crossed, so all crossings must happen on edges which do not correspond to these paths, but those edges correspond to edges of $H$, so the number of crossings in the drawing of $G$ is the same as the number of crossings in the drawing of $H$, so $\text{cr}(G) = \text{cr}(H)$, so the crossing number is a topological invariant.
+
+**Corollary**: If $H$ is a subdivision of $G$, then $\text{cr}(H) = \text{cr}(G)$. (since by a previous result we have that $H$ is homeomorphic to $G$ and by the last theorem we have that the crossing number is a topological invariant)
+
+**Theorem**: If $H$ has a topological minor of a non-planar graph, then $H$ is non-planar.
+
+**Proof**: Let $G$ be a topological minor of $H$ such that $G$ is non-planar, then $H$ has a subgraph isomorphic to a subdivision of $G$. By the last corollary, we have that the crossing number of all subdivisions of $G$ is the same, and since $G$ is non-planar that crossing number is greater than zero. By a previous result, we have that the crossing number of a subgraph is less than or equal to the crossing number of the graph, so the crossing number of $H$ is also greater than zero, so $H$ is non-planar.
+
+**Corollary**: If $K_{5}$ is a topological minor of $H$, then $H$ is non-planar.
+
+**Corollary 2** If $K_{3, 3}$ is a topological minor of $H$, then $H$ is non-planar.
+
+Both results immediately follow from the theorem and the fact that $K_{5}$ and $K_{3, 3}$ are non-planar.
+
+## Bounds on Crossing Number
+
+Now that we have seen that a crossing number is a graph and a topological invariant, we are interested in finding an upper and lower bound on the number of crossings of a graph. A trivial lower bound is $n^{4}$, where $n$ is the number of vertices.
+
+**Theorem**: Let $G$ be a graph with $n$ vertices, then $\text{cr}(G) \lt n^{4}$.
+
+**Proof**: Let $\phi: \text{geom}(G) \to \mathbb{R}^{2}$ be a linear drawing of $G$ such that no 3 vertices are collinear. The restriction of a such drawing to the vertices of $G$ is injective, and no more than two edges may be incident with a point (since that would mean that there exists three edges $\vec{u}, \vec{v}, \vec[w]$ such that $\alpha u + \beta v + \gamma u = 0$ for nonzero scalars $\alpha, \beta, \gamma$, which means that they share collinear ends, which is a contradiction to the fact that we choose a drawing such that no 3 vertices are collinear), so this is a non-degenerate drawing. Because no more than two edges may cross at a point, the maximal number of crossings is realized when every pair of edges cross exactly once. If $G$ has $m$ edges, then this number is $\binom{m}{2}$, but recall that a complete graph has $\binom{n}{2}$ edges so $m$ must not be greater than that, so we have
+
+$$
+\text{cr}(G) \leq \binom{m}{2} = \binom{\binom{n}{2}}{2} = \frac{\binom{n}{2}^{2} - \binom{n}{2}}{2} = \frac{n^{4} - n^{2}}{2} \lt n^{4}
+$$
+
+But is this a tight upper bound? In other words, can we find a graph $G$ such that the number of crossings in $G$ really is of order $n^{4}$? To do this, we consider some lower bounds on graphs.
+
+First, we know that if $G$ is non-planar, then $\text{cr}(G) \geq 1$, but can we do better? Recall that the upper limit on edges for a planar graph is $3n-6$ where $n=|V(G)|$, which means that any edge added after the first $3n-6$ edges must introduce at least one crossing, otherwise we can take a maximal graph with $3n-6$ edges and this edge that can be added to the drawing without introducing a crossng and get a planar graph with more than $3n-6$ edges, which is a violation of Euler's formula, so we have:
+
+**Theorem**: Let $G$ be a graph with $n$ vertices and $m$ edges, then $\text{cr}(G) \geq \min(0,m - 3n + 6)$.
+
+If we take a graph $G$ with at least $4n$ edges (assuming $4n \leq \binom{n}{2}$ which is an upper bound on the number of edges in a simple graph), we have $\text{cr}(G) \geq \Omega(n)$, and in the extreme case where we take a complete graph we get $m=\binom{n}{2}$ which is in the order of $n^{2}$ so we have a lower bound in the order of $\Omega(n^{2})$, but this is still very far from an order of $n^{4}$.
+
+To construct a graph such that it has a crossing number of that order, we will use a probabilistic method, which is common in modern graph theory. The proof itself is quite elegant and surprising, and considered a [book proof](https://en.wikipedia.org/wiki/Proofs_from_THE_BOOK).
+
+**Theorem** - **Crossing Number Inequality**: If $G$ is such that $m \gt 4n$ with $m$ being the number of edges and $n$ the number of vertices, then $\text{cr}(G) \geq \frac{m^{3}}{64n^2}$.
+
+**Corollary**: If $m$ is in order of $n^{2}$, then this gives a lower bound of $\frac{O(n^6)}{O(n^2)}=O(n^4)$, which means that the upper bound is tight. 
+
+**Proof**: Consider a graph $G$. We have $\text{cr}(G) \geq \min(0, m -3n + 6)$ so we have $\text{cr}(G) \geq m - 3n$, which we derived from the Euler formula but this is not a tight lower bound. Consider a random subgraph $H$ of $G$ constructed as follows: each vertex of $G$ has an independent probability $p \in (0, 1)$ to be in $H$, and for such subgraph $H$ we define $E(H)$ to be the set of all edges of vertices $v, u \in V(H)$ such that $\{u, v\} \in E(G)$. Since $H$ is also a graph, we have
+
+$$
+\text{cr}(H) \geq m_{H} - 3n_{H}
+$$
+
+Taking expectations (taking the expected value of each side), we get
+
+$$
+\begin{gathered}
+\mu (\text{cr}(H)) \geq \mu(m_{H}) - \mu(3n_{H}) \\
+\end{gathered}
+$$
+
+And now we have $\mu(3n_{H}) = 3 \mu(n_{H})=3np$ (since we have $n$ vertices of $G$ each with a probability of $p$ of being in $V(H)$). Similarly, the probability of an edge of $G$ being in $H$ is the probability that both its ends are in $H$ which is $p^{2}$, and there are $m$ edges, so we have $\mu(m_{H})=p^2 m$, so we have
+
+$$
+\mu (\text{cr}(H)) \geq p^{2}m - 3np
+$$
+
+Finally, consider a crossing of $G$ under some non-degenerate drawing $\phi$. The crossing is realized by exactly 2 curves under the drawing since it is non-degenerate. Similarly, consider a crossing of $H$ under the same drawing $\phi$. By a previous result, every crossing of $H$ is a crossing of $G$, so the probability that some crossing of $G$ is in $H$ (under $\phi$) is the probability that the crossing curves of the image of the drawing of $G$ are also in the image of the drawing of $H$, which is only possible if both edges are in $H$, so the probability that a crossing of $G$ is in $H$ is $p^{4}$, and there are $\text{cr}(G)$ such crossings, so we have
+
+$$
+p^4 \text{cr}(G) \leq \mu (\text{cr}(H)) \geq p^{2}m - 3np \overset{p \gt 0}{\Rightarrow} \text{cr}(G) \geq \frac{p^{2}m - 3np}{p^{4}}
+$$
+
+If we set $p=\frac{4n}{m}$, which is less than one for $m \gt 4n$, we get
+
+$$
+\text{cr}(G) \geq \frac{m^{3}}{64n^2}
+$$
+
+Which completes the proof.
+
+# Fary's Theorem
+
+While we mostly focused on linear drawings and planar embeddings (that is, drawings such that the geometric realization of edges are taken to straight line segments on the plane), and while we are able to find non-degenerate planar linear drawings for every (simple) graph, we haven't considered the question of whether every *planar graph* has a linear planar embedding, i.e. if given a simple planar graph, it can be drawn on the plane so that its edges are drawn as straight line segments. [Fary's theorem](https://en.wikipedia.org/wiki/F%C3%A1ry%27s_theorem) is a result which states just that.
+
+**Fary's theorem**: If $G$ is a simple planar graph, then there exists a linear planar embedding.
+
+To prove this theorem, we will use the following lemma:
+
+**Lemma**: If $G$ is a maximal planar graph, then there exists a linear planar embedding of $G$.
+
+**Proof of Fary's theorem**: Let $G$ be a simple planar graph, then we can add edges to $G$ until it is maximal. Then, by the lemma, there exists a linear planar embdding $\phi$, and the maximal graph has $G$ as a subgraph. Consider $\phi$ restricted to $G$ -it is a linear drawing, and by a previous result the number of crossing in the image of a drawing of a subgraph is not greater than the number of crossings in the image of a drawing of the graph, so the image of $G$ under $\phi$ cannot have more crossings that the image of the maximal graph under $\phi$, but that number if zero, so $\phi$ is also a linear planar embedding of $G$, and its image is simply that of the maximal graph with the images of the added edges removed.
+
+**Proof of the lemma**: $G$ is maximal planar so by a previous result its embedding is a triangulation, or it has less than 3 vertices in which case the proof is trivial. We prove by induction on the number of vertices in $G$. If $n=3$, then $G$ can be embedded as a triangle and we are done. By a previous result, since $G$ is maximal planar then it has at least 4 vertices with degree strictly less than 6, one of which must not be on the unbounded face. Consider such interval vertex $v$. By removing this vertex, we are left with a face $f$ that is bound by a cycle consisting of at most $5$ vertices. We now have a graph $G'$ such that $|V(G')|=|V(G)|-1$, so by the induction hypothesis we can take the embedding to a linear embedding, and now the face $f$ is a polygon with at most 5 vertices. To make this a linear embedding of $G$, we need to reintroduce $v$. $v$ is incident with all the vertices that define $f$, so to maintain the embedding we need to add $v$ and edges from $v$ to the vertices of the polygon such that no edges cross the boundary of the polygon or each other. This can be modeled as an [art gallery problem](https://en.wikipedia.org/wiki/Art_gallery_problem), which we discuss in detail in a different entry. By the art gallery theorem, we need at most $\lfloor \frac{n}{3} \rfloor$ points so that all points of a simple $n$-gon will be visible from these points, where visibility is defined as the existence of a straight line between the points such that the line doesn't cross the boundary of the $n$-gon. Since the polygon has at most 5 vertices, we have $\lfloor \frac{5}{3} \rfloor = 1$, so we only need one such point, so we set it as the image of $v$ under the embedding and draw the edges accordingly, which completes the proof by induction. This process is illustrated below (illustration taken from Wikipedia)
+
+![Fary's theorem proof steps](https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Fary-induction.svg/1920px-Fary-induction.svg.png)
+
+**Corollary**: Let $G$ be a maximal planar graph, and let $C$ be a cycle which bounds a face of $G$, then there exists a linear planar embedding of $G$ such that the image of $C$ bounds the outer face.
+
+**Proof**: In our proof of the lemma, we can take the face $f$ to be the outer face by induction, without making any other changes to the proof.
+
+Fary's theorem shows that every planar graph has a linear embedding, which means that if we allow for generalized curves in a planar embedding we do not increase the size of the family of graphs that can be embedded in the plane, so moving forward we no longer need to concern ourselves with non-linear planar embeddings.
+

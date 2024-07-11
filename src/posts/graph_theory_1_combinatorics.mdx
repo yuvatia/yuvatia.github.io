@@ -1,0 +1,666 @@
+export const frontmatter = {
+    title: "Graph Theory, Part 1: Combinatorics",
+    date: "2024-07-12",
+    summary: "A brief overview of graph theory from a combinatorical lens",
+    tags: ["graph-theory"]
+    // wip: true
+}
+
+This post is the first in a series of posts on graph theory which originally started out with the aim of explaining Tutte embedding but ended up suffering from a massive [scope creep](https://en.wikipedia.org/wiki/Scope_creep). As such, this series walks the reader through [Professor Don Sheeshy](https://donsheehy.net/)'s [excellent course](https://www.youtube.com/playlist?list=PLVqjIisMyo_9h78itHVS2hZzkthxFHoT7) on graph theory for graduates in [NCSU](https://en.wikipedia.org/wiki/North_Carolina_State_University). Some topics have been expanded upon while others have been abbreviated, a couple of topics have been completely removed and some motivation for graph theory before delving into definition has been added.
+
+In this series we will view graphs as combinatorical objects, then as topological objects, and finally as algebraic objects, drawing connections between the different settings and proving powerful and useful results in graph theory. Graphs are a very simple and abstract structure and so they are ubiquitous in many different topic and so it is worth studying them even if they are not one's main interest. Graph theory provides beatiful and simple results for problems such as the [art gallery problem](https://en.wikipedia.org/wiki/Art_gallery_problem) or the [Euler characteristic](https://en.wikipedia.org/wiki/Euler_characteristic).
+
+Originally written as one (very) long entry, I ended up deciding to break it down to a series to make it ever so slightly more digestable. As such, transitions between posts may seem somewhat arbitrary. Nevertheless, I hope they at least manage to pique the reader's interest. One final note before getting into the content is of the consistency of the writing style - initially I did not want to write this text in the classic mathematical whitepaper form where a theorem is stated and then a proof follows, because to me that style of writing fails to capture a lot of the charm of the discovery inherent to the mathematical process. However, as the text began to cover more and more ground, I found myself having some trouble navigating my own text in an attempt to figure out what claims have been properly proven and what claims have been only postulated or appealed to intuition but still require a more rigorous treatment. It was then that I found that writing format to be extremely valuable - even just for maintaining order and labeling if nothing else. Since this is a decision that I took while writing the text, the first few sections do not follow this style of writing.
+
+And now, some
+
+# Motivation
+
+A chessboard is an $8 \times 8$ grid of squares. A knight is a chess piece that moves in an L-shape, two squares in one direction and one square in a perpendicular direction. The knight's tour problem is an old mathematical problem, with written records dating back to the [9th century AD](https://en.wikipedia.org/wiki/Rudrata#Solving_Knight's_Tour_Problem), which is stated as follows: given an empty chessboard and a knight placed on one of the squares, construct a sequence of moves such that the knight visits every square exactly once. This sequence is called a knight's tour. Here's one such tour:
+
+![Knight's tour](https://upload.wikimedia.org/wikipedia/commons/d/da/Knight%27s_tour_anim_2.gif)
+
+When contemplating the problem, one quickly realizes that the shape of the chessboard is of no consequence. Instead, the problem is entirely about the connectivity of the squares (and the shape of the squares themselves are also irrelevant), which determines the allowed moves the knight can take. Consider, for example, a $3 \times 3$ chessboard:
+
+![3x3 chessboard](images/graph_theory/00_3by3_chessboard.png)
+
+Let us denote the squares of the chessboard by a set of letters and numbers, as such:
+
+$$
+\begin{array}{c|c|c}
+A3 & B3 & C3 \\
+\hline
+A2 & B2 & C2 \\
+\hline
+A1 & B1 & C1
+\end{array}
+$$
+
+Consider a knight place at each one of the vertices. The knight can only move in an L-shape, thus the allowed moves are:
+
+1. $A1 \to B3$
+2. $A1 \to C2$
+3. $B1 \to A3$
+4. $B1 \to C3$
+5. $C1 \to B3$ 
+6. $C1 \to A2$
+7. $A2 \to C3$
+8. $C2 \to A3$
+9. All of the above in the opposite direction.
+
+Notice how we modeled the problem in terms of a set of identifiers and a set of connections between them. Also note how the direction of the connections is irrelevant, as the knight can move in either direction. We can represent this visually as such:
+
+![3x3 Knight's tour graph](images/graph_theory/01_chess_3x3.svg)
+
+From this representation it is easy to see that we can get from every square to every other square including the starting square, except for B2 which cannot be reached, thus there is no knight's tour in a 3 by 3 grid, but the allowed moves form a cycle through all the squares but B2. Note that this is just one way to draw this structure. Convince yourself that this is a different representation of the same graph:
+
+![also a 3x3 knight's tour graph](images/graph_theory/02_chess_3x3_other.svg)
+
+This representation - using identifiers and connections - is called a graph, but instead of "identifiers" we use the term "vertices" or "nodes" and instead of "connections" we use the term "edges". By converting the problem to a graph problem, we were able to discard all irrelevant information and focus on the more general problem.
+
+Let's move our attention towards another, seemingly unrelated problem. Koningberg is a medieval city in Prussia, now known as Kaliningrad, Russia. The city was set on both sides of a river, with two large islands separated from the two portions of the mainland by the river. Seven bridges connected the islands to the mainland and to each other, as illustrated below:
+
+![Konigsberg bridges](https://upload.wikimedia.org/wikipedia/commons/5/5d/Konigsberg_bridges.png)
+
+As the story goes, the citizens of the city were quite fond of walking, and would come up with the challenge of walking around the city such that each bridge is crossed exactly once. This problem is known as the seven bridges of Konigsberg problem. Much like the Knight's tour problem, thinking of this problem quickly reveals that the shape of the city and the pieces of land is irrelevant, but rather only the connectivity between the different regions of the city, which can be abstracted as follows:
+
+![Konigsberg bridges as a graph](images/graph_theory/03_konigsberg.svg)
+
+It was Leonard Euler who came up with this equivalent strcuture for the problem, and with a proof that no such path exists. The paper in which he proved it is considered to be the first paper in the field of graph theory. In the paper, Euler developed an analytic framework which would lay the grounds for what we call graph theory today.
+
+# Set Theory - A Quick Recap
+
+A **set** is a collection of distinct objects. Consider all numbers from 0 to 5 - they are all distinct, and thus we can defined a set containing them. In set notation, we write
+
+$$
+S = \{0, 1, 2, 3, 4, 5\}
+$$
+
+Where $S$ is the same. Instead of explicitly specifying the objects of the set, we can define a set using a membership test. An equivalent definition of $S$ using a membership tests is
+
+$$
+S=\{a \in \mathbb{Z} | a \in [0, 5]\}
+$$
+
+For bravity, throughout this article we will use a notation borrowed from Python's list slicing operator, which we define as such
+
+$$
+[a:b] = \{x \in \mathbb{Z} | a \leq x \leq b\}, [:b] = [0:b]
+$$ 
+
+Thus we can write the set $S$ as $S={a | a \in [0:5]}$ or simply as $S=[0:5]=[:5]$.
+
+We define the **cardinality** of a set as the number of elements it contains, and denote it by $|S|$. In our example, $|S|=6$. A set with cardinality 0 is called the **empty set**, denoted by $\emptyset = \{\}$.
+
+A set $R$ is a **subset** of a set $S$ if all the elements of $R$ are in $S$, we denote this by $R \subseteq S$. Equivalently, we sometimes say that $S$ is a **superset** of $R$. Two sets are said to be equal if they both contain exactly the same elements, which is true iff $S \subseteq R$ and $R \subseteq S$. We denote this equivalence by $S=R$. By definition, the empty set is included in every set, thus it is a subset of every set.
+
+Since a set is itself an object, we can define a set of sets. For example, for our sets $S, R$, we can define a set $U$ s.t. $U=\{S, R\}$. Note that $|U|=2$ if $S \neq R$, and $1$ otherwise. We can also define sets of sets using membership tests, for example
+
+$$
+S=\{\text{all sets that contain the number 2}\}
+$$
+
+We define the following binary operations on two sets $A, B$ (binary in the sense that they operate on two operands):
+1. **Union**, denoted by $\cup$, is the set of all elements that are in either $A$ or $B$ or both. Note that a union is *symmetric*.
+$$
+A \cup B = \{x | x \in A \text{ or } x \in B\}
+$$ 
+2. **Intersection**, denoted by $\cap$, is the set of all elements that are in both $A$ and $B$. Intersections are *symmetric*.
+$$
+A \cap B = \{x | x \in A \text{ and } x \in B\}
+$$
+3. **Difference**, denoted by $A \setminus B$, is the set of all elements that are in $A$ but not in $B$. Note that set difference is *not* symmetric, i.e $A \setminus B \neq B \setminus A$.
+$$
+A \setminus B = \{x | x \in A \text{ and } x \notin B\}
+$$
+4. **Complement** of $A$ with respect to $B$ is denoted by $\overline{A}$ and is the set of all elements that are in $B$ but not in $A$.
+$$
+\overline{A} = B \setminus A
+$$
+5. **Symmetric difference**, denoted by $A \oplus B$, is the set of all elements that are in either $A$ or $B$ but not in both. As the name suggest, it is symmetric. We can write a symmetric difference in terms of set differences and set unions, as
+$$
+A \oplus B = (A \setminus B) \cup (B \setminus A)
+$$
+6. The **cartesian product** of two sets, denoted by $A \times B$, is the set of all ordered pairs $(a, b)$ where $a \in A$ and $b \in B$. For example, if $A=\{1, 2\}$ and $B=\{a, b\}$, then $A \times B = \{(1, a), (1, b), (2, a), (2, b)\}$. The cartesian product is not symmetric, i.e. $A \times B \neq B \times A$.
+$$
+A \times B = \{(a, b) | a \in A \text{ and } b \in B\}
+$$
+
+A **powerset** $P_{S}$ of a set $S$ is the set of all subsets of $S$. Since the empty set is a subset of every set, a powerset always contains the empty set, thus we have 1 as a lower bound on the cardinality of the powerset. For example, given $S=\{0, 1, 2\}$, we have
+
+$$
+P_{S}=\{\emptyset\ , \{0 \}, \{1 \}, \{ 2 \}, \{ 0, 1 \}, \{ 0, 2 \}, \{ 1, 2 \}, \{ 0, 1, 2 \}  \}
+$$
+
+Alternatively, we can define a subset of $P_{S}$ such that all the sets of the subset have the same cardinality. We denote this by $\binom{S}{n}$, where $n$ is the cardinality of the sets in the subset. For example, given $S=\{0, 1, 2\}$, we have $\binom{S}{n}=\{\{0, 1\}, \{0, 2\}, \{1, 2\}\}$.
+
+Observe that in our example, $|P_{S}|=8=2^{3}=2^{|S|}$. This is true in general, and we can prove this by induction on the number of elements in $S$. 
+
+First, if $|S|=0$, we have $P_{S}=\{ \emptyset \}$ and since every number but zero to the power of zero is defined to be 1, we get $|P_{S}|=2^{0}$ and the statement holds. Similarly, for $|S|=1$ we have only two possible subsets - the empty set and $S$ itself, thus we have $|P_{S}|=2$, which is $2^{1}$. Now, we assume that it holds up to $|S|=n$, and denote its powerset $P_{n}$. By adding an element $s$ to $S$, we get a new set $S_{n+1}$. Denote its powerset as $P_{n+1}$. A subset of $S_{n+1}$ either includes $s$ or it does not. Consider the following sets:
+
+$$
+\begin{gathered}
+P'_{n+1} = \{P' \in P_{n+1} | v \notin P' \} \\
+P''_{n+1} = \{P'' \in P_{n+1} | v \in P'' \}
+\end{gathered}
+$$
+
+Clearly, $P'_{n+1} \cup P''_{n+1} = P_{n+1}$. Now, consider a function $f: P'_{n+1} \to P''_{n+1}, p' \mapsto p''$ defined as:
+
+$$
+f(p') = p' \cup \{s\}
+$$
+
+Clearly the image of $f$ is $P''_{n+1}$, and clearly we have an inverse in $f^{-1}=p'' \setminus \{s\}$, thus $f$ is a bijection, which means that the cardinality of the image of $f$ is the same as that of the preimage, which in this case is the entire domain $P'_{n+1}$, thus we get
+
+$$
+|P''_{n+1}|=|P'_{n+1}|
+$$
+
+Now, observe that every member of $P_{n}$ is a subset of $S$ which itself is a subset of $S_{n+1}$, thus $P_{n}$ is a subset of $P_{n+1}$. Furthermore, if a subset of $S_{n+1}$ does not contain $v$ then clearly it is also a subset of $S$ which makes it a member of $P_{n}$, but this exactly how we defined $P'_{n+1}$, thus we have $P'_{n+1}=P_{n}$, so we get
+
+$$
+|P''_{n+1}|=|P_{n}| \underset{\text{induction hypothesis}}{=} 2^{n}
+$$
+
+Which means
+
+$$
+|P_{n+1}|=|P'_{n+1}|+|P''_{n+1}|=2|P_{n}|=2^{n+1}
+$$
+
+Proving the lemma.
+
+Notice that in our proof, we defined a bijection from $P'_{n+1}$ to $P''_{n+1}$. This bijection implies a strong relation between the sets, even though they do not contain exactly the same elements. Perhaps a more obvious and more motivating example is the following sets
+
+$$
+\begin{array}{cc}
+A=\{a, b, c, d \} & B =\{1, 2, 3, 4 \}
+\end{array}
+$$
+
+Clearly $A$ and $B$ seem identical up to the choice of elements, but by definition of set equality they are not the same. However, we can define a function $f: A \to B$ and a function $g: B \to A$ such that $f \circ g: B \to B$ is the identity on $B$, and similarly $g \circ f: A \to A$ is the identity on $A$. We call such construction an **isomorphism** between sets.
+
+Two sets are **isomorphic** iff there exists functions $f: A \to B$, $g: B \to A$ such that $f \circ g$ is the identity on $B$ and $g \circ f$ is the identity on $A$. We denote this by $A \cong B$. Many properties of sets are preserved under an isomorphism, which makes them a powerful tool. One property which we've already seen to be preserved is the cardinality of the sets.
+
+## Set Relations
+
+A **binary relation** $R$ on two sets $A, B$ is a subset of the cartesian product $A \times B$. For example, given the set of natural numbers $\mathbb{N}$, we can define a binary relation $a \gt b$ as follows in terms of a membership test:
+
+$$
+R = (\mathbb{N}, \gt) = \{(a, b) | a, b \in \mathbb{N}, a \gt b\}
+$$
+
+Thus another way to think of binary relations is as a function which takes an element of $A$ and an element of $B$ and returns a boolean result. Note that in our example, $(3, 0)$ is in the relation but $(0, 3)$ is not, which aligns with our usual notation for a comparison between two numbers: $3 \gt 0$ but $0 \ngtr 3$.
+
+We denote two elements related by a binary relation by the tilde symbol:
+$$
+a \overset{R}{\sim} b \vcentcolon= (a, b) \in R
+$$
+
+In our example, we have $3 \overset{\gt}{\sim}0$.
+
+A binary relation may have the following properties:
+
+1. **Reflexive**: A relation on a set $A$ is reflexive iff $\forall a \in A, a \sim a$. For example, the identity relation which is the subset of $\{(a, a) | \forall a \in A \}$ is reflexive.
+2. **Symmetric**: A relation on $A\times B$ is symmetric iff $\forall a \in A, b \in B$ s.t. $a \sim b$, we have $b \sim a$. For example, the equality relation is symmetric ($a=b$ necessiates $b=a$).
+3. **Antisymmetric**: A relation is anti-symmetric iff $\forall a \in A, b \in B$ s.t. $a \sim b$ and $b \sim a$, we have $a=b$. For example, the subset relation is anti-symmetric - if $A \subseteq B$ and $B \subseteq A$ then $A=B$.
+4. **Transitive**: A relation is transitive iff $a \sim b$ and $b \sim c$ implies $a \sim c$. For example, **public inheritance** in C++ is transitive - if $A$ publicly inherits from $B$ and $B$ publicly inherits from $C$, then $A$ publicly inherits from $C$.
+5. **Complete**: A relation is complete iff $\forall a \in A, b \in B$ we have $a \sim b$ or $b \sim a$. For example, the relation $\geq$ is complete on $\mathbb{N}$, however the relation $\gt$ is not complete since if we take $(\mathbb{N}, \gt)$, clearly $\forall n \in \mathbb{N}, n \ngtr n$.
+
+An **equivalence relation** is a binary relation which is *reflexive*, *symmetric* and *transitive*. It is easy to show that our classic notion of equivalance between numbers and algebraic expressions is an equivalance relation. An isomorphism between sets is also an equivalance relation: consider two sets $A, B$, clearly $A \cong A$ since we can compose the identity function with itself to get a bijective mapping $A \to A$, thus it is reflexive. Furthermore, since the construction of the isomorphism is symmetric, if we have $A \cong B$ we can simply reverse the order of the functions to get $B \cong A$, thus it is symmetric. Finally, if $A \cong B$ and $B \cong C$, then clearly we can compose functions from $A \to B$, $B \to A$ and functions from $B \to C$, $C \to B$ s.t. $A \cong C$, thus it is transitive. Thus an isomorphism is an equivalance relation.
+
+A **partial order** is a binary relation which is *reflexive*, *anti-symmetric* and *transitive*. For example, the classic notion of "greater than or equals" for real numbers is a partial order: $\forall a \in R$ we have $a \leq a$ so it is reflexive, if $a \leq b$ and $b \leq a$ then $a=b$ so it is anti-symmetric, and $a \leq b$ and $b \leq c$ implies $a \leq c$ so it is transitive.
+
+# Graph Basics
+
+Consider the examples presented in the beginning of the article. We modeled the problem as a set of elements and connectivity between them. The elements are a set and the connectivity is a symmetric (since the order in which the elements were connected is of no concern to us in the problems we discussed) binary relation on the elements of the set. 
+
+A **graph** is a structure which consists of such elements and binary relations between them. We call the elements *vertices* or *nodes*, denoted by $V$, and the relations *edges*, denoted by $E$. Since a binary relation of a set with itself is a subset of the cartesian product of the set with itself, we can define the edges as a set of sets which consist of two vertices, thus we define a graph by two sets $V, E$ s.t. $E \subseteq \binom{V}{2}$. We denote a graph as $G=(V, E)$. When discussing multiple graphs, we denote the vertices of $G$ as $V(G)$ and the edges of $G$ as $E(G)$ to prevent ambiguity. A graph with no edges is called the **empty graph**. Each vertex $v$ s.t. $\forall e \in E, v \notin e$ is called an **isolated vertex**.
+
+If $E$ is a symmetric relation, then its members are unordered and we say that travel is allowed in both direction, thus $\{v_{1}, v_{2}\} \in E$ means that we go from $v_{1}$ to $v_{2}$ and vice versa. In this case, we say that $G=(V, E)$ is an **undirected graph**. In our previous discussion, the graphs were undirected. For now, we will only discuss undirected graphs.
+
+If the sets are ordered, we say that travel is allowed only in one direction, thus $(v_{1}, v_{2}) \in E$ means that we go from $v_{1}$ to $v_{2}$ but not the other way around. In this case, we say that $G=(V, E)$ is a **directed graph**, and when drawing the edges we use arrows to indicate the direction of travel.
+
+We say that two vertices are *adjacent* or *neighbors* if they are connected by an edge, i.e. two vertices $v_{1}, v_{2} \in V$ are adjacent iff $\{v_{1}, v_{2}\} \in E$. A vertex $v$ and an edge $e$ are *incident* iff $v \in e$.
+
+A **loop** is an edge $e=\{v, v\} | v \in V$.
+
+A **parallel edge** is an edge $e \in E$ such that $\exists e' \in E, e \neq e'$ and $e = e'$. Put it words, two edges are said to be parallel if they connect the same two vertices.
+
+A **simple graph** is one with no loops nor parallel edges. Later we will mostly discuss simple undirected graphs.
+
+The **degree** of a vertex $v$ in a graph is the number of edges incident with $v$. When counting the degree of a vertex, each loop incident with it is counted twice, with the rational being that each end of the loop is coming out of $v$, thus the two ends can be thought of as parallel edges connecting $v$ to a non-existing *loop vertex*. In the 3 by 3 knight's tour problem graph, each vertex has a degree of 2, except for $B2$ which is an *isolated vertex* and has a degree of 0. The degree of $v \in V$ is usually denoted $\text{deg}(v)$, or $\text{deg}_{G}(v)$ to disambiguate the graph with respect to which the degree is being calculated. The minimum vertex degree in a graph is denoted by $\delta(G)$, and the maximum degree is denoted by $\Delta(G)$.
+
+The ordering of all the degrees of the vertices in descending order is called a **degree sequence**. Degree sequences which represent valid graphs are called **graphical**.
+
+An important result related to degree sequences is the **handshake lemma**. The lemma states that in any graph, the sum of the degrees of all the vertices is equal to twice the number of edges
+
+$$
+\sum_{v \in V} \text{deg}(v) = 2|E|
+$$
+
+This result is also known as the *degree sum formula*. Convince yourself that this is true by considering that each edge is incident with two vertices, thus contributing 2 to the sum of degrees, thus the sum of degrees must be twice the number of edges. This also motivates counting the degree of a loop as 2. A proper proof by induction can be formulated as follows - consider a graph with 0 edges, clearly all vertex degrees are 0 and the formula holds. When $|E|=1$, clearly both endpoints of $e$ have degree 1, thus the sum of degrees is $2$, and the formula holds. Now we assume that it is true for some $|E|=n$, and consider the case of $|E|=n+1$. By introducing a new edge to the graph, we have necessarily increased the sum of degrees by two, thus we have a new sum that is $2n+2=2(n+1)=2|E|$, completing our proof.
+
+An immediate result of the handshake lemma, sometimes referred to as the handshake lemma itself, is that the number of vertices of odd degree in a graph is always even. This is because the sum of degrees is always even, and if we have an odd number of odd degree vertices, then the sum of degrees would be odd, which contradicts the handshake lemma. We sometimes call a vertex with an odd degree an **odd vertex**. The handshake lemma and its results provide us with a way of testing if a degree sequence is graphical.
+
+## Fundamental Graphs
+
+It is beneficial to discuss a few elementary example of graphs that maintain certain properties to get a better feel for graphs. As we will soon see, these basic examples can be used to characterize the properties of more general graphs.
+
+First, consider a graph with $n$ vertices $V=[0:n-1]$ and all possible edges between them, meaning that the relation is not only symmetric but also complete, i.e. $E=\binom{V}{2}$. We call this graph the **complete graph** on $n$ vertices, denoted by $K_{n}$, or a **clique** if it is found as a subgraph. The degree of each vertex in a complete graph is $n-1$, since each vertex is connected to every other vertex. We can write $K_{n}$ is set notation as
+
+$$
+K_{n} = (V, E) = ([:n-1], \binom{V}{2})
+$$
+
+Below is a drawing of $K_{5}$
+
+![Drawing of K5](images/graph_theory/04_k5.svg)
+
+While a drawing may be more intuitive, note that a drawing of a graph is not unique, so special cares needs to be taken when using drawings to reason about graphs and derive theorems and algorithms. As an example, consider the following two drawings, both are drawings of $K_{4}$ yet are different
+
+![Two drawings of K4](images/graph_theory/05_k4_two_ways.svg)
+
+We will define drawings formally in a later section.
+
+The number of edges in a complete graph is given by the binomial coefficient $\binom{n}{2} = \frac{n(n-1)}{2}$.
+
+Another important graph is the **path graph**. A path graph is a graph with $m$ edges and $m+1$ vertices $V=[:m]$ s.t. each vertex but the first and the last is connected to the vertex before and after it via an edge, thus we have $\text{deg}(v)=2$ if $v \neq 0, m$ and $\text{deg}(v)=1$ if $v=0, m$. We denote the graph path on $m$ edges as $P_{m}$. We can think of a path graph as the path of a bus - each vertex is a bus stop and each edge is a road connecting two bus stops. In set notation, we write
+
+$$
+P_{m} = (V, E) = ([:m], \{\{i, i+1\} | i \in [:m-1]\})
+$$
+
+A **cycle graph** is a path graph where the first and last vertex are connected. A cycle graph with $n$ vertices is denoted by $C_{n}$. In set notaton, we have
+
+$$
+C_{n} = (V, E) = ([:n-1], \{\{i, i+1 \mod (n-1) \} | i \in [:n-2] \})
+$$
+
+In a cycle graph, we have $\lambda v = \Lambda v = 2$. This folllows quickly from the set notation of $C_{n}$: since each vertex belongs to two edges, then the degree of all vertices in a cycle graph is 2.
+
+A **star graph** is a graph with $m$ edges and $m+1$ vertices such that one vertex is connected to all other vertices, thus it has degree $m$ and the rest have degree $1$. In set notation, we write
+
+$$
+P_{m} = (V, E) = ([:m], \{\{m, i\} | i \in [:m-1]\})
+$$
+
+Below is a drawing of $S_{6}$
+
+![S6](images/graph_theory/06_s6.svg)
+
+A graph is **bipartite** if its vertices $V$ can be partitioned into two disjoint sets $U, W$ such that no edge connects a vertex from $U$ to a vertex in $W$: $E \subseteq U \times W$. A bipartite graph is sometimes denoted as $G=(U \cup W, E)$ to illustrate that the vertices are distinct sets. For example, in the following drawing we have a bipartite graph with $U=\{a, b, c\}$ and $W=\{d, e\}$:
+
+![A bipartite graph](images/graph_theory/07_bipartite.svg)
+
+A simple graph is **complete bipartite** if it is bipartite and $E=U \times W$. The cannonical family of complete bipartite graphs is denoted by $K_{n, m}$ where $n, m$ are the cardinalities of $U, W$ and we have $U=[:n-1]$ and $W=[n:m-n-1]$. Note that the order doesn't matter - $K_{2, 3}=K_{3, 2}$. Below is a drawing of $K_{3, 2}$
+
+![K3,2](images/graph_theory/08_k3_2.svg)
+
+# Relations on Graphs
+
+Consider two graphs $G, H$. We wish to extend the binary relations between sets which we have introduced earlier to graphs.
+
+We say that the two graphs are **equal** iff the sets of vertices and edges are equal
+
+$$
+G=H \iff V(G)=V(H) \land E(G)=E(H)
+$$
+
+A graph $H$ is a **subgraph** of $G$ if $V(H) \subseteq V(G)$ and $E(H) \subseteq E(G)$. We denote this by $H \subseteq G$. Note that we can't take any arbitrary subset of $E(G)$ - for $H$ to be a graph we must have $E(H) \subseteq \binom{V(H)}{2}$, thus we can only take edges which are incident with the vertices in $V(H)$.
+
+A subgraph is constructed as a sequence of operations which can be split to two categories:
+1. *Edge deletion*: given a graph $V(G), V(E)$, we can take any subset $H(E) \subseteq V(E)$ and create a new graph $H=V(G), H(E)$. Since $V(H)=V(G)$, we have $H(E) \subset \binom{V(H)}{2}$, thus $H$ is a graph. Such graph is called a **spanning subgraph**.
+2. *Vertex deletion*: given a graph $V(G), V(E)$, we can remove a vertex $v$ and all the edges incident with it to get a new graph $H=(V(G) \setminus \{v\}, E(G) \setminus \{e | v \in e\})$. Observe that this graph also meets the condition for a graph. We call such graph an **induced subgraph**. The graph created by removing all vertices not adjacent to a vertex $v$ is called the **neighborhood** of $v$.
+
+Any subgraph of $G$ can be constructed using a sequence of edge deletions and vertex deletions. This is trivial to prove using the transitive property of the subset relation and the definition of a graph.
+
+Two graphs $G, H$ are **isomorphic** iff there exists a bijection $f: V(G) \to V(H)$ such that $\{u, v \} \in E(G) \iff \{f(u), f(v)\} \in E(H)$. We denote this by $G \cong H$. An isomorphism between graphs preserves the abstract structure of a graph, i.e. the relations between vertices, and thus two graphs being isomorphic is essentially the same as the two graphs being equal, and in the case of unlabeled graphs (i.e. graphs where we don't explictly label the members of $V$), both definitions are in fact the same. 
+
+As an example, consider the graphs $G=(\{A, B, C\}, \binom{V(G)}{2})$ and $C_{3}$. Clearly $V(G) \neq V(C_{3})$ thus $G \neq C_{3}$, however given the bijective map $f$ which maps $A, B, C$ to $0, 1, 2$ respectively, it is trivial to show that $f$ is an isomorphism, thus we have $G \cong C_{3}$ under $f$. Note that an isomorphism isn't unique - consider the map $h$ which takes $B, C, A$ to $0, 1, 2$, clearly $h(B) \neq f(B)$ thus $h \neq f$, however it is easy to show that $h$ is also an isomorphism between the graphs.
+
+Consider the following graph $G$:
+
+![graph isomorphism](images/graph_theory/09_C3_isomorphism.svg)
+
+Clearly, the graph $H=(\{A, B, C\}, \{\{A, B\}, \{B, C\}, \{C, A\}\})$ is a subgraph of $G$, thus we have $H \subseteq G$. Observe that $E(H)=\binom{V(H)}{2}$, thus we have $H \cong C_{3}$, and we also have $H \subseteq G$, so we have $C_{3}$ isomorphic to a subgraph of $G$. Since an isomorphism often captures all the properties of a graph we care about, we often abuse the notation of a subgraph and write $C_{3} \subseteq G$ to mean that $C_{3}$ is isomorphic to a subgraph of $G$.
+
+Recall that we defined set isomorphism as the composition of two functions on the sets. We would like to construct an equivalent definition for graph isomorphism, that is equivalent to the more natural definition of an isomorphism which we presented above. We will do this by introducing a new definition - a *homomorphism*.
+
+A *homomorphism* between two graphs $G, H$ is a pair of functions $f_{V}, f_{E}$ such that
+1. $f_{V}: V(G) \to V(H)$
+2. $f_{E}: E(G) \to E(H)$
+3. $\forall \{u, v \} \in E(G), f_{E}(\{u, v \}) = \{f_{V}(v), f_{V}(u)\}$
+
+We denote a homomorphism by $f: G \to H, f=(f_{V}, f_{E})$. Observe that the third requirement means that $f_{E}$ is uniquely determined by $f_{V}$ to be $f_{E}(\{u, v\})=\{f_{V}(u), f_{V}(v)\}$.
+
+Unlike an isomorphism, a homomorphism needn't be bijective. For example, consider the graphs $K_{2}$ and $C_{4}$. Clearly we cannot construct a bijection $f_{V}: V(K_{2}) \to V(C_{4})$ since $|V(C_{4})| \gt |V(K_{2})|$, however consider the following function:
+
+$$
+\begin{gathered}
+f_{V}: V(C_{4}) \to V(K_{2})\\
+f_{V}(v) = \begin{cases} 0 & \text{v is even} \\ 1 & \text{v is odd} \end{cases} \\ \\
+\end{gathered}
+$$
+
+Observe that by our set notation definition of $C_{4}$, it consists of edges of the form $\{i, i+1 \mod 4\}$. If $i$ is odd, then $i+1$ is even and $i+1 \mod 4$ is even, similarly if $i$ is even then $i+1 \mod 4$ is odd, thus in terms of parity, all edges of $C_{4}$ are of the form $\{ \text{even}, \text{odd} \}$ (disregarding the order since it is an unordered set), thus we get $f_{E} = \{f_{V}(\text{even}), f_{V}(\text{odd})\} = \{0, 1\} \in E(K_{2})$, thus we have a homomorphism $f: C_{4} \to K_{2}$. To convince yourself that $C_{4}$ and $K_{2}$ are isomorphic, consider the following: $K_{2}$ connects two vertices, which can be thought of as two distinct groups (remember that a set can also be a set of sets). In $C_{4}$, we have edges between $0$ and $1$, $1$ and $2$, $2$ and $3$, and $3$ and $0$, notice that there are no edges between $0$ and $2$ or between $1$ and $3$, thus $C_{4}$ is bipartite. In a bipartite graph, we think of the vertices of the graphs as the union of two distinct sets, and the only allowed edges are those that are in the cartesian product of the sets, i.e. those that connect the two sets. By mapping the distinct vertices sets to distinct vertices, we can capture this property of the graph by a single edge conencting the vertices. This is a more intuitive interpretation of a homomorphism. 
+
+In fact, we can show that **a graph is bipartite iff it is homomorphic to $K_{2}$**. Consider a graph $G$. If $G$ is bipartite, then we have $V(G)=U \cup W$ s.t. $U \cap W = \emptyset$. Consider the function $f_{V}: V(G) \to V(K_{2})$ defined as follows
+
+$$
+f_{V}(v) = \begin{cases}
+0 & v \in U \\
+1 & v \in W
+\end{cases}
+$$
+
+Consider an edge $e=\{u, w\} \in E(G)$. By definition of a bipartite set we have $u \in U$ and $w \in W$, so we have $f_{E}(e)=\{0, 1 \}$ which is an edge in $K_{2}$, thus completing the first part of the proof.
+
+Next, consider a graph $G$ homomorphic to $K_{2}$, thus there exists functions $f_{E}$ and $f_{V}$ s.t. $f_{E}(\{u, w\})=\{f_{V}(u), f_{V}(w)\}=\{0, 1\}$ (since that is the only edge of $K_{2}$). If $G$ is the empty graph, then it's vacously true that $G$ is bipartite. Next, denote $U$ to be the preimage of $0$, and $W$ to be the preimage of $1$. To prove that $G$ is bipartite, we need to show that no edge exists between two vertices of $U$ or two vertices of $W$. The proof is symmetric for both cases so w.l.o.g we will prove it for $U$. Let $u_{1}, u_{2}$ be two vertices of $U$, not necessarily distinct (to allow for loops as well), such that $e=\{u_{1}, u_{2}\} \in V(G)$. Since $G$ is homomorphic to $K_{2}$, $f_{E}(e) \in E(K_{2})$, however $f_{E}(e)=\{0, 0 \}$ which is clearly $\notin E(K_{2})$, which is a contradiction. Thus no inner-group edges are in $G$, thus $G$ is bipartite with vertices sets $U, W$. A related result is that every cycle graph with an odd number of vertices is bipartite, and every cycle graph with an even number of vertices is not bipartite. This result can be shown by making some slight modifications to our proof that $C_{4}$ is homomorphic to $K_{2}$, and showing that adding a vertex to the cycle breaks the homomorphism.
+
+Using graph homomorphism, we can provide an equivalent definition to graph isomoprhism: two graphs $G, H$ are *isomorphic* iff there exists a homomorphism $f: G \to H$ and $g: H \to G$ s.t. $f \circ g = I_{G}$ and $g \circ f = I_{H}$, where $I$ is the identity and the identity on a graph $G$ and a composition of homomorphisms is defined as a pair of functions which are the composition of each function of each homomorphism, i.e $f \circ g = (f_{V} \circ g_{V}, f_{E} \circ g_{E})$. It can be shown that this definition is equivalent to the one we presented earlier.
+
+With this basic set of tools, we can already identify some **graph invariants**, i.e. properties of a graph which are preserved under an isomoprhism. We shall provide an initial least here, and extend it as we present more definitions.
+
+First, the cardinalities of $V$ and $E$ are preserved under an isomoprhism. This is trivial to show with the first definition of an isomorphism - for $f: V_{G} \to V_{H}$ to be a bijection, the image and the preimage should be of the same cardinality.
+
+Consider a vertex $v \in V_{G}$. Under an isomoprhism, we have a one-to-one relation $\{v, v'\} \mapsto \{f(v), f(v')\}$, where $v'$ is a neighbor of $v$, thus the *degree* of $v$ is preserved under an isomorphism, which means that *degree sequences* are also preserved.
+
+Another property of a graph is the state of being bipartite (or not). Recall that we have shown that a graph is bipartite iff it is homomorphic to $K_{2}$. Let $G$ be isomorphic to $H$, then there exists a homomorphism $f: G \to H$. Let $H$ be bipartite, thus it is homoromphic to $K_{2}$ under $g: H \to K_{2}$. It is easy to show that a homomorphism is transitive, and thus we have $g \circ f: G \to K_{2}$, thus $G$ is bipartite. The converse is also true - we can prove this by contradiction using the same argument.
+
+One last property is the notion of a a graph $G$ being isomorphic to a subgraph of $H$. Let $K \cong G$. Since an isomorphism is an equivalence relation, it is transitive, thus we have $K$ also isomorphic to a subgraph of $H$.
+
+In summary, we have the following properties preserved under an isomorphism:
+1. The cardinality of $V$ and $E$.
+2. The degree of vertices and the degree sequence of the graph.
+3. The bipartite state of the graph.
+4. The property of being isomorphic to a subgraph of another graph.
+
+As we gather more tools and properties to describe graphs, we will check whether or not they are graph invariants. Much to our delight, we will see that almost all relevant properties are invariant.
+
+# Graph Coloring
+
+Consider the following problem - you are planning a seating arrangment for a wedding. However, not all guests can sit next to each other due to bad blood and other reasons. This problem can also be modeled as a graph problem, by taking the guests as vertices and mapping the "seatability" of pairs of guests as edges - if two guests cannot sit next to each other, we add an edge. This is somewhat counter-intuitive since when drawing a graph, we draw edges as connections between vertices, and in this case we are drawing edges to represent a conflict, i.e. a lack of connection. However, if we think back to our definition of a graph and of edges of a graph as a binary relation, this should make sense - we are simply defining a binary relation between the guests.
+
+Consider a simple case - assume you have 4 guests numbered $[1:4]$ s.t. $1$ and $3$ can't sit next to $2$ or $4$, modeled as a graph in the following drawing:
+
+![Wedding planar graph](images/graph_theory/10_wedding_planar.svg)
+
+One viable sitting arrangment would be one that partitions the guests into different tables, such that each table has no conflicts. In our example, it is obvious that we need two tables - one for persons $1$ and $3$, and one for persons $2$ and $4$. This is denoted in the graph by the colors assigned to each vertex - each color maps to a different table. Note how adjacent vertices have different colors. This is called a *graph coloring*.
+
+Let us define graph coloring properly. A **graph coloring** of a graph $G$ is a mapping $c_{V}: V(G) \to V(C)$, where $V(C)$ is a set of *colors*, such that $\forall e=\{u, v\} \in E(G), c_{V}(u) \neq c_{V}(v)$, i.e. adjacent vertices are assigned different colors. Such coloring is also called a *proper coloring*. For simplicity, we will denote $V(C)$ by $[:k-1]$ if $|V(C)|=k$. In our example, we have $k=2$. We say that a graph is **k-colorable** if a coloring with $k$ colors exists. We see that the graph in our example is $2$-colorable.
+
+Observe that our example is a coloring of a graph isomorphic to $C_{4}$, which is bipartite and homomorphic to $K_{2}$. Since a coloring is a partitioning of vertices into distinct sets, we can think of a coloring as an extension of a bipartite graph to $k$ different sets.
+
+We have seen that a graph is bipartite iff it is homomorphic to $K_{2}$. Since we reason about graph coloring as an extension of the notion of a bipartite graph, it is reasonable to ask - given a graph coloring with $n$ colors, can we view the coloring as a homomorphism with $K_{n}$? The answer is yes, and in fact a stronger statement is true: **A graph $G$ is n-colorable iff there exists a homomorphism $c: G \to K_{n}$, with $c$ being the coloring.**
+
+For the first direction, consider a graph $G$ which is $n$-colorable, then there exists a function $c_{V}: V(G) \to [:n-1]$ such that $\forall \{u, v \} \in E(G), c(u) \neq c(v)$. Consider the function $c_{E}: \{u , v \} \in E(G) \mapsto \{c(u), c(v)\}$. Clearly $c(u), c(v) \in V(K_{n})$ and since $\{c(u), c(v) \} \in \binom{V(K_{n})}{2}$, we have $c_{E}: E(G) \to E(K_{n})$, thus we have $c=(c_{V}, c_{E}): G \to K_{n}$ a homomorphism.
+
+For the other direction, let $c: G \to K_{n}$. Assume by contradiction that $c_{V}$ is not a coloring, thus $\exists \{u, v\} \in E(G), c_{V}(u)=c_{V}(v)$, which means that both vertices are mapped to the same edge. Since $c$ is a homomorphism, then $c_{E}(\{u, v\})=\{c_{V}(u), c_{V}(v)\} \in E(K_{n})$. However, if $c_{V}(u)=c_{V}(v)$, then the edge $\{u, v \}$ is not mapped to an edge, thus $c_{E}$ is not a map from $E(G)$ to $E(K_{n})$, which contradicts $c$ being a homomorphism. Thus by contradiction we have $c_{V}$ is a coloring.
+
+The **chromatic number** of a graph is the minimum number of colors needed to achieve a proper coloring of the graph, denoted by $\chi(G)$. Since we require that adjacent vertices will get different colors, we have a lower bound $\chi(G) \geq \Delta(G)$. Since a bipartite graph is homomorphic to $K_{2}$, we have $\chi(G)=2$ for every bipartite graph. The chromatic number is a graph invariant, and this can be proved directly from the fact that a graph coloring is a homomorphism to $K_{n}$, thus if $G \cong H$ and $\chi(G)=n$ then there exists $f: G \to K_{n}$ and since $G \cong H$ under some $f$ we can compose $c \circ f$ to get a homomorphism $H \to K_{n}$, thus $\chi(G) = \chi(H)$.
+
+# Walks
+
+In the bridges of Konigsberg problem, we are looking for a way to take a walk around the city such that we cross each bridge once. When modeling the problem as a graph, the graph becomes a map of the different regions of the city, which are connected by edges representing the bridges that we can physically walk across, and a solution would be one where we "go for a walk" on the graph. This motivates the definition of a **walk** in a graph.
+
+
+A **walk** in $G$ is an ordered sequence of $n$ edges $(e_{1}, e_{2}, \dots, e_{n}) \in E(G)$ and on ordered sequence of $n+1$ vertices $(v_{0}, v_{1}, \dots, v_{n})$, such that $e_{i}=\{v_{i-1}, v_{i}\}$. In a simple graph, we disallow parallel edges, thus a walk in a simple graph is strictly defined by its sequence of vertices $(v_{0}, v_{1}, \dots, v_{n} )$ s.t $\{v_{i}, v_{i+1} \} \in E(G) | i \in [:n-1]$. Consider the following graph
+
+![walk graph](images/graph_theory/11_walk.svg)
+
+The sequence $(b, c, d, c, e)$ is a walk on the graph. We can convince ourself that this is true visually by tracking the path on the graph with our finger such that the finger is only allowed to move along the edges of the graph, as long as we do not need to lift our finger to move to the next vertex in the walk, the walk is valid. Note that in our walk, we repeat the edge $\{c, d\}$ and the vertex $c$ twice - this is allowed in a walk. We soon introduce more strict definitions based off a walk in which this will not be allowed, and there the vertices and edges of a walk will be proper sets.
+
+We will use the definition of a walk to define other properties of a graph. Whenever we define a property, we would like to check if it is a graph invariant. We have seen that proving that a property is a graph invariance is easy if it follows from a homomorphism, thus we would like to provide an equivalent definition for a walk via a homomorphism.
+
+We have already seen a family of graphs which exhibits a walk - the path graph. Indeed, we can define a walk as homomorphism to the cannonical path graph. Consider a walk $w$ on a graph $G$ with vertex sequence $v_{w}$ such that $|v_{w}|=m+1$ and edge seequnce $e_{w}$ such that $|e_{w}|=m$, and the cannonical path graph $P_{m}$. Recall our definition for $P_{m}$: 
+
+$$
+P_{m} = (V, E) = ([:m], \{\{i, i+1\} | i \in [:m-1]\})
+$$
+
+We define $w: P_{m} \to G = (w_{V}, w_{E})$ as follows
+
+$$
+\begin{gathered}
+w_{V}: V(P_{m}) \to V(G), i \mapsto v, \\
+w_{V}(i) = v_{{w}_{i}} \\\\
+
+w_{E}: E(P_{m}) \to E(G), \{i, i+1\} \mapsto e, \\
+w_{E}(\{i, i+1\}) = \{v_{{w}_{i}}, v_{{w}_{i+1}}\} = e_{w_{i}}
+\end{gathered}
+$$
+
+Clearly, $w$ is a homomorphism from $P_{m}$ to $G$, thus a walk is a homomorphism from $P_{m}$ to $G$. One can easily verify that the converse is also true - if $w: P_{m} \to G$ is a homomorphism, then the image of $w$ is a walk on $G$. In our example, the homomorphism takes the vertices $\{0, 1, 2, 3, 4 \}$ of $P_{5}$ to $(b, c, d, c, e)$, while taking the edges to edges in $G$. Note that the edges $\{1, 2 \}$ and $\{2, 3 \}$ both get taken to the edge $\{c, d \}$, thus the mapping is not injective.
+
+A **trail** is a walk with no repeated edges, i.e. the image of $w_{E}$ is a set, i.e. $w_{E}$ is injective. A **path** is a walk with no repeated vertices, i.e. $w$ is injective.  A **closed walk** is a walk that starts and ends at the same vertex, i.e. $v_{0}=v_{n}$. A **tour** is a closed walk with no repeating edges, i.e. $w_{E}$ is injective. A **cycle** is a closed path, i.e. a closed walk where $w$ is injective. A graph with no cycles is called **acyclic**.
+
+Since we already defined a fundamental family of graphs that have this cycle property - the cannonical cycle graphs $C_{k}$ - it makes sense to define a closed walk on $n$ vertices on $G$ as a homomorphism $w: C_{n} \to G$ by mapping every vertex of $C_{n}$ to the corresponding vertex of the walk, i.e. $i \mapsto v_{w_{i}}$. Using this definition, it is easy to show that having a cycle is a graph invariant - if $G \cong H$ and $G$ has a cycle, then there exists a homomorphism $f: C_{K} \to G$ and a homomorphism $g: G \to H$, so we can construct a homomorphism $g \circ f: C_{K} \to H$, thus $G$ is also homomorphic to $C_{K}$, thus $G$ also has a cycle. If $H$ has a cycle, then we follow the same proof to compound a homomorphism $C_{k} \to H$ and $H \to G$.
+
+# Connectivity
+
+Edges are connections between adjacent vertices. If we wish to travel between two vertices in a graph, we go for a walk. Given two vertices $u, v \in V$, we define a $(u,v)$-walk as a walk starting at $u$ and ending at $v$. Generally, there is not always a $(u, v)$-walk between any two vertices in a graph. As a trivial example, if $G$ has an isolated vertex and we take it as $v$, clearly no $(u, v)$-walk exists.
+
+A graph $G$ is **connected** iff $\forall u, v \in V(G), \exists w: P_{K} \to G$ such that $w$ is a $(u, v)$-walk. Informally, a graph is connected if we can get from any vertex to any other vertex by means of traveling along the edges of the graph. A graph is **disconnected** if it is not connected.
+
+Let $H \cong G$ under $f$, and let $G$ be connected. We wish to prove that being connected is a graph invariant. To do that, we need to show that $\forall u, v \in V(H)$, there exists a $(u,v)$-walk in $H$. Consider $f_{V}(u), f_{V}(v) \in V(G)$. Since $G$ is connected, there exists a walk between these vertices in $G$, i.e. we have a homomorphism $w: P_{K} \to G$ s.t. $w_{V}(0)=f_{V}(u)$ and $w_{V}(K)=f_{V}(v)$. $f$ is an isomorphism we have $f^{-1}: G \to H$ s.t. $f^{-1}\circ f = I_{H}$. By composition, we have $f^{-1} \circ w: P_{K} \to H$ a walk in $H$, with $(f^{-1} \circ w)_{V}(0)= f^{-1}_{V}f_{V}(u)=u$, and similarly we have $(f^{-1} \circ w)_{V}(K)=v$, thus $f^{-1}\circ w$ is a $(u-v)$-walk in $H$, and since we didn't limit our choice of $u, v$, we have $H$ connected. Proving the opposite direction follows a symmetrical argument, but this time we compose a walk $f \circ w: P_{K} \to G$.
+
+Consider the following graph:
+
+![connected components](images/graph_theory/12_connected_components.svg)
+
+Identify that the subsets of the graph induced by the vertices $\{1, 2, 3 \}$ and their incident edges, and the graph induced by $\{4, 5, 6\}$ and their incident edges. Observe that they are connected and that no edge incident with any vertex of either subgraph exists outside of the subgraph. We call these **components**, or **connected components**. A connected component is a maximal connected subgraph. In graph theory, when we say that something is "maximal" or "minimal" followed by a property, we mean that it is the largest or smallest such subgraph that maintains the property. In this case, when we say that a connected component is a maximal connected subgraph, we mean that a union of a connected component and any other edge or vertex from the larger graph will result in a disconnected subgraph, disconnecting the component. This idea can be illustrated in our example by considering any subgraph induced by $\{1, 2, 3\}$ and any of $\{4, 5, 6\}$ - since they belong to two distinct connected components of the same graph, no edge can connect them and so we say they are maximal connected. On the other hand, consider the subgraph induced by $\{1, 2\}$ - clearly it is connected, but it is not maximal - we can add $3$ and the edges incident with it and it will still be connected, thus it is not a connected component of the graph. In set notation, we can define a connected component $H$ as a connected subgraph of $G$ such that:
+
+$$
+\forall u, v \in V(H), \nexists e \in E(G) \setminus E(H) \text{ s.t. } u, v \in e
+$$
+
+Since we take the empty graph to be connected, we can say that a graph is always the union of its connected components. Let us prove this: consider a vertex $v \in V(G)$. If $v$ belongs to a connected component $C \subset G$, then it does not belong to any other connected component of $G$, otherwise the $C$ wouldn't be maximal connected and thus not a component. Similarly, if an edge of $v$ is not in $C$, then there exists some vertex $v'$ which is connected to $v$ and thus we can extend $C$ by including $v'$ and it will still be a connected subgraph, contradicting the assumption that $C$ is maximal connected, thus all edges of $v$ are in $C$, and by extension the neighborhood of $v$ is in $C$. If $v$ does not belong to a connected component, then it must have degree zero, and thus must be the empty graph, which by definition is a connected component. Thus, any vertex of $G$ either belongs to a single connected component $C$ which has at least one edge, or it belongs to the empty graph. Taking the union of all these connected components gives us all the vertices of $G$ along with all their edges, thus we have proven that a graph is the union of its connected components.
+
+A connected graph has a single connected component, otherwise it must be disconnected since any two connected components are disconnected.
+
+Consider the graphs $C_{3}$ and $P_{5}$
+
+![C3 and P5](images/graph_theory/13_connectedness.svg)
+
+Clearly both graphs are connected, however we can observe that by removing one vertex (and the edges incident with it) in $P_{5}$ which is not $0$ or $4$ (i.e. not a vertex with degree 0), $P_{5}$ becomes disconnected. However, it seems impossible to make $C_{3}$ disconnected by removing a single vertex. We are interested in studying this property in which some graphs are "more connected" than others. We call this property *k-coonectivity*.
+
+A graph $G=(V, E)$ is *k-connected* if $|V| \gt k$ and the induced subgraph of $G$ by deleting any set of vertices $S \in V(G)$ such that $|S| \lt k$ is connected. Note that a graph that is $k$-connected is also $k-1$ connected, $k-2$-connected, etc, e.g. a 3-connected graph is also a 2-connected graph and a 1-connected graph. A graph is **well-connected** if it is k-connected with $k \gt 1$.
+
+Consider the cannonical path graph $P_{k}$. If we remove a vertex $i \neq 0, k$, then we also remove an the edges $\{i, i+1 \}$ and $\{i-1, i\}$. Assume by contradiction that $G=P_{k} \setminus i$ is connected, then there exists a $(i-1, i+1)$-walk on $G$. Since all the edges of $G$ take the form $\{t, t+1\}$ then there is no edge from $i+1$ to $i-1$ that passes through any vertex $v \gt i+1$. Similarly for the same reason, for $i-1$ to connet to $i+1$ it must pass through a vertex $v \gt i-1$. Thus we have two options for the path: either the path is simply $(i-1, i+1)$, but since this isn't an edge in $P_{k}$ is is also not an edge in $G$ so it's impossible, or the path is $(i-1, i, i+1)$, however since $i$ is removed from $G$ clearly the path is not valid, thus we have $G$ disconnected since we found a set of vertices for which there is no walk, thus any cannonical path graph $P_{k}$ is 1-connected.
+
+Consider a cannonical cycle graph $C_{n}$ and some $v \in V(C_{n})$. Recall that $v$ is denoted by a number in $[:n-1]$, thus $v$ is either $0$, $n-1$ or $v \in [1:n-2]$. If $v=0$, then we remove the edge $\{0, 1\}$ and $\{ n-1, 0\}$, thus the edges of $G=C_{n} \setminus 0$ are given by $\{i, i+1 \}$ where $i \geq 1$ (note that we no longer need the mod since we remove the edge connecting the first and last vertex), and the vertices are $[1:n-1]$. By mapping each vertex $i \in G$ to $i-1 \in P_{n-2}$, we constuct an isomorphism (this requires proof but is trivial to verify) $G \cong P_{n-2}$. A similar argument follows for the case where $v=n-1$. For the case where $v \in [1:n-2]$, we observe that the vertices $[:v-1]$ and $[v+1:n-1]$ are in $G=C_{n} \setminus v$, and consider the following mapping:
+
+$$
+\begin{gathered}
+f_{V}: V(G) \to V(P_{n-2}), \\
+f_{V}(i) = \begin{cases}
+i-(v+1) & i \gt v \\
+i+(v+1) & i \lt v \\
+\end{cases}
+\end{gathered}
+$$
+
+This maps $[v+1:n-1]$ to $[0:n-v-2]$ and $[:v-1]$ to $[n-v-1:n-2]$, thus $f_{V}$ is bijective. Next, consider an edge in $P_{n-2}$, which is given by $\{i, i+1\}$. There are 3 cases:
+
+1. Both vertices are mapped according to the first case: $f^{-1}_{V}(i)$ is of the form $v \lt i+v+1 \lt n$ and $f^{-1}_{V}(i+1)$ is of the form $v \lt i+v+2 \lt n$ in $V(G)$, then we match the edge to the set $\{i+v+1, i+v+2\}$ and since the vertices are of the form $\{i, (i+1) \mod n\}$ and neither is $v$, the set is an edge in $G$.
+2. Both vertices are mapped according to the second case: $f^{-1}_{V}(i)$ is of the form $0 \leq i-v-1 \lt v$ and $f^{-1}_{V}(i+1)$ is of the form $0 \leq i-v \lt v$ in $V(G)$, then we match the edge to the set $\{i-v-1, i-v\}$ and since the vertices are of the form $\{i, (i+1) \mod n\}$ and neither is $v$, the set is an edge in $G$.
+3. $i$ is mapped according to the first case and $i+1$ is mapped according to the second case. This is only possible if $\{f^{-1}_{V}(i), f^{-1}_{V}(i+1) \} = \{n-1, 0\}, which is also of the form $\{i, (i+1) \mod n\}$ with $i, i+1 \neq v$, thus it is an edge in $G$.
+
+In total, we paired all edges of the graph distinctly, thus we have $G \cong P_{n-2}$. To summarize, we have shown that $C_{n} \setminus v \cong P_{n-2}$ $\forall v \in V(C_{n})$, and since $P_{n-2}$ is 1-connected, this means that $C_{n}$ is 2-connected. Note that we use the fact that k-connectivity is a graph invariant, which we have not proven. 
+
+Another important result is that if $G$ is $k$-connected, then $\delta G \geq k$. This can easily be proven as follows: let $v$ be a vertex with $\text{deg}(v)=\delta G$. Assume by contradiction that $\delta G \lt k$, thus $v$ is adjacent to at most $k-1$ vertices. By definition of $k$-connectivity, we can remove any $k-1$ vertices and the graph will still be connected. We shall remove all vertices adjacent to $v$, removing $k-1$ vertices. By definition of $k$-connectivity, $G$ is still connected, however now we have $v$ isolated with degree 0, and thus $\forall u \in V(G), u \neq v, \nexists (u, v)$-walk, which contradicts $G$ being connected, thus we have $\delta G \geq k$. It is important to note that this the converse is not true. Consider for example the following graph with $\delta G \gt 2$:
+
+![vertices 1 and 4 are cut vertices](images/graph_theory/14_cut_vertex.svg)
+
+Clearly removing vertex $4$ disconnects the graph, thus the graph is 1-connected. If there exists a single vertex which disconnects a graph, we all it a **cut vertex**. In the general case where $G$ is $k$-connected we will need at least $k$ vertices. A set of vertices which disconnects a graph is called a **separating set** or a **cut set**.
+
+An **edge subdivision** of an edge $e$ in a graph $G=(V, E)$ is the graph $H=(V \cup w, (E \setminus e) \cup \{e', e''\})$, where $w$ is a new object (i.e. not in $V$) and $e', e''$ are defined as $\{e'_{0}, w\}, \{w, e'_{1}\}$. An edge subdivision is the act of taking an edge $e$ and replacing it with two new edges connected via new vertex. For example, the graph $P_{3}$ is a subdivision of the edge $\{0, 1\}$ of $P_{2}$. Another way to think of an edge subdivision is that it replaces an edge $\{a, b \}$ with a new $(a, b)$-walk of length 2.
+
+The inverse of an edge subdivision is a **smoothing**. In a smoothing, we take a vertex $v$ such that $\text{deg}(v)=2$, connect its two neighbors via a new edge and then delete $v$ and its edges. A **graph subdivision** is the result of a sequence of edge subdivisions to a graph.
+
+One property of edge subdvisions which relates to $k$-connectivity is that an edge subdivision of a 2-connected graph is 2-connected. Let $G$ be a 2-connected graph and let $e=\{a, b \} \in E(G)$. Let $H$ be the edge subdivision of $e$ and let $w$ be the added vertex incident with $a$ and $b$. $H$ is 2-connected if it remains connected when 1 vertex is removed from it. Let $s \in V(H)$ and let $H'=H \setminus s$, i.e. the induced subgraph of $H$ by deleting $s$. Let $u, v \in V(H')$. There are two cases:
+
+1. $s \neq w$, in which case $u, v$ are either both in $V(G)$, or one of the vertices is $w$. In the former, consider a $G'=G \setminus s$. Since $G$ is 2-connected, there exists a walk in $(u, v)$-walk in $G'$. The only edge in $G'$ not in $H'$ is $\{a, b\}$, so we map any $\{a, b \}$ occurence in the walk to the added $(a, b)$-walk (which passes through $w$), thus for every $(u, v)$-walk in $G'$ we can match a $(u, v)$-walk in $H'$. If one of the edges is $w$, w.l.o.g $u$, then we consider a $(u, a)$-walk in $G'$, which is (via the mapping we described) a $(u, a)$-walk in $H'$, and then add to the edge $\{a, w\}$ to the edge sequence, thus forming a $(u, v)$-walk in $H'$.
+2. $s = w$. Since $G$ is 2-connected, $\text{deg}(b) \geq 2$, thus $b$ has at least one neigbor $c \neq a$ and an edge $\{b, c \}$. Similarly, $G'=G \setminus b$ is connected, so there exists an $(a, c)$-walk in $G$ which does not pass through the edge $e$, to which we can add $\{b, c \}$ to get an $(a, b)$ walk not through $\{a, b \}$. Observe that in this case, $V(G)=V(H')$, thus for all $u, v \in V(H')$ we can find a $(u, v)$-walk in $G$, and replace every occurence of $\{a, b\}$ in the walk with the $(a, b)$-walk we described, thus we have a $(u, v)$-walk in $H'$.
+
+And in total, we have $W'$ is connected, thus $W$ is 2-connected, thus an edge subdivision of a 2-connected graph is 2-connected.
+
+In $(2)$, we actually proved another useful lemma: if $G$ is 2-connected, then every edge in $E(G)$ is part of a cycle. We provided a constructive proof in which we showed that in a 2-connected graph, for a given edge $e$ with $a, b \in e$, we can always find an $(a, b)$-walk which does not pass through $e$, and then add $e$ to the walk to get a cycle. 
+
+## Megner's theorem
+
+In the previous section, we showed that in a 2-connected graph, which is a graph with a cut set of cardinality 2, there exists 2 distinct paths between every pair of vertices. This can be generalized to any $k$-connected graph: in a finite graph $G$ that is $k$-connected, there exists $k$ internally disjoint paths between any pair of vertics $u, v \in V$, where paths are *disjoint* if they share no vertices, and *internally disjoint* if they share no vertices except for the endpoints. This result is known as [Megner's theorem](https://en.wikipedia.org/wiki/Menger%27s_theorem), which is a special case of the [Max-flow min-cut theorem](https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem). We will provide it directly here.
+
+Let $A, B \subseteq V(G)$ sets (not necessarily disjoint) of vertices of $G$. An $AB$-separator is a set of verticse $S \subseteq V$ such that $G \setminus S$ contains no $AB$-path (an $AB$-path here is a natural extension of a path between two vertices, and defined as a path between a vertex of $A$ and a vertex of $B$ which has no internal vertices in $A$ nor $B$). An $AB$-connector is a set of disjoint $AB$-paths, i.e. paths statring at a vertex of $A$ to a vertex of $B$ such that they have no vertex in common. We allow single-vertex paths in this definition, for example if $u, v \in V$ are isolated, then by choosing $A=B=\{u, v\}$ we have an $S=A$ with an $AB$-connector being the single-vertex paths $\{u\}, $\{v\}$. We will use the following lemma:
+
+**Lemma**: In a graph $G$, the minimum size of an $AB$-separator is equal to the maximum size of an $AB$-connector (or the number of disjoint $AB$-paths).
+
+From this lemma, we prove Megner's theorem as follows: in a $k$-connected graph, we need to remove at least $k$ vertices for the graph to be disconnected, thus the minimum size of an $AB$-separator is $k$ if $|A|, |B| \geq k$ (otherwise we can't match $k$ pairs of vertices). Consider any two vertices $a, b \in V(G)$. By a previous result, we have $\lambda G \geq k$, thus $a$ and $b$ have $k$ neighbors each. Denote the set of neighbors $A$ and $B$ respectively. By the lemma, we have $k$ distinct $AB$-paths. For each path, take the end in $A$ and connect it to $a$ via the edge connecting it to $a$ (since $A$ is the neighbors of $a$ such edge exists), similarly connect the other end to $b$, thus constructing an $(a, b)$-path. This $(a, b)$-path is internally disjoint, and we have $k$ of those, proving the theorem.
+
+As for the lemma, we will prove it by induction on $|E(G)|$ for any two sets $A, B \subseteq V(G)$. If $|E(G)|=0$, then we have no edges and only single-vertex paths, thus the number of disjoint paths is $|A \cap B|$ and a minimum separator is $S=A \cap B$ thus the maximum size of an $AB$-connector is the minimum size of an $AB$-separator. Otherwise, let $e=\{u, v\} \in E(G)$, and let $k$ be the size of the minium $AB$-separtor of $G$. Consider the graph $G'=G \setminus e$, and denote a minimum $AB$-separator in $G'$ as $S$. If $|S|=k$, then by the induction hypothesis we have a maximum $AB$-connector with size $k$, which is also an $AB$ connector in $G$ and we are done. If $|S| neq k$, then consider the set $S'=S \cup \{u\}$ (or $S \cup \{v \}$, the endpoint of $e$ which we pick is irrelevant). Clearly, $|S'|=|S|+1$, and clearly by removing $S'$ from $G$ we disconnect $A$ and $B$ since we remove $e$ as well as an $AB$-separtor in $G \setminus e$ thus $S'$ is an $AB$-separator in $G$, which means that $|S'|=k$, thus $|S|=k-1$. Next, consider a minimal $AS$-separator in $G$, denoted $T$. Clearly $T$ is also an $AB$-separator (but not necessarily minimal) since without $T$ no vertex of $A$ can reach $S$ and thus no vertex of $A$ can reach $B$, thus $|T| \geq k$. Consider the subgraph induced by $A, T, S$, clearly it is a subgraph of $T$ with at least one edge removed (the edge $e$), thus we can apply the hypothesis and have $k$ disjoint $AS$-paths. A symmetric arguments prove that there are $k$ disjoint $SB$-paths. Since $|S|=k$, each path is incident with a single vertex of $k$, thus for any $s \in S$ we have an $AS$-path and an $SB$-path, so for each such vertex we concatenate the paths to achieve an $AB$-path. In total, we have $k$ of those, thus completing our proof by induction.
+
+The proof is illustated in the following sketch, taken from the Wikipedia entry on Megner's theorem:
+
+![Sketch of the proof of the lemma](https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Proof_of_Menger%27s_Theorem.svg/2560px-Proof_of_Menger%27s_Theorem.svg.png)
+
+# Trees
+
+A **forest** is a graph with no cycles (acyclic) (thus it is simple). A **tree** is a connected forest. A **spanning tree** is a spanning subgraph that is also a tree. A **leaf** is a vertex of degree 1. Trees have nice properties which are useful in algorithms, and as we will see every connected graph has a spanning tree, which makes them quite useful in algorithms which use graphs. Below we prove some properties of trees.
+
+Any graph $G$ that satisfies any of these conditions is a tree:
+1. $G$ is connected and acyclic.
+2. $G$ is connected and any non-leaf is a cut vertex.
+3. $G$ is connected and removing any edge disconnects $G$.
+4. $\forall u, v \in V(G)$, there exists a unique $(u, v)$-path.
+5. $G$ is acyclic and adding an edge to $G$ forms a cycle.
+6. $G$ is connected with $n$ vertices and $n-1$ edges.
+
+We will show that $(1)$ implies $(2)$, which implies $(3)$, etc., until finally we show that $(6)$ implies $(1)$, thus completing the chain.
+
+$(1) \to (2)$: Assume not, then let $v \in V(G)$ be a non-leaf, thus we have $\text{deg}(v) \gt 1$, so it has at least 2 distinct neighbors (we assume the graph is simple) $a, b \in V(G) \setminus \{v\}$. Consider $G'=G \setminus \{v\}$, we assume that $v$ is not a cut-vertex thus since $G$ is connected $G'$ is also connected and there exists an $(a, b)$-path $P$ in $G'$ which is also a path in $G$. Since $a, b$ are adjacent to $v$ in $G$, then the sequence of vertices $\{b, v, a \}$ is a path in the simple graph $G$, but then we can concatenate $\{b, v, a \}$ to $P$ and get an $(a, a)$-path, which is a cycle, but $G$ is a tree thus has no cycles, thus $v$ is not a cut-vertex. If $v$ were a leaf, then this "proof" would fail since it only has 1 neighbor.
+
+$(2) \to (3)$: Assume not, then let $e=\{u, v\} \in E(G)$ be an edge such that $G \setminus e$ is connected, then clearly there exists a $u, v$ path that does not pass through $e$, but then we can concatenate $e$ to the path and get a cycle. However, $(2)$ implies that $G$ is acyclic, thus we have a contradiction, thus $G \setminus e$ is disconnected, thus removing any edge disconnects $G$. In fact, in $G$ were a tree, then removing an edge would result in a forest which consists of two trees (since it would introduce no new cycles and split one connected graph into two distinct connected components).
+
+$(3) \to (4)$: Since $G$ is connected, the existence of a path between any pair of vertices is guaranteed, so we shall show that it is unique. Assume not, then there exists $u, v \in V$ such that they have two distinct paths between them $P_{1}$ and $P_{2}$. By concatenating $P_{1}$ and $P_{2}^{-1}$ we get a cycle $C$. Consider an edge $e \in E(C)$. Remove the edge from $G$, and denote the resulting subgraph as $G'$. We wish to prove that $G'$ is connected, thus contradicting $(3)$ which states that removing any edge disconnects $G$, thus proving that a $(u, v)$-path is unique. Let $a, b \in V$, and consider an $(a, b)$-path $P_{ab}$ in $G$. If $P_{ab}$ does not use $e$, then clearly it is also an $(a, b)$-path in $G'$. If it does use $e$, then denote $k_{1}, k_{2}$ the vertices incident with $e$, clearly they are in $C$. Consider the cycle graph $C$, since it is a cycle it is 2-connected and we can find a $k_{1}, k_{2}$ path in $C \setminus \{e \}$, denote it $P_{k_{1}k_{2}}$. Since $P_{k_{1}k_{2}}$ is a path in $C \setminus \{e\}$, it is also a path in $G'$, and we can replace the edge $e$ in $P_{ab}$ with $P_{k_{1}k_{2}}$ and find an $(a, b)$-path in $G'$. In both cases we are able to find a path for any pair of vertices of $G'$, thus $G'$ is connected, and by the argument presented earlier we have a contradiction and thus the $(u, v)$-path is unique.
+
+$(4) \to (5)$: Assume $G$ is cyclic, then for some $v$ there exists a $(v, v)$-path, where we disallow single-vertex paths, then there exists at least one vertex in the path $u \neq v$, such that the cycle is of the form $\{v, \dots, u, \dots, v\}$. Take $\P_{1}=\{v, \dots, u \}$ and $P_{2}=\{u, \dots, v \}$ such that the concatenation of $P_{1}$ and $P_{2}$ results in the cycle. Clearly, $P_{1}$ and $P_{2}$ are part of a path and thus are not equal, thus we have two distinct $(u, v)$-paths, contradicting $(4)$, thus $G$ must by acyclic. Next, consider a new edge $e$ between two vertices $u, v \in V(G)$ and the graph $G + e$. By adding the edge, we add a $(u, v)$-path which was not in $G$, denote it $P_{1}$. However, since by $(4)$ we have a path between every two vertices in $G$, we have a $(u, v)$-path in $G$, denote it $P_{2}$. If we reverse $P_{1}$ we get a $(v, u)$-path, and if we concatenate $P_{2}$ to it we get a $(v, v)$-path, which is a cycle, thus proving $(5)$.
+
+$(5) \to (6)$: First, we show that $G$ is connected. If $G$ is disconnected, then we can take two edges $u, v$ such that there is no $(u, v)$-path in $G$ and connect them by an edge and construct a unique $(u, v)$-path. However, by $(5)$, this should result in a cycle, but if we have a cycle then we can consider the subgraph of the cycle and it should be 2-connected by a previous result, but by Megner's theorem this means we have 2 distinct $(u, v)$ paths, contradicting $G$ being disconnected, so we have $G$ is connected. Next, we show that $|E|=|V|-1$ by induction on the number of vertices. If $G$ has 1 vertex, then it is connected and has no edges (since we disallow loops) thus we have $|E|=|V|-1=0$. Assume the statement holds for $|V|=n-1$ for some $n$, and add a new vertex $v$. Clearly for $G'=G \cup \{v\}$ to be connected we need at least 1 edge that connects to $v$, so we have $|E'| \geq |E| + 1 \geq n-1$. However, adding any other edge forms a cycle by $(5)$, thus we have $|E|=n-1$.
+
+$(6) \to (1)$: For $G$ to be connected, every vertex must have at least be at least of degree 1, otherwise it is not incident with any edge and thus has no path to any other vertex, thus we have $|E| \geq |V|-1$ with $|E|=|V|-1$ being the minimal amount of edges to make $G$ connected. If we remove any edge from the graph then clearly we have $|E'| \lt |V|-1$ which is the minimal amount of edges to make $G$ connected, thus $G$ is disconnected, thus $G$ is not 2-connected, thus $G$ is acyclic by a previous result, thus $G$ satisfies $(1)$.
+
+Every tree $G$ with $|V| \gt 1$ has at least 2 leaves. We can prove this by the handshake lemma, using condition $(6)$: by the handshake lemma, we have that the sum of degrees in the graph is $2|E|=2(n-1)=2n-2$. Clearly if $\lambda G = 2$ then we have that the sum of degree is at least $2n$, which is greater than the actual sum we calculated, thus $\lambda G = 1$. If $G$ has only one leave, then similarly we have a lower bound of $2n-1$. The smallest number of leafs which satisfies this is 2, thus every tree with more than 1 vertex has at least 2 leaves.
+
+Recall the definition of a spanning tree: a spanning tree of $G$ is a subgraph of $G$ that is also a tree. A powerful result related to spanning trees is that *every connected graph has a spanning tree*. We prove this by construction: let $G$ be a connected graph. If $G$ has no cycles, then by definition $G$ is a tree and a spanning subgraph of itself. If $G$ has a cycle, then we remove an edge from the cycle and by a previous result $G$ will remain connected. This can be repeated until the resulting graph is a tree, and since we haven't removed any vertices it is a spanning tree of $G$. Thus every connected graph has a spanning tree.
+
+This result leads to a result which is useful in proofs by induction: let $G=(V, E)$ be a graph, and let $H=(V, \emptyset)$ be the empty graph of $V$. We can construct $G$ from $H$ incrementally by adding edges. Each edge is either going to connect 2 components, or it is going to introduce a cycle (if the connected component is already a spanning tree).
+
+In computer science, most tree data structures represent trees as *rooted trees*. A **rooted tree** is a tree where one vertex has been designated the root. The choice of a root is arbitray (i.e. we can re-root a tree without changing the graph). Let $r$ be the root of the tree, and let $v$ be any other vertex. As we have seen, there exists a unique $(r, v)$-path. Consider a sequence $(a, b)$ of two consecutive vertices in this path. We call $a$ the **parent** of $b$ if it is adjecent to it and appears in an $(r, b)$ path directly before $b$. We call $b$ a **child** of $a$. A **descendant** of $a$ is a vertex $v$ such that $a$ is in $(r, v)$. The **depth** of a vertex $v$ is the length of the unique $(r, v)$-path. The **height** of a rooted tree is the maximum depth of any vertex. We may denote a rooted tree of a tree $T$ rooted at $r$ using set notation, as
+
+$$
+T_{r} = (V_{T}, \{v, \text{parent}_{s}(v)\} | \forall v \in V_{T} \setminus \{r\})
+$$
+
+A rooted tree provides a notion of direction to an undirected graph - from the root to the leaves, from parents to children. Consider a vertex $v$ in a rooted tree $T_{r}$. By definition it is a member of the vertices sequence of a the path from the root to its descendants, thus it is a cut vertex that splits its descendants from the rest of the tree, thus every vertex of a rooted tree is also the root of a subtree which consists of itself and all its descendants. This is the core idea behind (depth-first search)[https://en.wikipedia.org/wiki/Depth-first_search].
+
+**Theorem**: If a tree $T$ has 3 leaves, then it is a subdivision of the star graph $S_{3}$.
+
+**Proof**: Let $P$ be a maximal path of $T$. Both its ends must not have any neighbor not in the path so they must be of degree 1 (since $T$ is acyclic) so they are leaves. Let $c$ be the third leaf of $T$. Pick a vertex $v$ in $P$. Since $T$ is a tree, then a $(c, v)$-path is guaranteed to exist and be unique. If that path and $P$ are internally disjoint, then the paths from $v$ to the two ends of $P$ and the path to $c$ are all internally disjoint, so we have $v$ with degree 3 connected to three internally disjoint paths with internal degree 2 which can be constructed via a sequence of edge subdivisions. If $(c, v)$ and $P$ are not internally disjoint, then their union must be a subpath of each path, otherwise we would be able to form a cycle. The cycle starts at $v$ since $v$ is a shared vertex of both paths, and ends at another shared vertex $w$, but now $(c, w)$ and $P$ are internally disjoint, so by the same argument $w$ is connected to all leaves via internally disjoint paths so $T$ is a subdivision of $S_{3}$ (with $w$ being the center instead of $v$).
+
+The theorem does not generalize to 4 leaves. Consider the following tree which has 4 leaves, yet is not a subdivision of $S_{4}$ (it has no "central" vertex, i.e. no vertex such that its path to the leaves are internally disjoint)
+
+![A tree with four leaves is not always a star](images/graph_theory/17_tree_with_4_leaves.svg)
+
+We can however state a weaker result in the case of a tree with 4 leaves:
+
+**Theorem**: If a tree $T$ has 4 leaves, then it is either a subdivision of $S_{4}$ or a subdivision isomorphic to the graph presented above.
+
+**Proof**: We start the same as before by taking a maximal path $P$ and then finding a vertex on that path such that it is connected to 3 leaves of the tree via internally disjoint paths and we denote this vertex $v$. Since $T$ is a tree there must also be a path from $T$ to the fourth leaf of the tree. This path cannot have any internal vertices both in $P$ and in the path from $v$ to the third leaf because then we would have a cycle, so either the path starts at $P$ or the path to the third leaf and then branches off to a new path, or the path does not have any internal vertex in any existing path. In the latter case, identify that we have a central vertex $v$ such that it is connected to all leafs via 4 internally disjoint path so it is a subdivision of $S_{4}$. In the former, w.l.o.g assume that the path starts at $P$ until it branches off. By a similar argument to the 3 leafs case the path must not intersect with $P$ again to avoid a cycle. Denote the last shared vertex of $P$ and the path to the fourth leaf as $w$. Observe that the path $(v, w)$ lies entirely on $P$, so it is a subdivision of the edge $\{v, w\}$. Similarly, observe that each of $v$ and $w$ is connected via a path to two leafs, and that all of these paths are internally disjoint, so these are also subdivisions of edges, so $T$ must be a subdivision of the second graph we described (which has two $P_{3}$ subgraphs whose middle vertices are connected by an edge).
+
+![Tree with 4 leaves proof sketch](images/graph_theory/xx_tree_with_4_leaves_proof.svg)
+
+**Theorem**: If $T$ is a tree and $\Delta T=k$, then $T$ has at least $k$ leaves.
+
+**Proof**: Assume not, then $T$ has $m$ leaves such that $m \lt k$. Take a vertex $v$ with degree $k$. It is connected to each leaf via a unique path. Since $m \lt k$, we have at least 1 edge of $v$ that is not a part of any of the paths, denote the other end of the edge $w$. $w$ is connected to each leaf via a unique path since $T$ is a tree, but now we can take that path and follow the edge through $v$ and then follow along the path from $v$ to that leaf, which is still a path since $\{v, w\}$ was not a part of the path from $v$ to the leaf by our assumption that $m \lt k$, but now we have a cycle, which is a contraction, so $T$ must have at least $k$ leaves.
+
+# Bridges of Konigsberg Revisited
+
+Now that we have accumulated some knowledge on graphs, we can revisit the bridges of konigsberg. Recall the graph representation of the problem (as a drawing):
+
+![Bridges of Konigsberg](images/graph_theory/03_konigsberg.svg)
+
+Or, in set notation
+
+$$
+\begin{gathered}
+G = (V, E) \\
+V = \{1, 2, 3, 4 \} \\
+E = \{\{1, 2\}, \{1, 2 \}, \{3, 2\}, \{3, 2\}, \{1, 4\}, \{2, 4\}, \{3, 4\} \}
+\end{gathered}
+$$
+
+Note that $E$ is a multiset, thus $G$ is not a simple graph. However, we can convert every graph to a simple graph by the following method: For each set of parallel edges, subdivide all but one, until no parallel edges remain. Here we consider a loop as a pair of parallel edges. The resulting graph $G'$ is a simple graph. In Python, we can construct $G'$ as follows:
+
+```python
+def simplify(g: Graph):
+    seen = set()
+    to_subdivide = []
+    for edge in g.edges:
+        if edge in seen or edge.is_loop():
+            to_subdivide.append(edge)
+        else:
+            seen.add(edge)
+    
+    for edge in to_subdivide:
+        g.subdivide(edge)
+```
+
+![Simple bridges of konigsberg graph](images/graph_theory/18_konigsberg_simple_graph.svg)
+
+Let $W'$ be a walk in $G'$, then let $P'$ be a $(u, v)$-walk in $G'$ with $u, v \in V(G)$, then we can map $W'$ to a $(u, v)$-walk in $G$ as follows: let $W'=(V', E')$, and let $W=(V' \cup V(G), \emptyset)$. We build $P$ incrementally by edges, as follows: walk over $V(W')$. Since $W'$ is a walk on a simple graph, each pair of consecutive vertices in $V(W')$ matches an edge in $E(W')$. Let $e$ be a temporary set that is initially the empty set. When we see a vertex $v' \in V(W')$ that is also $\in V(W)$, we add it to $e$, otherwise we ignore it. When $|e|=2$, we add it to $E(W')$ and empty it. This algorithm is equivalent to a smoothing of the subdivision, thus it guarantees to map the subdivided walks to edges in $E(P)$.
+
+```python
+def map_walk(g: Graph, w: Graph):
+    """
+    g is the original graph, and w is a walk subgraph in g' (i.e. g after simplification)
+    """
+    w_out = Graph(vertices=g.vertices.union(w.vertices), edges=[])
+    e = []
+
+    for v in w.vertices:
+        if v in g.vertices:
+            e.append(v)
+        if len(e) == 2:
+            w_out.add_edge(e)
+            e.clear()
+
+    return w_out
+```
+
+The inverse is also true - every $(u, v)$-walk in $G$ can be mapped to a $(u, v)$-walk in $G'$ by replacing edges which were subdivided with the path of length 2 they were subdivided into. Thus, we can solve the problem in $G'$ instead of $G$. Recall that the problem was to walk across every bridge exactly once. In graph theory terms, this is equivalent to finding a trail $t$ such that $E(t)=E(P)$. We call such trail an *Euler walk*. 
+
+# Euler Walk
+
+An *Euler walk* of a graph $G$ is a trail in which every edge of $G$ is used exactly once. A *closed Euler walk*, also called *Eulerian circuit*, is a tour which is also an Euler walk. We can neatly define Euler walks in terms of homomorphisms: recall that a walk is a homomorphism $w: P_{n} \to G$, and a trail as a walk such that $w_{E}$ is injective. An Euler walk is a homomorphism $w: P_{n} \to G$ such that $w_{E}$ is bijective. Similarly, a closed Euler walk is a homomorphism $w: C_{n} \to G$ such that $w_{E}$ is bijective, which is a special case of a tour which has $W_{E}$ injective.
+
+Using the definition of Euler walks in terms of a homomorphism, it is easy to show that Euler walks are a graph invariant. The proof follows the same template we have seen before for properties which can be defined in terms of a homomorphism, so it is left out.
+
+In his original paper, Euler proved the the bridges of Konigsberg do not admit an Euler walk. To prove this, he showed that they do not meet the conditions for the existence of an Euler walk. Euler proved the following theorem:
+
+**Theorem**: If a graph $G$ doesn't have exactly 0 or 2 odd degree vertices, and not all vertices with nonzero degree belong to the same connected component, then it does not admit an Euler walk.
+
+The second part of the theorem is trivial: let $w$ be a walk, thus it can't connect disconnected components, thus the walk is only on a single connected component. Let $G$ be a graph with more than one connected component, and let $w$ be an Euler walk on $G$. By definition of an Euler walk, $w$ uses every edge of $G$, but since $w$ is a walk it only involves edges from one connected component, thus for $w$ to be an Euler walk, $G$ must have all its edges in a single component.
+
+The first part is more involved, but also trivial: let $v$ be a vertex in $V(w)$ such that it is the starting vertex of an Euler walk. If $|V(w)|=1$, then $v$ has degree 0 since $E(G)$ consists of all the edges in $G$, and we have $G$ is the empty graph with 0 vertices of odd degree (we consider degree 0 to be even). If $|V(w)=2|$, then there are two vertices with the same degree which is either even or odd (depending on the number of parallel edges), and again the theorem holds. If $|V(w) \geq 3|$, then consider the internal walk, i.e. the part of the walk without the first and last edge. Clearly, every vertex visited must be entered and exited, and since each entry and exit requires an edge, and since this is an Euler walk, each visit of an internal vertex uses 2 distinct edges incident with it. However, for the boundary vertices, i.e. the first and last vertex, we have that they are only exited (for the starting vertex) or entered (for the ending vertex), thus a visit of a boundary vertex requires 1 edge incident with it. Assume that $v$ has even degree. Since it is the starting vertex, we require 1 edge to move from it to the second vertex, thus we have an odd number of edges remaining that need to be visited for the walk to be Eulerian, so we must also visit it at the end of the walk, thus any other vertex may only be internal to the walk, and since each visit requires 2 edges, all other vertices must also be of even degree, thus we have 0 vertices of odd degrees. If $v$ has odd degree, then the visit at the start of the walk leaves it with an even number of edges that need to be used, thus it may only be used internally, but we still need one vertex to visit at the end of the walk and that visit requires 1 edge, thus we need to have exactly 1 more vertex of odd degree, thus we have 2 vertices of odd degree. Thus, if a graph does not have exactly 0 or 2 odd degree vertices, it does not admit an Euler walk. This also directly proves a corollary:
+
+**Corollary**: If a graph with al edges in one connected component does not have exactly 0 odd degree vertices, it does not admit a closed Euler walk.
+
+The converse is also true, as proven by Hierholzer about 100 years after Euler's paper. Hierholzer provides a constructive proof which describes an algorithm for finding Euler walks, proving that if a graph has exactly 0 or 2 odd degree vertices, it admits an Euler walk, thus we can rephrase the theorem as:
+
+**Theorem**: A graph that has all its edges in a single connected component admits an Euler walk if and only if it has exactly 0 or 2 odd degree vertices. A graph with all its edges in a single connected component admits a closed Euler walk if and only if it has exactly 0 odd degree vertices.
+
+We will provide the algorithm for finding Eulerian circuits first, then expand it to find Euler walks as well. We look at the connected component $G$ and assume that all vertices of $G$ are of even degree. Pick a starting vertex $v$, and maintain a copy of $G$, denoted $G'$. Every time we visit an edge of $G'$, we remove it. Clearly when $E(G')=\emptyset$, we will have an Euler walk. We go for a walk on $G'$. Pick an edge incident with $v$ (one guarantees to exist because we assume $v$ has even degree ad $G$ is connected), and denote the other end of the edge $w$. Advance to $w$, and remove $e$ from $G'$. We now have $\text{deg}_{G'}(w)=\text{deg}_{G}(w)-1$ and $\text{deg}_{G'}(v)=\text{deg}_{G}(v)-1$, so they are both of odd degree. Now, pick an edge (in $G'$!) incident with $w$, and move to the other end of the edge then remove it from $G'$. Now we have $\text{deg}_{G'}(w)=\text{deg}_{G}(w)-2$, so it is even again. We can repeat this until we eventually get back to $v$. It is guaranteed that we will not get stuck because whenever we enter an internal vertex that is not $v$, since the degree of the vetex in the original graph is even and we only use it as an internal vertex, we will have at least one edge to exit it, and since the only vertex we use an odd number of edges of is $v$, we will eventually return to it. When the walk is over, we will have found an Eulerian circuit of a subgraph of $G$, which we can denote by $G \setminus G'$, but it is not guaranteed that we will have visited all edges of $G$, and since we ended up deducing an even number of edges from each vertex in the circuit, the degree of all vertices in $G'$ is still even, so we can repeat the tour starting with another vertex, and again the tour is guaranteed to terminate at the starting vertex by the same argument. Since $G$ is connected, then there must exist an edge of some vertex in $G \setminus G'$ which connects it to a vertex outside of $V(G) \setminus V(G')$ (otherwise $G \setminus G'$ will be a connected component, contradicting that $G$ is connected thus has only one connected component), so we pick such vertex and start a new tour until we get stuck, then concatnate the replace the vertex in the first tour with the second tour, thus sewing together an extended tour. We repeat this process until we $E(G')=\emptyset$. By the arguments provided above, this guarantees to terminate, thus proving the theorem and the correction of the algorithm.
+
+If $G$ has exactly 2 odd degree vertices, then we can introduce a new vertex and connect it to both odd vertices via 2 edges, thus all vertices including the new one will be of even degree, and we can use the algorithm to find an Eulerian circuit in $G \cup (\{w\}, \{\text{edded edges}\})$. Next, to find an Euler walk in $G$, we simply need to remove the added vertex. This preserves the connectedness of the walk, because a circuit is homomorphic to a cycle and thus is 2-connected, so we can remove one vertex and still have a connected graph.

@@ -1,0 +1,228 @@
+export const frontmatter = {
+    title: "Graph Theory, Part 3: Simplicial Complexes and Minors",
+    date: "2024-07-12",
+    summary: "We present abstract simplicial complexes as a natural generlization of graphs and discuss minors, leading up to Kuratowski-Wagner's theorem",
+    tags: ["graph-theory"]
+    // wip: true
+}
+
+In this entry, we present a new structure which extends the combinatorical structure of a graph and provides a nice setting for discussing edge contractions and graph minors, ending with Kuratowski-Wagner's theorem which characterizes planar graphs in terms of forbidden minors.
+
+# Simplicial Complexes
+
+A graph $G=(V, E)$ is a pair of sets such that every member of $E$ is a pair of members of $V$, so we have $E \subseteq \binom{V}{2}$. Consider a more general structure, such that $E$ is not limited to $\binom{V}{2}$, but rather to the powerset of the vertices $\text{pow}(V)$. Such a structure, with the added condition that it is closed under taking subsets, is an abstract simplicial complex.
+
+An **abstract simplicial complex** consists of a set of vertices $V$ and a set $S \subseteq \text{pow}(V)$, such that $S$ is closed under taking subsets, i.e. if $K$ is a member of a member of $S$ then $K$ is a member of $S$ (for example, if $S=\{\emptyset, \{a, b\}, \{a\}, \{b\}\}$ then consider the member $\{a, b \}$, $S$ must include both $\{a\}$ and $\{b\}$ and indeed this holds for the given $S$), which immediately leads to the fact that $\emptyset$ is a member of $S$ for all complexes. We call the members of $S$ **simplices** (singular: **simplex**), and denote a simplicial complex by $K = (V, S)$. 
+
+The **dimension** of a simplex is one minus its cardinality (i.e. the dimension of a simplex with two members is 1, and the dimension of the empty simplex is defined as negative one). A 0-dimensional simplex is called a *vetex*, 1-dimensional an *edge*, 2-dimensional a *triangle*, 3-dimensional a *tetrahedron*, and so on.
+
+Every graph can b mapped to a simplicial complex such that $V(G)=V(K)$ and $S=\emptyset \cup \{v | v \in V(G) \} \cup E(G)$. Let us check that this is really a simplicial complex: every member of $S$ is a member of the powerset of $V$, and $S$ is also closed under taking subsets - for some $A \in S$, $A$ is either the emptyset, which does not have any subsets, or it is a set of a single member so its only subset are itself and the empty set, both already in $S$, or $A$ is an edge in $G$, but then both its members are in $V(G)$, so all its subsets are also in $S$, which shows that $S$ is closed under subsets. A simplicial complex of a graph has dimension of at most 1. The dimension of a simplicial complex is the maximal dimension of its simplices.
+
+Analogous to graph homomorphism, we are interested in defining maps between two simplicial complexes. Let $K, L$ be simplicial complexes. A **simplicial map** $f: K \to V$ is a pair of functions $f_{V}: V(K) \to V(L)$ and $f_{S}: S(K) \to S(L)$ such that $f_{S}(k) = \{ f_{V}(v) | v \in k \}$ for all $k \in S(K)$. A simplicial map from one graph complex to another graph complex resembles a graph homomorphism, and indeed graph homomorphisms can be expressed as simplicial maps, however simplicial maps can describe operations which cannot be describe via a homomorphism. For example, consider the following graphs $G$
+
+![G isomorphic to K3](images/graph_theory/31_graph_G.svg)
+
+and $K$
+
+![K isomorphic to P2](images/graph_theory/32_graph_K.svg)
+
+Consider the map $f_{V}: G \to K$ such that $a, b \mapsto 1, c \mapsto 2$. Clearly we cannot define a homomorphism since the edge $\{a, b\}$ is not taken to an edge in $K$. However, consider the representation of $G$ as an abstract simplicial complex:
+
+$$
+\text{simp}(G)=\{V(G), \{\emptyset, \{a\}, \{b\}, \{c\}, \{a,b \}, \{b, c \}, \{c, a \}\}\}
+$$
+
+Under $f_{V}$, the simplices are taken to
+
+$$
+\emptyset, \{1\}, \{1\}, \{2\}, \{1\}, \{1, 2\}, \{1, 2\}
+$$
+
+All of which are in $S(\text{simp}(K))$, and we can observe that this set is also closed under subsetting. Simplicial maps of graph complexes let us define functions that take edges to point, such as the simplicial map we just examined. In that sense, they provide a better framework for thinking about edge contractions, which are the operation of mapping an edge of a graph to a vertex. We will discuss contractions in more detail soon.
+
+The **image** of a simplicial map $f: K \to L$ is $\text{Im}(f) = (\text{Im}(f_{V}), \text{Im}(f_{S}))$. In the example provided above, we have
+
+$$
+\text{Im}(f) = (\{1, 2 \}, \quad \{\emptyset, \{1\}, \{1\}, \{2\}, \{1\}, \{1, 2\}, \{1, 2\}\})
+$$
+
+The image of a simplicial map is itself a subcomplex of the co-domain complex $L$, which also means that its dimensions is less than or equal to the dimension of the co-domain, which means that the image of a graph complex under a simplicial map is a graph complex.
+
+The **preimage** of a simplicial map $f$ is denoted $f^{-1}(\text{Im}(f))$ (where $\text{Im}(f)$ is a subcomplex of the co-domain) and defined as $(f^{-1}_{V}(\text{Im}(f)), f^{-1}_{S}(\text{Im}(f)))$, and it can be verified that the preimage of a subcomplex is a subcomplex of the domain complex. A **minimal preimage** is a minimal subcomplex of the domain $G' \subseteq G$ such that $\text{Im}(f)(G')=\text{Im}(f)$. If $f$ is injective then the minimal preimage of $f$ is the entire complex $G$. 
+
+Given a graph homomorphism $f: G \to H$, we can define its *simplicial map* $\text{simp}(f)$ as a set of function $(f_{V}, f_{S})$, where $f_{V}$ is the map between vertices defined in the homomorphism and $f_{S}$ is a map $f_{S}: S(\text{simp}(G)) \to S(\text{simp}(K)), s_{G} \mapsto s_{K}$ defined as
+
+$$
+f_{S}(s_{G}) = \{ f_{V}(v) | v \in s_{G} \}
+$$
+
+By definition the image of $f_{S}$ is a set of simplices in $S(\text{simp}(K))$. To show that it is indeed closed under subsetting, consider a member $s_{K}$ (that is not the empty set) of the image and a subset $a \subseteq s_{K}$. Since it is a simplicial complex of graphs, we have $\text{dim}(\text{Im}(f_{S})) = 2$, so $s_{K}$ is either a vertex or an edge. If it a vertex, then it is in $\text{Im}(f_{S})$ as the image of a vertex simplex of $\text{simp}(G)$, and if it is an edge then it must consist of two vertices which are also in the image of all vertex simplices, so it is closed.
+
+Simplicial maps are also nice in how they behave with identity and composition. We define the identity simplicial map as a map $K \to K$ such that $f_{V}=\text{id}_{V}$ and $f_{S}=\text{id}_{S}$. Consider simplicial maps $f: K \to L$ and $g: L \to M$, then we have $g \circ f: K \to M$ such that it is a simplicial map from $K$ to $M$, which is simple to verify. In particular, for simplicial maps induced by a homomorphism, we have
+
+$$
+\begin{gathered}
+\text{simp}(\text{id}_{G}) = \text{id}_{\text{simp}(G)} \\
+\text{simp}(g \circ f) = \text{simp}(g) \circ \text{simp}(f)
+\end{gathered}
+$$
+
+Two abstract simplicial complexes $K, L$ are **isomorphic** $K \cong L$ if there exist simplicial maps $f: K \to L, g: L \to K$ such that $g \circ f = \text{id}_{K}$ and $f \circ g = \text{id}_{L}$.
+
+## Clique Complex
+
+Let $G$ be a graph. We can define an abstract simplicial complex induced by the graph as we have seen in the last section, but by letting the dimension of simplices be greater than 2 we can define other interesting simplicial complexes that arise from a graph. Consider all cliques (i.e. complete subgraphs) of $G$. Each clique is itself a simplex of dimension $k-1$ with $k$ being the number of vertices in the clique subgraph, so we can define the following structure
+
+$$
+\text{clique}(G) = (V_{G}, \{C | C \subseteq G, C \cong K_{n}\})
+$$
+
+To show that it is an abstract simplicial complex, we need to verify that $S(\text{clique}(G))$ ($S$ for bravity) is close under subsets. To do that, we first need to verify that $\emptyset \in S$, so we extend our definition of a clique to include the empty clique $K_{0}=\{\emptyset, \emptyset\}$ the graph with no vertices nor edges, which is vacously complete. Every graph has $K_{0}$ as a subgraph, so clearly $K_{0} \in S$. Consider $\sigma \in S$, $\sigma$ is a subset of vertices of $V(G)$ such that the graph induced by them is a clique in $G$, which means that every pair of vertices in $\sigma$ is connected via an edge. Consider $\tau \subseteq \sigma$. As a subset of the vertices of a clique, it must also induce a subgraph isomorphic to a complete graph, but that subgraph is also a subgraph of $G$, so it is also a clique of $G$, so it is in $S$, so $S$ is close under subsets, so $\text{clique}(G)$ is a simplicial complex. We call it the **clique complex** of $G$.
+
+Consider a simplicial map $f: \text{simp}(G) \to \text{simp}(H)$. We claim that the simplicial map
+
+$$
+g=(f_{V}, \{f_{V}(x) | x \in \sigma \})
+$$
+
+Is a simplicial map $g: \text{clique}(G) \to \text{clique}(H)$. To prove that, we need to show that $\{f_{V}(x) | x \in \sigma \}$ takes a clique complex of $G$ to a clique complex of $H$. Let $\sigma$ be a clique in $G$, then for every two distinct vertices $u, v \in \sigma$, we have $\{u, v\} \in E(G)$. Consider the image of $u, v$ under $g_{V}=f_{V}$: there are two cases, either they get mapped to a set $\{g_{V}(u), g_{V}(v) \} \in S$, which is an edge in $S$ and so corresponds to an edge in $V(H)$, or they get mapped to a vertex, so a clique consisting of $n$ vertices and $\binom{n}{2}$ edges is taken to $n'$ vertices and $\binom{n'}{2}$ edges, which is also a clique, so $g$ takes cliques to cliques, so $g$ is a simplicial map. We can also think of $g$ as the clique complex of the simplicial map $f$, so we may write $\text{clique}(f): \text{clique}(G) \to \text{clique}(H)$.
+
+Clique complex maps interact nicely with identity and composition, and we have $\text{clique}(f \circ g) = \text{clique}(f) \circ \text{clique}(g)$ and $\text{clique}(\text{id}_{G}) = \text{id}_{\text{clique}(G)}$. From this we can also show that if $A, B$ are abstract simplicial complexes such that $A \cong B$, then $\text{clique}(A) \cong \text{clique}(B)$ by taking the clique of the simplicial maps governing the isomorphism.
+
+## Minors
+
+In our introductory to simplicial complexes we have seen an example of a simplicial map that takes one graph complex to another graph complex by contracting an edge of the graph. Contractions are a graph operation we have not yet discussed, and they provide a new way for us to find graphs inside other graphs. Just as subdivisions paved the way for defining topological minors, contractions pave the way for defining minors. As we will see, topological minors are also minors, so minors can be viewed as a generalization of topological minors, and edge smoothing is a special case of an edge contraction.
+
+### Edge Contractions
+
+Consider the following graphs $G$ (to the left) and $H$ (to the right):
+
+![By contracting an edge we form a new graph such that they are not homomorphic](images/graph_theory/33_edge_contraction.svg)
+
+Hopefully the drawing makes it appearant that $H$ can be formed from $G$ by collapsing the edge $\{u, v\}$ to a single vertex $w$. This operation is called an **edge contraction**. A more descriptive and accurate definition is that an edge contraction of an edge $\{u, v \}$ removes the edge and the vertices incident with it from the graph, and instead adds edges between the neighbors of $u$ and $v$ to a new vertex $w$. Formally, we define an edge contraction of the edge $\{u, v \} \in E(G)$ ad a graph $G'$ such that
+
+$$
+\begin{gathered}
+G' = (V(G'), E(G')) \\
+V(G') = V(G) \setminus \{u, v \} \cup \{w\} \\
+E(G') = E(G) \setminus \{e \in E(G) | u \in e \lor v \in e \} \cup \{\{w, x\} | \{u, x\} \in E(G) \oplus \{v, x\} \in E(G)\} \\
+\end{gathered}
+$$
+
+Since a contraction takes an edge (or a pair of vertices) to a vertex, both are simplices, it would perhaps be easier to define an edge contraction in terms of simplicial maps between graph complexes. We define a **contraction** as a *surjective* simplicial map $f: G \to H$ (where $G$ and $H$ is an abuse of notation meant to signify that the domain and codomain are compelxes induced by graphs $G$ and $H$) such that for every subgraph $H' \subseteq H$, if $H'$ is connected then its preimage is connected. The image of a contraction of $G$ is a complex of a graph that can be obtained by a sequence of edge contractions of $G$. More concisely: a contraction is a surjective simplicial map where the preimages of connected subgraphs are connected.
+
+Let us sketch a proof to show that this is the case: consider a contraction $f: G \to H$ and a subgraph $H' \subseteq H$ such that $H'$ is connected and $f^{-1}(H')$ is connected, we wish to show that the image of $f$ corresponds to a series of edge contractions. First, we know that $f$ is surjective, so every subset of vertices has a preimage $f_{V}^{-1} \in V(G)$. If $H'$ is connected, then consider a vertex $v \in H'$ such that its preimage consists of more than one vertex. If none exists, then $H$ and $G$ are isomorphic and if we allow a contraction sequence of length zero then $H$ is a contraction and we are done. Otherwise, take the preimage of $H'$ which is connected by assumption, and consider the preimage of $v$. Since $f^{-1}(H')$ is connected, then the preimage of $v$ is also connected. If $|f^{-1}(v)|=2$, then clearly this is a contraction of a single edge. Otherwise, we can realize the image as a sequence of contractions, each can be viewed as its own simplicial map, so the following fact should come as no surprise:
+
+**Fact**: The composition of contractions is a contraction.
+
+**Proof**: Let $f: A \to B$ and $g: B \to C$ be contractions, and consider $g \circ f: A \to C$. Since the composition of simplicial maps is a simplicial maps then it $g \circ f$ is a simplicial map, furthermore it is surjective as the composition of two surjections. Consider a connected subgraph $C' \subseteq C$. Since $g$ is a contraction, $g^{-1}(C')$ is also connected, however since $f$ is a surjection then $g^{-1}(C') \subseteq B = \text{Im}(f)$, so we have $f^{-1}(g^{-1}(C'))$ is also connected since $f$ is a contraction, but this is a composition of $(g \circ f)^{-1}$, so $g \circ f$ is a contraction.
+
+Informally an edge contraction takes an edge to a vertex. We have already seen this operation when discussing an edge subdivision - an edge subdivision takes an edge into a path of length 2. A smoothing takes this path and turns it back to an edge. If we subdivide the edge $uv$ to $uw, wv$, then a smoothing takes $uw, wv$ into $uv$ while removing $w$. Viewed as a contraction, we can also define a smoothing as a contraction of the edge $uw$ into the edge $u$, so we see that a smoothing is realized via an edge contraction, which leads to the following result
+
+**Theorem**: If $G$ is a subdivision of $H$, there exists a contraction $f: G \to H$.
+
+**Proof**: $G$ is realized by a sequence of edge subdivisions, which can be undone by a sequence of edge smoothings, which can be realized via edge contractions, which is a contraction.
+
+More generally, as we have shown graph subdivisions take an edge to a path, and the inverse of that is taking a path to an edge, so $f$ is a contration that takes paths to edges, and only paths, which makes it a special case of the more general notion of a contraction, which does not specify a restriction on an edge or on a sequence.
+
+### Minors
+
+Recall our definition of a topological minor: We say that $H$ is a topological minor of $G$ if a subdivision of $H$ is isomorphic to a subgraph of $G$. Let's revisit this defintion through the lens of contractions: consider the subdivision of $H$, denote it $K$. By the last theorem we have $f: K \to H$ under some contraction map $f$ that takes paths to edges, so another way to define a topological minor is to say that $H$ is a topological minor of $G$ if there exists a contraction $f: K \to H$ limited to paths, such that $H$ is isomorphic to a subgraph of $G$. If we lift the restriction on paths, we can define a new operation, called a **minor**.
+
+A garph $H$ is a **minor** of a graph $G$ if there exists a contraction $f: K \to H$ such that $H$ is isomorphic to a subgraph of $G$. Less formally, $H$ is a minor of $G$ if we can construct (a graph isomorphic to) $H$ from a subgraph of $G$ via a sequence of edge contractions. We denote this relation by $H \preceq_{M} G$. From this definition it is clear that every topological minor is a minor, but not every minor is a topological minor. We denote a topological minor $H$ of $G$ by $H \preceq_{T} G$.
+
+**Theorem**: The property of being a minor is *transitive*, i.e. if $A \preceq_{M} B \preceq_{M} C$ then $A \preceq_{M} C$.
+
+**Proof**: We have $A \preceq_{M} B$ so there exists a contraction $f: B \to A$, similarly we have $B \preceq_{M} C$ so $\exists g: C \to B$. Consider a connected subgraph $B' \subseteq B$, since $g$ is a contraction its preimage $X=g^{-1}(B')$ is complete, and is a subgraph of $C$. Consider the function $g$ restricted to $X$, we have $g_{X}: X \to B'$ which is a contraction. Consider $f: B \to A$, which is also a contraction when restricted to $B'$, so we have that $f_{B'}: B' \to \text{Im}(f(B'))$ is a contraction, but now we can compose these contractions to get a contraction from $X \to \text{Im}(f(B'))$ (surjectivity is guaranteed by the restriction on the domains of the maps) which gives $A \preceq_{M} C$.
+
+Since we define a contraction with sequence length 0 to be a valid contraction, we get that every graph is its own minor, so the minor relation is *reflexive*. Similarly, it is easy to check that it is *anti-symmetric*, and we have just shown that it is *transitive*, so we have $\preceq_{M}$ is a *partial order* on the set of graphs.
+
+### Degree 3 Minors
+
+Let's revisit our definition of a minimal preimage of a simplicial map, in the context of a contraction. We define a minimal preimage as a subcomplex of the domain complex such that its image is the same as the image of the entire complex. IN the context of a contration, this is equivalent to saying that given a contraction $f: G \to H$, a minimal preimage is a subgraph $G' \subseteq G$ such that it is the minimal subgraph of $G$ such that $f$ restricted to $G'$ is a contraction.
+
+**Lemma 1**: The minimal preimage of a vertex under a contraction is a tree.
+
+**Proof**: Consider a $v$ vetex in $H$. Since $f$ is a contraction then $v$ is in the image of $f$ so its preimage $f^{-1}(v)$ is a subgraph of $G$. Recall that $f$ is a contraction, so the preimage of $v$ is a connected subgraph of $G$ (because $f$ is a contraction), denote it $G'$. If $G'$ is acyclic, then $G'$ is a tree. If $G'$ is not acyclic, then consider a spanning tree of $G'$ (which exists since $G'$ is connected), denote it $T$. Sine $T \subseteq G'$ and $G'$ is taken to a single vertex under $f$, then $T$ is also taken to a single vertex, so it is also a preimage of $v$. If we were to remove an edge from $T$ then it would no longer be connected, so $f_{T}$ is not a contraction, so $T$ is a minimal preimage.
+
+**Lemma 2**: The minimal preimage of an edge under a contraction is a (single) edge.
+
+**Proof**: An edge in the image of a contraction can only appear if it corresponds to at least one edge in the original graph, because contactions do not introduce new edges. However, it can be that two edges are collapsed to the same edge via a sequence of contractions. In that case, we take only one of those edges, which is a minimal preimage.
+
+**Theorem**: The minimal preimage of a connected contraction is a tree.
+
+**Proof**: By lemma 1, the minimal preimage of a vertex is a tree, and by lemma 2, the minimal preimage of an edge is an edge. The images of two vertices must be disconnected, otherwise we would have a subgraph of a tree mapped to two distinct vertices and then the map would not be well defined, so the minimal preimage of a contraction must be a forest with the preimages of edges connecting trees which are the preimages of vertices, and if $G$ is connected then its preimage is connected since $f$ is a contraction so the preimage must be a tree.
+
+**Theorem**: Let $G$ be a connected graph with maximum degree 3, and let $H$ be a graph. If $G \preceq_{M} H$, then $G \preceq_{T} H$.
+
+**Proof**: Since $G \preceq_{M} H$, there exists a contraction $f: H \to G$. The minimal preimage of each vertex is a tree, and the minimal preimage of the contraction can be viewed as a tree whoes vertices are also trees, connected via edges such that the correspondence to $E(G)$ is injective. Each vertex of $v$ has at most 3 edges so it is homeomorphic to $S_{3}$ and the preimage of its neighborhood has a subgraph which is a tree with at most 3 leaves which is a subdivision of $S_{3}$ by a previous result (and if it has less than 3 leaves then it is simply a path which easily maps to a subdivision), and if we take the preimage of all the neighborhoods of all the edges we would get a subdivision of $G$, so we have $G \preceq_{T} H$.
+
+**Corollary**: If $K_{3, 3} \preceq_{M} G$, then $G$ is non-planar.
+
+**Proof**: By the theorem, we also have $K_{3, 3} \preceq_{T} G$, and by a previous result this means that $G$ is non-planar.
+
+Using the results and methods discussed in this section, we can prove the following result:
+
+**Theorem**: Let $G$ be a graph. If $K_{5} \preceq_{M} G$, then either $K_{5} \preceq_{T} G$ or $K_{3, 3} \preceq_{T} G$.
+
+**Proof**: We have $f: G \to K_{5}$ such that the minimal preimage is a tree whose nodes are trees corresponding to vertices in $K_{5}$ and edges have a one-to-one correspondence to edges in $K_{5}$. All vertices of $K_{5}$ have degree 4, so the minimal preimage corresponding to the neighborhood of each vertex is a tree with 4 leaves, which by a previous result is either a subdivision of $S_{4}$ or a subdivision of the graph $H$ which consists of two $P_{3}$ subgraphs connected by an edge between their vertices of degree 2. In the former case (where every neighborhood is a subdivision of $S_{4}$), by a similar argument to the one presented in the proof of the last theorem that $K_{5} \preceq_{T} G$. In the latter, some vertex must have 2 degree 3 neighbors in its preimage (convince yourself that this is the case by examining the general shape of he neighborhood of $v$ in the latter case), denote the neighbors of this vertex $u, w$ and assign $w$ the color blue and $u$ the color red. Each of the two remaining edges of each vertex belongs to a path to a neighbor of each vertex in $K_{5}$. Color the two ends which are realized by following the edges from $w$ with red and the two ends realized by followign $u$ with blue. Identify that this is a 2-coloring so it is a subdivision of a complete bipartite graph with 3 vertices in each group, so we have $K_{3, 3} \preceq_{T} G$.
+
+**Corollary**: $K_{5} \preceq_{M} G$ or $K_{3, 3} \preceq_{M}$ if and only if $K_{5} \preceq_{T} G$ or $K_{3, 3} \preceq_{T} G$.
+
+**Proof**: the only if direction is easy, since we have seen that $H \preceq_{T} G$ implies $H \preceq_{M} G$. For the if direction, if $K_{5}\preceq_{M}G$ then by the last result the corollary holds. If $K_{3, 3} \preceq_{M}$ then by a previous result we have $K_{3, 3} \preceq_{T} G$ and again the corollary holds, completing the proof.
+
+## Connectivity and Contractions
+
+In this section we will see some interesting relations between well-connected graphs and contractions which will help us prove an important theorem about planar graphs soon.
+
+**Theorem**: If $G$ is a (1-)connected graph with at least 2 vertices, then for any edge contraction the resulting graph is still connected.
+
+**Proof**: Let $u, v$ be two vertices of $G'$ which results from the contraction $f: G \to G'$ of some edge $e$. Since it is a contraction the preimage of $u, v$ is not empty (since it is a surjective map). Take one of the vertices of each preimage $u' \in f^{-1}_{V}(u), v' \in f^{-1}_{V}(v)$. Since $G$ is connected, there exists a $(u', v')$-walk in $G$, which is a homomorphism $w: P_{K} \to G$. The homomorphism can be realized as a simplicial map $\text{simp}(w)$. Consider $f \circ \text{simp}(w)$, it is a $(u, v)$-walk in $G'$, which completes the proof.
+
+**Theorem**: If $G$ is 2-connected and $|V(G)| \geq 4$, then $\exists e \in E(G)$ such that the contraction of $e$ given by the map $f: G \to G'$ results in a graph $G'$ that is also 2-connected.
+
+**Proof**: Suppose not, then $\forall e \in E(G)$ the graph $G'$ resulting from the contraction of $e$ is not 2-connected, so by Menger's it has a separating set of 1 vertex. Let $e=\{u, v\}$ for $u, v \in V(G)$. Since we contracted $e$, then the vertex $w$ formed by the contraction must be a cut vertex (otherwise $G$ would not be 2-connected), so it must separate $G'$ to two disconnected subgraphs $A$ and $B$ such that $A \cup B = \emptyset$ (this is the same as taking $G$ and deleting $u$ and $v$ and all edges incident with either vertex). Since by our assumption doing this for any edge will result in two disconnected subgraphs, we choose an edge $e$ such that it maximizes the size of the larger component, w.l.o.g let $A$ be that component. Since $w$ is a cut vertex, $S=\{u, v\}$ is a separating set of $G$ so by Megner's we must have 2 internally-disjoint paths between $A$ and $B$ that pass through $S$, each passing through a different vertex of $S$. This means that $u$ must have a neighbor not in $A$, call it $b$. But then we can take $A \cup \{v \}$, and consider the graph $G \setminus \{u, b\}$, which must also be disconnected by a similar argument (since it the result of contracting $\{u, b \}$ then deleting the resulting vertex which must be a cut vertex if our assumption is currect). $A \cup \{v \}$ is a connected component of this graph, but it is strictly larger than $A$, which is a contradiction to $A$ being maximal, so our assumption that the theorem is false is incorrect.
+
+The last result can be generalized, although we will not present the argument here since it is very similar to the last one, for 3-connected graphs:
+
+**Theorem**: If $G$ be 3-connected with $|V(G) \geq 5$, then $\exists e \in E(G)$ such that the contraction of $e$ results in a 3-connected graph.
+
+We use the last result to prove a useful result on planarity:
+
+**Theorem**: If $G$ is 3-connected and has no $K_{3, 3}$ or $K_{5}$ minor, then it is planar.
+
+**Proof (incomplete)**: Prove by induction on $|V(G)|$. For $G$ to be 3-connected and simple we must have $|V(G)| \geq 5$, so the base case is $|V(G)|=5$. Since in this case we have only 5 vertices, we cannot have a $K_{3, 3}$ minor and the only way to have a $K_{5}$ minor is if $G$ is itself $K_{5}$, so the base case holds. For $|V(G) \gt 5$, by the last theorem there exists an edge $e=\{u, v\}$ such that the contraction of the edge results in another 3-connected graph $G'$, which has less that $|V(G)|$ vertices. If $G$ does not have a $K_{3, 3}$ or $K_{5}$ minor then so does $G'$ so by induction $G'$ is planar. From here we consider a linear planar embedding of $G \setminus \{u, v \}$ and attempt to use that embedding to reintroduce $u, v$ into the graph to get a planar embedding of $G$ by considering the face $u, v$ used to lie inside and attempting to fit $u, v$ inside the face without crossings. All neighbors of $u, v$ must be on the boundary of the face. If $u, v$ have more than 2 neighbors in common then we can find a $K_{5}$ minor in $G$, which we assumed to not exist. Let $a$ be a neighbor of $u$ (both $u$ and $v$ are guaranteed to have a neighbor since the graph is 3-connected). Walk along the boundary of the face in an arbitrary direction until we reach back to $u$. As we walk along the boundary, we take note of vertices that are neighbors of $u$ or $v$. If the last vertex we took note of does is not a neighbor of the same vertex (i.e. one is a neighbor of $u$ and the other is a neighbor of $v$ disregarding the order), we say that $u$ and $v$ *alternate* on that vertex. If $u$ and $v$ alternate more than twice, then we claim without proof that we can find a $K_{3, 3}$ minor, which is forbidden by our assumption. So we have that $u, v$ must have at most 2 common neighbors and cannot alternative more than twice, so we can form a linear planar embedding of $G$ from the existing embedding via a triangle fan, as shown in the sketch
+
+![Triange fan](images/graph_theory/35_triangle_fan.svg)
+
+### Minimal Non-Planar Graphs
+
+We say that $G$ is a **minimal non-planar graph** if every minor of $G$ is planar. We will now show that every minimal non-planar graph is 3-connected.
+
+**Theorem**: Minimal non-planar graphs are 3-connected.
+
+**Proof**: Let $G$ be minimal non-planar. Suppose $G$ is not 3-connected, so it is either disconnected, connected or 2-connected. We will show that in each case we can find a planar embedding of $G$ using the fact that its minors are connected, which would prove the theorem. 
+
+Case 1: If $G$ is disconnected, then consider its connected components - each connected component is a subgraph of $G$ so it is also a minor of $G$ so it is planar since $G$ is minimal non-planar, but then we can take the embedding of each connected component and put them together to get an embedding of $G$, so $G$ is planar, so this case is impossible.
+
+Case 2: If $G$ is connected, then it has at least one cut vertx $v$ which separates $G$ into to connected components $A$ and $B$. Consider $A'=A \cup \{v\}$ and $B'=B \cup \{v\}$. Both are minors of $G$ that are not equal to $G$ so they are planar so by Fary's theorem we have an embedding such that $v$ is on the outer face, but now we can take the two images of the embeddings and put them side by side such that they touch only at $v$ (which is possible since $v$ is a vertex on the outer face of each image), and this is an embedding of $G$, in contradition to $G$ being non-planar.
+
+Case 3: If $G$ is 2-connected, then consider a separating set $u, v$, which must be connected via an edge $\{u, v\}$ otherwise it is non-separating. By the same argument as before, we can take two connected minors $A \cup \{u, v \}$ and $B \cup \{u, v \}$ and by Fary's embed them linearly such that $\{u, v \}$ is an edge which bounds the outer face, and then we can put the two images side by side such that they touch only at $\{u, v \}$, which is an embedding of $G$, in contradiction to $G$ being non-planar.
+
+Since all 3 cases lead to contradictions, we conclude that non-planar graphs are 3-connected.
+
+## Kuratowski-Wagner Theorem
+
+[Kuratowski's theorem](https://en.wikipedia.org/wiki/Kuratowski%27s_theorem) and [Wagner's theorem](https://en.wikipedia.org/wiki/Wagner%27s_theorem) are theorems that characterize planar graphs in terms of forbidden minors/subdivisions.
+
+**Kuratowski's theorem**: $G$ is planar if and only if it does not have $K_{5}$ or $K_{3, 3}$ as topological minors.
+
+**Wagner's theorem**: $G$ is planar if and only if it does not have $K_{5}$ or $K_{3, 3}$ as minors.
+
+**Corollary**: Kuratowski's theorem and Wagner's theorem are equivalent.
+
+**Proof of the corollary**: Recall that we have seen that a graph has $K_{5}$ or $K_{3, 3}$ as topological minors if and only if it has either as a minor, so Wagner's theorem is true if and only if Kuratowski's theorem is true, so they are equivalent.
+
+**Proof of Wagner's theorem**: To prove the only if direction, we recall that we have already proven the inverse - if $G$ has $K_{5}$ or $K_{3, 3}$, then $G$ is non-planar (we have proven each part of the statement separately), which proves this direction. For the if direction, again recall that we have already proven this statement, so we have in fact already proven the theorem.
+
+Proof for Kuratowski's follows from the equivalance shown in the corollary.

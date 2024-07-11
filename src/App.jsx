@@ -21,7 +21,18 @@ import { FaEnvelope, FaLinkedin } from 'react-icons/fa';
 import { FaGithub } from 'react-icons/fa6';
 
 const PostsList = ({ ...props }) => {
-    const posts = useLoaderData().sort((a, b) => new Date(b.frontmatter.date || null) - new Date(a.frontmatter.date || null));
+    const posts = useLoaderData().sort((a, b) => {
+        const dateA = new Date(a.frontmatter.date || null);
+        const dateB = new Date(b.frontmatter.date || null);
+
+        // Compare dates first
+        if (dateB - dateA !== 0) {
+            return dateB - dateA; // Sort by date descending
+        } else {
+            // If dates are equal, sort by title in descending order
+            return -a.frontmatter.title.localeCompare(b.frontmatter.title);
+        }
+    });
     return (
         <div className='posts-list' style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '80%', margin: 'auto', marginTop: '1vh' }}>
             {posts.map(({ frontmatter }, index) => (

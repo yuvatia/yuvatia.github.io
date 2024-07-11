@@ -1,0 +1,98 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with svg_stack (http://github.com/astraw/svg_stack) -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="917.5" height="185.0">
+  <defs/>
+  <g id="id0:id0" transform="matrix(1.25,0,0,1.25,0.0,65.0)"><g id="id0:page0,1_graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 40)">
+<title>P5</title>
+<!-- 0 -->
+<g id="id0:node1" class="node">
+<title>0</title>
+<ellipse fill="white" stroke="red" cx="27" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="27" y="-14.3" font-family="Times,serif" font-size="14.00">0</text>
+</g>
+<!-- 1 -->
+<g id="id0:node2" class="node">
+<title>1</title>
+<ellipse fill="white" stroke="red" cx="153" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="153" y="-14.3" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 0&#45;&#45;1 -->
+<g id="id0:edge1" class="edge">
+<title>0--1</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M54.03,-18C75.14,-18 104.37,-18 125.58,-18"/>
+</g>
+<!-- 2 -->
+<g id="id0:node3" class="node">
+<title>2</title>
+<ellipse fill="white" stroke="red" cx="279" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="279" y="-14.3" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- 1&#45;&#45;2 -->
+<g id="id0:edge2" class="edge">
+<title>1--2</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M180.03,-18C201.14,-18 230.37,-18 251.58,-18"/>
+</g>
+<!-- 3 -->
+<g id="id0:node4" class="node">
+<title>3</title>
+<ellipse fill="white" stroke="red" cx="405" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="405" y="-14.3" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 2&#45;&#45;3 -->
+<g id="id0:edge3" class="edge">
+<title>2--3</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M306.03,-18C327.14,-18 356.37,-18 377.58,-18"/>
+</g>
+<!-- 4 -->
+<g id="id0:node5" class="node">
+<title>4</title>
+<ellipse fill="white" stroke="red" cx="531" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="531" y="-14.3" font-family="Times,serif" font-size="14.00">4</text>
+</g>
+<!-- 3&#45;&#45;4 -->
+<g id="id0:edge4" class="edge">
+<title>3--4</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M432.03,-18C453.14,-18 482.37,-18 503.58,-18"/>
+</g>
+</g>
+</g>
+  <g id="id1:id1" transform="matrix(1.2480294272201786,0,0,1.2483130904183537,727.5,0.0)"><g id="id1:page0,1_graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 144.2)">
+<title>C3_Isomorphism</title>
+<!-- A -->
+<g id="id1:node1" class="node">
+<title>A</title>
+<ellipse fill="white" stroke="red" cx="27" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="27" y="-14.3" font-family="Times,serif" font-size="14.00">A</text>
+</g>
+<!-- B -->
+<g id="id1:node2" class="node">
+<title>B</title>
+<ellipse fill="white" stroke="red" cx="27" cy="-122.2" rx="27" ry="18"/>
+<text text-anchor="middle" x="27" y="-118.5" font-family="Times,serif" font-size="14.00">B</text>
+</g>
+<!-- A&#45;&#45;B -->
+<g id="id1:edge1" class="edge">
+<title>A--B</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M27,-36.15C27,-55.16 27,-84.85 27,-103.91"/>
+</g>
+<!-- C -->
+<g id="id1:node3" class="node">
+<title>C</title>
+<ellipse fill="white" stroke="red" cx="117.24" cy="-70.1" rx="27" ry="18"/>
+<text text-anchor="middle" x="117.24" y="-66.4" font-family="Times,serif" font-size="14.00">C</text>
+</g>
+<!-- B&#45;&#45;C -->
+<g id="id1:edge2" class="edge">
+<title>B--C</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M47.48,-110.38C62.14,-101.91 81.82,-90.55 96.53,-82.06"/>
+</g>
+<!-- C&#45;&#45;A -->
+<g id="id1:edge3" class="edge">
+<title>C--A</title>
+<path fill="none" stroke="#777777" stroke-width="3" d="M96.76,-58.28C82.1,-49.81 62.43,-38.45 47.71,-29.96"/>
+</g>
+</g>
+</g>
+</svg>

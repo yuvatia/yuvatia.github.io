@@ -1,0 +1,726 @@
+export const frontmatter = {
+    title: "Graph Theory, Part 4: Algebraic Graph Theory",
+    date: "2024-07-12",
+    summary: "An introduction to algebraic graph theory, the laplacian matrix, and Tutte embedding",   
+    tags: ["graph-theory"]
+    // wip: true
+}
+
+In this last entry in the graph theory series, we present graphs as an algebraic structure and discuss the vector spaces associated with graphs, define the laplacian matrix and wrap things up with Tutte embedding, which is a beautiful result that shows that every planar graph can be embedded in the plane by solving a linear system of equations.
+
+Some of the content in this section is based on the blog post [The Smallest Eigenvalues of a Graph Laplacian](http://blog.shriphani.com/2015/04/06/the-smallest-eigenvalues-of-a-graph-laplacian/).
+
+# Algebraic Graph Theory
+
+So far we have discussed graphs either as a topological object (when dealing with geometric realizations), geometric object (when dealing with linear embeddings), or combinatorial object (when dealing with a graph as a pair of finite sets of vertices and edges where the edges are themselves sets of pairs of vertices). We have also discussed simplicial complexes which we have also examined through all these lenses to realize operations such an edge contractions, which provided a nice setting for the discussion of minors. In this section, we will consider graphs as algebraic objects, and we will see how vector spaces and linear maps can be used to study graphs and their drawings.
+
+## Vector Space of a Set
+
+Consider the [minimal finite field](https://en.wikipedia.org/wiki/GF(2)) $\text{GF}(2)$, whose members can be identified as $0$ and $1$. In this field, addition behaves as a logical XOR (e.g. $0+1=1$ but $1+1=0$), or equivalently as addition modulo 2, and multiplication behaves as a logical AND (e.g. $0\times1=0$ but $1 \times 1 = 1$), which again can be identified with multiplication modulo 2. This field can also be identified with the possible value of a bit in computing and boolean algebra.
+
+Let $S$ be a set. Consider the powerset of $S$, $P_{S}$. Consider the algebraic structure $V_{S}=(P_{S}, \text{GF}(2), \oplus)$. If we take the members of $P_{S}$ to be vectors, members of $\text{GF}(2)$ to be scalars, and $\oplus$ (the symmetric difference) to be the addition operation, then we can see (by checking that this structure satisfies the axioms of a vector space) that $V_{S}$ is a vector space with $\emptyset$ being the zero vector. Since addition in this vector space is the symmetric difference, we can construct every vector of $V_{S}$ by taking the linear combination of singletons of $P_{S}$ (i.e. member of $P_{S}$ that have only 1 member, which are in one-to-one correspondence to members of $S$) with scalars $\lambda_{i}$ such that
+
+$$
+\forall v \in V_{S}, v = \bigoplus_{s \in S} \lambda_{s} \{s\}, \lambda_{s} = \begin{cases} 1 & s \in v \\ 0 & \text{otherwise} \end{cases}
+$$
+
+So the set of singletons spans $V_{S}$, and it is also a mininal spanning set (we can show this by removing a singleton and checking that the remaining set has no linear combination which results in that singleton), so the set of singletons is a basis (and in fact we take it as the standard basis) of $V_{S}$ and $\text{dim}(V_{S})=|S|$.
+
+Consider $v \in V_{S}$, and the standard basis $b$, then the coordinate vector $[v]_{b}$ is an $|S|$-dimensional vector whose $i$-th entry is 1 if the member of $S$ corresponding to the singleton $b_{i}$ is also a member of $v$, and 0 otherwise. This coordinate vector is a vector in $\text{GF}(2)^{|S|}$.
+
+Since a graph is a pair of sets, we naturally have two vector spaces associated with the graph.
+
+## Edge and Vertex Space
+
+Consider the graph $G=(V, E)$. The **vertex space** of $G$ is given by $\mathcal{V}=(V, \text{GF}(2), \oplus)$, and the **edge space** of $G$ is given by $\mathcal{E}=(E, \text{GF}(2), \oplus)$. Since $E$ and $V$ are closely related, we would like to construct meaningful maps between the vector spaces. One such map is a *cut*.
+
+## Cut Space
+
+Combinatorically, a **cut** (more specifically, an edge cut) of a subset of vertices $U \subseteq V$ is the subset of edges in $E$ such that they are incident with exactly one point in $U$
+
+$$
+\text{cut}{U} = \{e \in E | |e \cap U| = 1\}
+$$
+
+A cut is an operation on a subset of vertices that results in a subset of vertices, so it is a map $\text{cut}: P_{V} \to P_{E}$. Combinatorically if we take a cut and remove the edges in it from $G$, we get two separated subgraphs $G_{1}, G_{2}$ such that $V(G_{1})=U$ and $V(G_{2})=\overline{U}$.
+
+**Theorem**: A cut is a linear map $\text{cut}: \mathcal{V} \to \mathcal{E}$.
+
+**Proof**: We already have $\text{cut}: P_{v} \to P_{E}$ so we to prove that it's a linear map from $\mathcal{V}$ to $\mathcal{E}$ we only need to show that the map is linear. To do this, take an ordering of $V(G)$ and $E(G)$ such that $v_{i}$ corresponds to the i-th standard basis vector of $\mathcal{V}$ and $e_{i}$ corresponds to the $i$-th standard basis vector of $\mathcal{E}$, so $U$ can be expressed via some coordinate vector $[U]_{b}$. To show that a cut is a linear map, we need to find a matrix $M$ such that $\text{cut}(U)=MU$. Consider the combinatorical meaning of a cut - an edge belongs to the cut if and only if it is incident with exactly one vertex in $U$. Since an edge is a pair of vertices from $V$, then it is also a member of the powerset of $V$ so we can identify edges with vectors of the vector space. Consider an $m \times n$ ($n$ rows and $m$ columns) matrix $B$ such that its columns vectors (which have size $n$) are the coordinate vectors of the vectors in $\mathcal{V}$ associated with $e_{i}$ such that the $i$-th column vector corresponds to $e_{i}$. We call this matrix the **incidence matrix** and denote it $B$.
+
+As an example, consider the graph $P_{4}$, with the following ordering of vertices and edges:
+
+$$
+\begin{gathered}
+V = \{0, 1, 2, 3 \} \\
+E = \{ \{0, 1\}, \{1, 2\}, \{2, 3 \} \}
+\end{gathered}
+$$
+
+Then we have:
+
+$$
+B = 
+\left(
+\begin{array}{ccc}
+\vert & \vert & \vert \\
+[e_{0}] & [e_{1}] & [e_{2}] \\
+\vert & \vert & \vert
+\end{array}\right)=
+\begin{pmatrix}
+1 & 0 & 0 \\
+1 & 1 & 0 \\
+0 & 1 & 1 \\
+0 & 0 & 1
+\end{pmatrix}
+$$
+
+Now consider the function
+
+$$
+f(U) = B^{T}U
+$$
+
+Since this is matrix multiplication of matrices with dimensions $m \times n$ and $n \times 1$ with symmetric differene as vector addition and $\text{GF}(2)$ scalars, the result of this vector multiplication would be an $m$ dimensional vector in $\mathcal{E}$ such that
+
+$$
+f(U)_{i} = \begin{cases} 1 & \text{col}(B, i) \cdot U = 1 \\ 0 & \text{otherwise} \end{cases}
+$$
+
+Where $\cdot$ means the inner product, but this is true only if the $i$-th column of $B$ has only one $k$ for which $\text{col}(B, i)_{k}=U_{k}$ (since the scalars are from $\text{GF}(2)$), which corresponds to our combinatorical definition of a cut, which completes the proof.
+
+**Corollary**: Edge cut is distributive over symmetric difference, i.e. given a graph $G$ and subsets of vertices $A, B \subseteq V(G)$, $\text{cut}(A \oplus B) = \text{cut}(A) \oplus \text{cut}(B)$.
+
+**Proof**: $A \oplus B$ corresponds to vector addition in $\mathcal{V}$, and since $\text{cut}$ is a linear map we have $\text{cut}(u+v)=\text{cut}(u)+\text{cut}(v)$.
+
+**Corollary**: Consider $f(e)=Be$ for $e \in \mathcal{E}$, then it is a linear map $f: \mathcal{E} \to \mathcal{V}$.
+
+**Proof sketch**: Intuitively this is true since we constructed $B$ by thinking of what the image of an edge would look like and since the edges correspond to singletons which are the standard basis of $\mathcal{E}$, we can rewrite a vector $e \in \mathcal{E}$ as a linear combination of basis vectors and since $B$ takes a basis vector to its corresponding vector in $\mathcal{V}$, we have that $B$ takes $e$ to its corresponding vector in $\mathcal{V}$. 
+
+Since a cut can be realized as a linear map, its image is a subspace of the co-domain. We denote it by $C_{G}^{\star}=\text{Im}(\text{cut})$ and call it the **cut space**. Every vector in the cut space is a subset of edges incident with one of the vertices its preimage, which means that the vertices of the graph span $C_{G}^{\star}$. However, this is not an independent set: consider the vertices of the graph and some subset $U \subseteq V(G)$, we have $\text{cut}(U)=\text{cut}(\overline{U})$ purely by a combinatorical argument (if $e \in \text{cut}(U)$ then it is incident with exactly one vertex of $U$, but then means it must have its other end at $\overline{U}$ so by symmetry we have $\text{cut}(U)=\text{cut}(\overline{U})$), so a minimal spanning set would have $n-c$ vertices where $C$ is the number of connected components, to summarize:
+
+$$
+\text{dim}(C_{G}^{\star}) = n - c
+$$
+
+We state without proof that the dimension of the cut space of a graph is $n-c$, where $c$ is the number of connected components and $n$ is the number of vertices.
+
+## Cycle Space
+
+In the last section we presented the vertex cut, which is a linear map represented by the transpose of the incidence matrix $B$. By a classic result in linear algebra, the image and kernel of a linear map are both vector subspaces. We called the image of the map the cut space. We have also seen that the incidence matrix $B$ represents a linear map $\mathcal{E} \to \mathcal{V}$. In this section, we shall consider the kernel of that map.
+
+The kernel of the map $B$ is a vector subspace of $\mathcal{E}$ which consists of all vectors $x \in \mathcal{E}$ such that $Bx=0$ (where $0$ in this vector space is the empty set). Consider a member of the standard bais of $\mathcal{E}$, $e_{i}$, whose corresponding edge is $uv$ (we use vector notation instead of set notation here for bravity and to prevent ambiguity). We have seen that
+
+$$
+Be_{i}=u+v
+$$
+
+Where $u$ and $v$ are the singletons corresponding to the vertices $u, v$, and the addition here is a symmetric difference.
+
+Consider a graph with the following cycle $C=\{a, b, c, a\}$, and consider the corresponding member of $\mathcal{E}$ which describes the edge set of the cycle, then we have $x_{C}=\{ab, bc, ca\}$, and under $B$ we have
+
+$$
+Bx_{C} \underset{\text{linear}}{=}B(ab)+B(bc+B(ca)) = (a + b) + (b + c) + (c + a) \underset{\text{vector space}}{=} (a + a) + (b + b) + (c + c) = 0
+$$
+
+So $x_{C} \in \text{ker}(B)$. We can extend this argument to any cycle, since in a a cycle each vertex appears twice. However, not every member of $\text{ker}(B)$ is a cycle. To show this, consider the following graph
+
+![Addition in the cycle space](images/graph_theory/36_cycle_space.svg)
+
+Indetify the cycle subgraphs $\{a, b, c, a\}$ and $\{d, e, f, g\}$. Both are in the kernel of $B$, which is a vector space so their addition should also be a vector in the kernel of $B$, but now we have a member of $\text{ker}(B)$ that clearly does not correspond to a single cycle in the graph. However, it does correspond to an even degree subgraph, so each vertex ends up being counted an even number of times, so the vector is in the kernel of $B$, which leads to the following definition/result:
+
+The **cycle space** $C_{G}$ of a graph $G$ is defined as $C_{G}=\text{ker}(B)$ where $B$ is the incidence matrix of the graph. Each member of the cycle space corresponds to a subgraph of $G$ where all vertices are of even degree.
+
+**Lemma**: If $u, v \in C_{G}$ and the subgraphs corresponding to $u, v$ share an edge, then $u+v$ corresponds to a cycle subgraph of $G$ which consists of all the vertices in $u$ or $v$ without the shared edge.
+
+**Proof**: The sum of the vectors is a member of $C_{G}$ because $C_G{}$ is a vector space and a shared edge is counted twice so it is not an edge in the sum.
+
+### Basis of the Cycle Space
+
+Recall that each connected graph has a spanning tree such that every other edge in the graph not in the spanning tree creates a cycle. Similarly, every graph has a spanning forest such that every other edge in the graph either creates a cycle (it cannot connect two disconnected components since if there were a path between the components in the graph they would be connected in a tree component of the spannig forest). These cycles have all their edges in the spanning forest except for the one edge which was added to close the cycle. We call these the *fundamental cycles* of the graph.
+
+**Theorem**: The fundamental cycles of a graph are a (standard) basis of $C_{G}$.
+
+**Proof**: We shall prove that fundamental cycles span the cycle space. Consider a member of $x$ the cycle space. It is either a cycle of the graph or it is a union of cycles of the graph. Since the latter generalizes the former, we only consider that case. Consider a spanning forest $F$ of $G$, and identify the subgraph corresponding to the member of the cycle space, denote it $H$. Consider the fundamental cycles of $G$, each is the single cycle subgraph of $T'$ which is $T$ with a single edge from $E(G) \setminus E(F)$. There are $m-(n-c)$ such fundamental cycles, where $c$ is the number of connected components (this is because the spanning forest is a union of $c$ trees such that the union of all trees have $n$ vertices and each tree has $n-1$ edges). Pick an ordering for these fundamental cycles and identify their corresponding vectors in $C_{G}$ as $c_{i}$.
+
+Consider $x+c_{0}$. Since both are members of $C_{G}$ the resulting vector must correspond to a union of cycles. Now, if the edge which formed $c_{0}$ was in $x$, then $x+c_{i}$ must not contain the edge, but then it must not be equal to the spanning forest because then it would not be a cycle. Next, we take $x+c_{1}$. By a similar argument $x+c_{2}$ must not contain the edge which formed $c_{1}$ but must also not be equal to $T$. Repeat this argument until you exhaust all fundamental cycles. The remaining vector must be in $C_{G}$, but it must have no fundamental cycle of $T$, so it must not have any edge not in the spanning forest, but then if it has any edges remaining it cannot be a cycle, so it must be the empty set, so it must be zero, so we have that $x$ is a linear combination of fundamental cycles.
+
+To prove that they are a basis, remove a vector corresponding to a fundamental cycle $c_{k}$ from the set of vectors. Then consider a member $x \in C_{G}$ such that $x$ corresponds to $c_{k}$. Clearly we cannot form the cycle by a combination of the remaining cycles, since we cannot introduce the edge that forms $c_{k}$, so the set we found must be a basis.
+
+**Corollary**: $\text{dim}(C_{G}) = m - (n - c)$
+
+**Proof**: Follows immediately from the set of fundamental cycles being a basis of $C_{G}$, which has cardinality $m - (n-c)$ as we have seen.
+
+**Corollary**: $\text{dim}(C_{G}) + \text{dim}(C_{G}^{\star}) = \text{dim}(\mathcal{E}_{G})$
+
+**Proof**:
+
+$$
+\text{dim}(C_{G}) + \text{dim}(C_{G}^{\star}) = m - (n - c) + (n - c) = m = \text{dim}(\mathcal{E}_{G})
+$$
+
+## Adjacency Matrix of a Graph
+
+Consider a graph $G=(V, E)$ with some ordering on the vertices. We define the **adjacency matrix** $A$ of a simple graph as an $n \times n$ matrix ($n=|V|$) such that the $i$-th column (or row, as we will see $A$ is symmetric) corresponds to a vector in $\mathcal{V}$ which corresponds to the set of all vertices incident with $v_{i}$ under the ordering:
+
+$$
+A_{ij}=\begin{cases}
+1 & \{v_{i}, v_{j} \} \in E \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+From this definition it follows immediately that the adjacency matrix is symmetric.
+
+Let $n_{v} \in \mathcal{V}$ be a vector which corresponds to the set of all neighbors of the vertex $v$. Consider some vector $x \in \mathcal{V}$, it can be expressed as a linear combination of basis vectors $\sum_{i=0}^{n-1} \lambda_{i}b_{i}=\lambda b$. The product $Ax$ is an $n$-dimensional vector such that
+
+$$
+[Ax]_{i} = \lambda^{T} \cdot [n_{v}]
+$$
+
+Clearly, this result is a linear combination of vectors in $\mathcal{V}$, so we have that $A$ defines a linear map $A: \mathcal{V} \to \mathcal{V}$. The image of a vector $v$ under $A$ is a vector whose $i$-th entry is the sum of the subset of coefficients $\lambda$ of $v$ which correspond to the neighbors of the vertex corresponding to the basis vector $v_{i}$. In $\text{GF}(2)$ this is not particularly interesting, but as we will soon see if we let vertices correspond to vectors in $\mathbb{R}^{n}$ this map becomes useful.
+
+## Towards Euclidean spaces
+
+In our treatment of graphs as vector spaces so far we had vector spaces isomorphic to $\text{GF}(2)^{k}$ where $k$ is the dimension of the vector space. This setting, while helpful, is limiting. As a motivating example, consider that our object of interest is an electronic circuit. A natural way to represent an electric circuit using a graph is to take points (nodes) on the circuit to vertices on the graph and conductors connecting nodes to edges. This graph corresponds to the two vector spaces $\mathcal{V}$ and $\mathcal{E}$ which are isomorphic to $\text{GF}(2)^{n}$ and $\text{GF}(2)^{m}$ respectively. However, in an electric circuit the nodes and the conductors also have a numerical value associated to them - for example, at each point we can measure the potential and each conductor conducts some current. We would like to capture this information about the vertices and edges as well.
+
+To do that, we define a new vertex space $\mathcal{V}$ which is isomorphic to $\mathbb{R}^{n}$ and a new edge space $\mathcal{E}$ which is isomorphic to $\mathbb{R}^{m}$. In these spaces, an edge or vertex in the graph is represnted by a vector which is a scaled basis vector, i.e. $\lambda_{i}b_{i}$ where $\lambda_{i}$ is the scalar corresponding to the vertex/edge (perhaps a mure intutive way to think of this value would be as a *label* or some *data* on the vertex/edge) and $b_{i}$ is the associated basis.
+
+As an example, consider the following graph with labels written inside each vertex with the ordering $\{a, b, c, d \}$
+
+![Labeled undirected graph](images/graph_theory/35_labeled_undirected_graph.svg)
+
+Consider the adjacency matrix of the graph
+
+$$
+A = \begin{pmatrix}
+0 & 1 & 1 & 1 \\
+1 & 0 & 0 & 0 \\
+1 & 0 & 0 & 1 \\
+1 & 0 & 1 & 0
+\end{pmatrix}
+$$
+
+Let $x$ be a vector in $\mathcal{V}$ corresponding to the subset $\{a, b, c, d \}$ with the labels seen in the graph, so we have
+
+$$
+x = \begin{pmatrix}
+0 \\ 1 \\ 2 \\ 3
+\end{pmatrix}
+$$
+
+Recall that $Ax$ takes $x$ to a vector such that $[Ax]_{i}$ is the sum of the coefficients in $x$ of the neighbors of $v_{i}$, so we have
+
+$$
+Ax = \begin{pmatrix}
+1 + 2 + 3 \\
+0 \\
+0 + 3 \\
+0 + 2
+\end{pmatrix} = \begin{pmatrix}
+6 \\ 0 \\ 3 \\ 2
+\end{pmatrix}
+$$
+
+Now, consider the incidence matrix $B$ which we have defined earlier. Recall that given a basis vector $e \in \mathcal{E}$ corresponding to the edge $\{u, v\}$, we had $Be = u + v$, which in $\text{GF}(2)$ also corresponds to $Be = u - v$ (we abuse notation here because the addition is in fact the symmetric difference, but if we were to perform the operation on the coordinate vectors of $u$ and $v$ this result would hold). Continuing our analogy to electronic circuits, if we think of the labels on the vertices as potential, it would make sense to associate a *voltage* to an edge, but a voltage is a difference in potential, so when extending the incidence matrix to real Euclidean space we would like to have the result of multiplication of an edge vector by that matrix be a difference of vertex vectors and not a sum. This also requires us to pick an arbitrary orientation for each edge, which should correspond to the direction of electron flow along the corresponding conductor, which should be encoded in this new matrix. We call this matrix the **boundary matrix**.
+
+The **boundary matrix** $\partial$ of a graph is a matrix where every column corresponds to an edge of the graph written as a vector in $\mathcal{V}$ with some arbitrary orientation, such that
+
+$$
+\partial_{ij} = \begin{cases}
+1 & \text{if edge $j$ is oriented from $v_{i}$ to $v_{j}$} \\
+-1 & \text{if edge $j$ is oriented from $v_{j}$ to $v_{i}$} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+In our example, if we were to direct all edges incident with $a$ towards $a$, and the edge from $c$ to $d$ towards $d$, and choose the ordering $(ab, ac, ad, cd)$, then the boundary matrix would be
+
+$$
+\partial = \begin{pmatrix}
+1 & 1 & 1 & 0 \\
+-1 & 0 & 0 & 0 \\
+0 & -1 & 0 & -1 \\
+0 & 0 & -1 & 1 \\
+\end{pmatrix}
+$$
+
+We can check and verify that this is a map $\partial: \mathcal{E} \to \mathcal{V}$ such that given an $m$-dimensional vector corresponding labeled edges, its image would be the labels for the vertices whose differences along edges correspond to the labeling of the edges (to convince yourself that this is true, try it yourself!)
+
+Similarly, we can check that $\text{ker}(\partial)$ corresponds to the cycle space $C_{G}$, and that $\partial^{T}$ is also a map whose image corresponds to the cut space $C_{G}^{\star}$. It is easy to verify that $\partial^{T}$ takes a vector of labeled vertices and returns a vector of labeled edges such that each edge is assigned to the difference of the labels of the vertices it connects. In that sense, $\partial^{T}$ is a discrete derivative operator.
+
+Consider the map $\partial \partial^{T}: \mathcal{V} \to \mathcal{V}$. Since it is a composition of linear transformations it is also a linear transformation. We can calculate $\partial \partial^{T}$ for some ordering on vertices and edges from the definition of the boundary matrix, which will get us (here we state the final result without proof, which should be easy to verify manually):
+
+$$
+[\partial \partial^{T}]_{ij} = \begin{cases}
+\text{deg}(v_{i}) & i = j \\
+-1 & \{v_{i}, v_{j}\} \in E \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+We call this result the **laplacian** of the graph and we denote it with the letter $L$. Observe that the diagonal is simply the degree of each vertex, so we can write $L$ in terms of matrix difference
+
+$$
+L = D_{G} - M
+$$
+
+Where $D_{G}$ is a diagonal matrix where $[D_{G}]_{ik} = \begin{cases} 0 & i \neq k \\ \text{deg}(v_{i}) & i = k \end{cases}$ which we call the **degree matrix** and $M$ is a matrix where $[M]_{ij} = \begin{cases} 1 & \{v_{i}, v_{j}\} \in E \\ 0 & \text{otherwise} \end{cases}$, but this is precisely the definition for the adjancy matrix so we have
+
+$$
+L_{G} = D_{G} - A_{G}
+$$
+
+**Theorem**: The laplacian matrix is positive semi-definite.
+
+**Proof**: Considering again the definition of $L_{G}$ as $\partial \partial^{T}$, we have that for all $x \in \mathcal{V}$ the quadratic form of $L$ Is
+
+$$
+x^{T}Lx = x^{T}(\partial \partial^{T}) x = (\partial^{T}x)^{T}(\partial^{T}x) = ||\partial^{T}x||^{2} \geq 0
+$$
+
+Where the minimum of $0$ is attained iff $x$ is the zero vector, so $L_{G}$ is positive semi-definite, which means that all its eigenvalues are non-negative.
+
+**Fact**: The quadratic form of a laplacian for some vector $x \in \mathcal{V}$ is of the form
+
+$$
+x^{T}Lx = \sum_{\{v_{i}, v_{j}\} \in E} (x_{i} - x_{j})^{2}
+$$
+
+This can be arrived at directly by considering the definition of the laplacian and expanding the quadratic form, or by recalling that the quadratic form of a matrix $M$ is equivalent to $\sum_{i=1}^{n} \sum_{j=1}^{n} M_{ij}x_{i}x_{j}$.
+
+This matrix will be very useful for us moving forward, so it is worth considering how different orderings of the vertices and edges sets change it. The laplacian is:
+
+1. Symmetric (as the difference of symmetric matrices)
+2. The sum of every row and every column of $L_{G}$ is zero. This stems from the fact that for every row and column, the only positive value is the degree of a vetex and the only negative values are $-1$ and they appear once for every neighbor of the vertex, so in total we have $\sum = \text{deg}(v) + (-1)\text{deg}(v) = 0$.
+3. $L_{G}$ has $\lambda_{0}=0$ as an eigenvalue with eigenvector $\mathbf{1}$, where $\mathbf{1}$ is the vector of all ones. This is because by $(2)$ the sum of every row and column is zero, so the sum of every row and column of $L_{G}\mathbf{1}$ is zero, so $\mathbf{1}$ is an eigenvector of $L_{G}$ with eigenvalue 0.
+4. The geometric multiplicity of $\lambda_{0}=0$ is the number of connected components in $L_{G}$. This is because if $G$ is not connected then we can write the laplacian for each connected component of $G$ which will have eigenvalue 0 with eigenvector all ones, but then if we project this vector back to $\mathcal{V}$ we will have a vector which, multiplied by the laplacian, will only take into account the rows and columns of the laplacian of the subgraph, which will add out to zero.
+5.  $L_{G}$ is singular since it has 0 as an eigenvalue.
+6. The laplacian is indepdent of the orientation we pick for the edges in constructing the boundary matrix $\partial$.
+7. All eigenvalues of $L_{G}$ are non-negative.
+
+## Boundary Matrix Similarity
+
+Recall that when discussing the geometric realization of a graph, we proved that the geometric realization is invariant up to a homeomorphism by considering the permutation matrix which essentially maps a elements of one finite set to another, and when this mapping is surjective and injective this mapping is a bijection, which means that the permutation matrix is invertible. In fact, if a permutation matrix is invertible we have
+
+**Theorem**: Let $P$ be a permutation matrix between two finite sets of equal cardinality, then $PP^{-1}=I$ if and only if $PP^{T}=I$.
+
+**Proof**: The theorem is equivalent to stating that if $P$ is invertible, then it is orthogonal, which is equivalent to saying that $P^{-1}=P^{T}$. We prove this by considering the definition of a permutation matrix. Let $P$ be a permutation matrix and let $f: S \to K$ be the linear map defined by $P$ where $S$ and $K$ are two sets with some ordering, then we have
+
+$$
+P_{ij} = \begin{cases} 1 & f(s_{i}) = k_{j} \\ 0 & \text{otherwise} \end{cases}
+$$
+
+Similarly, we have $f^{-1}$ defined by $P^{-1}$, which is also a permutation $f^{-1}: K \to S$, so we have
+
+$$
+P^{-1}_{ij} = \begin{cases} 1 & f^{-1}(k_{i}) = s_{j} \\ 0 & \text{otherwise} \end{cases}
+$$
+
+But now we have
+
+$$
+[P^{T}]_{ij}=P_{ji} = \begin{cases} 1 & f(s_{j}) = k_{i} \\ 0 & \text{otherwise} \end{cases}
+$$
+
+Which is the same as $P^{-1}$, which completes the proof.
+
+**Corollary**: The cycle space $C_{G}$ and the cut space $C_{G}^{\star}$ of a graph are isomorphic under orderings.
+
+**Proof**: In the definition of the boundary matrix, we picked two orderings - an ordering of the vertices and an ordering of the edges. Let $P_{n}$ be a permutation matrix which reorders the vertices, and let $P_{m}$ be a permutation matrix which reorders the vertices. Consider some boundary matrix $\partial$ with one arbitrary ordering on the vertices and the edges. Since the rows of the boundary matrix correspond to vertices and the columns to edges, in order to properly apply the permutations we need to consider the matrix $P_{n} \partial P_{m}$. Similarly for $\partial^{T}$ (which we use to define the cut space) we need to consider the matrix $P_{m} \partial^{T} P_{n}$. We show that $\text{ker}(\partial)$ is isomorphic to $\text{ker}(P_{n} \partial P_{m})$ by composing isomorphisms:
+
+First, $\forall x \in \text{ker}(\partial)$, we have $P_{n}\partial x = P_{n} (\partial x) = P_{n} 0 = 0$, so $\partial \cong P_{n} \partial$. Next, consider $P_{n} \partial P_{m}x$ for some $x \in \mathcal{E}$. Since $P_{m}$ is a permutation of $\mathcal{E}$, we have an isomorphism between two bases of $\mathcal{E}$ via $P_{m}$ and $P_{m}^{-1}=P_{m}^{T}$, so by composition we have $\text{ker}(\partial) \cong \text{ker}(P_{n} \partial P_{m})$. A similar proof follows for the cycle space.
+
+**Theorem**: The laplacian of a graph is invariant under edge reordering and a vertex reordering is an isomorphism on the laplacian.
+
+**Proof**: We have $L_{G}=\partial \partial^{T}$. Permuate the vertices and the edges with $P_{n}$ and $P_{m}$ respectively, then we have
+
+$$
+L'_{G} = (P_{n} \partial P_{m}) (P_{n} \partial P_{m})^{T} = P_{n} \partial P_{m}P_{m}^{T} \partial^{T} P_{n}^{T} = P_{n} \partial \partial^{T} P_{n}^{T} = P_{n} L_{G} P_{n}^{T}
+$$
+
+But since $P_{n}^{T}=P_{n}^{-1}$ we have $L'_{G}$ written in the form of $AL_{G}A^{-1}$, which is an isomorphism via matrix similarity, and indepdent of the ordering of the edges, which completes the proof.
+
+**Corollary**: For any ordering of the vertices and edges of the graph, if $L_{G}$ is the laplacian of the graph for that ordering, then the following are invariant:
+
+1. $\text{tr}(L_{G})$
+2. $\text{det}(L_{G})$
+3. Eigenvalues of $L_{G}$.
+
+**Proof**: All 3 immediately follow from the fact that the laplacian matrices of different orderings of the graph are similar so they have the same trace, determinant, and eigenvalues. Furthermore, since we have that the diagonal of $L_{G}$ is the degree matrix for some ordering, we have that $\text{tr}(L_{G})$ is the sum of degrees of the vertices of the graph, which is a graph invariant so this result is expected regardless of the matrix similarity. Similarly, since the laplacian is singular we always have $\text{det}(L_{G})=0$. 
+
+# Laplacian Systems
+
+Recall the electronic circuit analogy we used when introducing the boundary matrix which led to the introduction of the laplacian. By Ohm's law, for any two points on a conductor, we have
+
+$$
+V = RI
+$$
+
+Where $V$ is the voltage across the two points, which is the difference in the potential of the two points, $R$ is the resistance of the conductor and $I$ is the current through the conductor. An electronic circuit consists of many such conductors, each satisfying Ohm's law where $V$ is the difference of potential between its ends.
+
+![electronic circuit as a graph](images/graph_theory/37_electronic_circuit.svg)
+
+Assume you wanted to calculate the voltage at each point, given the potential at each point. One way would be to explicitly calculate Ohm's law for each conductor, but this is not as efficient computetionally compared to matrix multiplication, which can be parallalized and optimized. If we represent the circuit as a graph with an ordering on the vertices and on the edges and assign label the vertices with their potentials and label each edge with the voltage of the conductor it represents, then we have that the label of each edge is given by the difference of labels of each vertex, but this is 
+*precisely* the result of multiplying the co-boundary (transpose of the boundary) matrix with the vector represnting all the potentials (in the ordering we chose), so we have
+
+$$
+\partial^{T} \vec{p} = \vec{v}
+$$
+
+Where $\vec{p}$ is the potential vector and $\vec{v}$ is the voltage vector.
+
+Similarly, if we have a label vector $\vec{i} \in \mathcal{E} \cong \mathbb{R}^{m}$ such that $i_{j}$ corresponds to the current through the $j$-th conductor, then we have that the vector of *net current* at each vertex (i.e. the sum of currents through all conductors incident with the vertex, or the *flow* of the vertex) is given by $\partial\vec{i}$.
+
+Assume that we know have a net current or a flow vector, and wish to solve for potential. Both vectors are in $\mathcal{V} \cong \mathbb{R}^{n}$, so we need a matrix which maps a vector in $\mathcal{V}$ to another vector in $\mathcal{V}$. We have one such matrix - the laplacian. We will see that it naturally appears when attempting to solve for the potential using Ohm's law. If we consider Ohm's law on every conductor, we have the following system of equations
+
+$$
+\vec{v} = R\vec{i}
+$$
+
+Where $\vec{v}$ and $\vec{i}$ are the potential vector and current vector respectively, and $R$ is a diagonal matrix where $R_{ii}$ is the resistance of the $i$-th conductor (again in correspondence with the ordering of the edges). For now let us assume that the resistance is equals across the edegs of the circuit, so we can take $R$ to be the identity matrix and scale the $\vec{i}$ later to account for the resistance. We can rewrite the system of equations as
+
+$$
+\vec{v} = \vec{i}
+$$
+
+But recall that we have $\vec{v} = \partial^{T} \vec{p}$, so we have
+
+$$
+\partial^{T} \vec{p} = \vec{i}
+$$
+
+Now, recall that we have seen that the net current is given by $\partial\vec{i}$. Denote the net current by $\vec{c}$. We have
+
+$$
+\vec{c} = \partial\vec{i} = \partial \partial^{T} \vec{p} = L\vec{p}
+$$
+
+Which gives a system of linear equations $L\vec{p}=\vec{c}$ where $\vec{c}$ and $L$ are known and we wish to solve for $\vec{p}$. This is a **laplacian system**. Were $L$ invertible, the system would have a single solution in $\vec{p}=L^{-1}\vec{c}$, but since $L$ is singular we either have infinitely many solutions or none. Luckily, we *can* always find a solution if $G$ is connected.
+
+**Theorem**: Given a graph $G$, we have $\forall x \in \mathcal{V} \cong \mathbb{R}^{n}, (Lx)^{T} \mathbb{1} = 0$ where $\mathbb{1}$ is a vector in $\mathcal{V}$ whose every entry is 1.
+
+**Proof**: Let $y=Lx$, then this expression is equivalent to $y \cdot \mathbb{1}$, which is the same as the sum of all entries of $y$. Now, we have $L=D-A$, and we have seen that $Ax$ is a vector whose $i$-th entry is the sum of all values in $x$ at indices corresponding to neighbors of the $i$-th vertex in the graph. Similarly, we have $Dx$ as a vector where the $i$-th entry is the degree of the $i$-th vertex times its corresponding value in $x$. So we have
+
+$$
+[Lx]_{i} = [(D-A)x]_{i} = \text{deg}(v_{i})x_{i} - \sum_{\{i, j \} \in E(G)} x_{j}
+$$
+
+Consider the following combinatorical argument: each vertex $v_{i}$ is the neighbor of $\text{deg}(v_{i})$ vertices, so in the sum of all such $[Lx]_{i}$ we expect it to appear exactly $\text{deg}(v_{i})$ times with a negative sign and exactly 1 time with a positive sign but multiplied by $\text{deg}(v_{i})$, but this means that the sum of all entries related to $v_{i}$ is zero, but since $v_{i}$ is any vertex we have $\sum_{i=0}^{n-1}[Lx]_{i}=0$, which completes the proof.
+
+**Corollary**: Given a vector $b \in \mathbb{R}^{n}$ and a laplacian $L$ such that $x \cdot \mathbb{1} = 0$, then the system of equations $Lx=b$ has a solution.
+
+**Proof**: By the theorem we have that every vector of the form $Lx$ must satisfy $Lx \cdot \mathbb{1} = 0$, but this is also the only restriction on a vector of the form $Lx$ so if some vector satisfies this restriction then it can be rewritten as $Lx$ for some $x$ which is the solution of $Lx=b$.
+
+**Corollary 2**: In this theorem hides a proof of Kirchhoff's current law: given an internal node in an electronic circuit, the sum of currents in and out of the node is zero.
+
+**Proof**: This lemma is directly proven in the theorem.
+
+Back to our original problem, if we wish to solve a laplacian system which is described as a connected graph, then we can "inject" one unit of current to one vertex and "extract" it at another vertex, and then we would have
+
+$$
+\vec{c}_{i} = \begin{cases} 1 & i \text{ the injected vertex} \\ -1 & i \text{ the extracted vertex} \\ 0 & \text{otherwise} \end{cases}
+$$
+
+It is easy to see that $\vec{c} \cdot \mathbb{1} = 0$ so by the theorem the system $Lp=c$ has a solution. If we find one such solution, we can find an entire subspace of solutions by taking the solution $p_{0}$ and adding the $\mathbb{1}$ vector to it, which results in $L(p_{0}+\mathbb{1})=Lp_{0}+L\mathbb{1}=c+0=c$ thus $p_{0}+\mathbb{1}$ is also a solution. One way to get such solution for this system is to use the [pseudoinverse](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) of $L$.
+
+Now, let's consider the general case again where $R \neq I$. In that case, $R$ is a diagonal matrix where $R_{ii}$ is the resistance of the $i$-th conductor, and we have
+
+$$
+\partial^{T} \vec{p} = R\vec{i}
+$$
+
+Since $R$ is a non-singular diagonal matrix it is invertible so we can rewrite this As
+
+$$
+R^{-1} \partial^{T} \vec{p} = \vec{i}
+$$
+
+
+And agan we have the net current vector such that
+
+$$
+\vec{c} = \partial \vec{i} = \partial R^{-1} \partial^{T} \vec{p}
+$$
+
+Next, we denote $\tilde{L}=\partial R^{-1} \partial^{T}$, which gives the following linear system of equations
+
+$$
+\tilde{L}\vec{p} = \vec{c}
+$$
+
+Where $\tilde{L}$ is called the **weighted laplacian** of the graph (if $R=I$ then $\tilde{L}=L$ which is to be expected if all the weights are one). This system can be solved in the same way we solved $Lp=c$.
+
+# Sub-Laplacian Systems
+
+Let $G$ be a graph with laplacian $L$. In the last section we have seen that in general it is difficult to solve a laplacian system and there isn't always a solution (and if one exists it is not unique) because $L$ is singular.
+
+Recall that the laplacian for some vertex ordering is given by $L_{G}=D_{G}-A_{G}$, where $A_{G}$ is the adjacency matrix and $D_{G}$ is the degree matrix. Consider some partitioning of the laplacian into blocks
+
+$$
+L_{G} = \left(\begin{array}{c|c}
+L_{1}^{T} & Q^{T} \\
+\hline
+Q & L_{1}
+\end{array}\right)
+$$
+
+such that all blocks are square matrices and $Q$ is strictly below the diagonal, which means it corresponds to some square block in $A$ and hence why the corresponding block diagonal to $Q$ is $Q^{T}$ (since $A$ is symmetric). Similarly $L_{1}$ is symmetric by the same argument (since $L$ is symmetric). We call such matrices $L_{1}^{T}$ and $L_{1}$ **sub-laplacians**.
+
+Consider $L_{1}$. It corresponds to the sum of the blocks $D_{1}$ and $A_{1}$ of $D$ and $A$ respectively. However, since $A_{1}$ is a square block of $A$ it is also the adjacency matrix of a subgraph $H$ of $G$ which is the induced subgraph of the vertices whose adjacency is described by $A_{1}$, and $D_{1}$ is the degree matrix of the vertices $V(H)$ with respect to their degrees in $G$, such that $D_{1}$ is a nonnegative diagonal matrix. Since we have $\forall v \in V(H), \text{deg}_{H}(v) \leq \text{deg}_{G}(v)$, we can instead write
+
+$$
+L_{1} = L_{H} + X
+$$
+
+Where $L_{H}$ is the laplacian of the subgraph $H$ and $X$ is a nonnegative diagonal matrix which is equal to $D_{1}-D_{H}$.
+
+**Theorem**: If $G$ is connected and $L_{1}$ is a sub-laplacian of $G$, then $L_{1}$ is invertible.
+
+**Proof**: Recall from linear algebra that if $M$ is a positive definite matrix, then it is invertible. A matrix is positive definite if
+
+$$
+\forall x \neq 0, x^{T}Mx \gt 0
+$$
+
+Here we have $M=L_{1}=L_{H}+X$, which gives
+
+$$
+x^{T}L_{H}x + x^{T}Xx
+$$
+
+Since $X$ is a diagonal matrix, we have that $x^{T}Xx$ is equal to $\sum_{i=0}^{n-1} x_{i}^{2}X_{ii}$, which is a sum of nonnegative values so it is nonnegative. Next, $x^{T}L_{H}x$ will be greater than zero unless $x$ is a constant vector (because then the positive and negative values associated with each vertex will be equally weighted and cancel each other out), but in this case $x^{T}Xx$ must be strictly positive because then we would have $\forall i, x_{i} \gt 0$ and since $G$ is connected $X$ must be nonzero so there exists some $i$ for which both $x_{i}$ and $X_{ii}$ are positive, so $x^{T}Xx$ is strictly positive. This completes the proof.
+
+**Corollary**: all eigenvalues of a sub-laplacian are strictly positive. This is a classical result in linear algebra for positive definite matrices.
+
+Sub-laplacians are used to prove Kirchhoff's [matrix-tree theorem](https://en.wikipedia.org/wiki/Kirchhoff%27s_theorem), which states that given a connected graph $G$ with laplacian $L$, the number of spanning trees of $G$ is given by the determinant of any sub-laplacian of $G$.
+
+## Electricity again
+
+Consider a circuit with some battery with known voltage $V$, which corresponds to the label on some edge in the graph representation of the circuit. Let $a$ and $b$ be the vertices corresponding to the ends of the edge representing the battery, then we know that $p_{b}-p_{a}=V$, where $p_{a}$ is the potential at point $a$ and is the label of the vertex $a$. We can pick arbitrary values for $p_{a}$ and $p_{b}$ so long as their difference is preserved, so for simplictly lets choose $p_{a}=0$ and $p_{b}=V$. Assume the net current $c$ is known and we wish to solve for the potentials vector $p$, then we have a laplacian system
+
+$$
+Lp=c
+$$
+
+Which as we have seen before may not have a solution. However, since we know $p_{a}$ and $p_{b}$, we can choose an ordering on the vertices such that $a, b$ correspond to the first two vertices.  Now, by Kirchhoff's current law we know that the sum of currents in and out of a node is zero, so we expect that $c_{i}$ will be zero other than for $c_{0}$ and $c_{1}$ which correspond to the net current along $a$ and $b$. Putting this all together, we can rewrite this system as
+
+$$
+\left(\begin{array}{c|c}
+L_{1}^{T} & Q^{T} \\
+\hline
+Q & L_{1}
+\end{array}\right)
+\begin{pmatrix}
+0 \\ V \\ \hline p_{\text{rest}}
+\end{pmatrix}
+=
+\begin{pmatrix}
+c_{0} \\ c_{1} \\ \hline 0
+\end{pmatrix}
+$$
+
+By expanding the block which involves $L_{1}$, we get
+
+$$
+Q\begin{pmatrix} 0 \\ V \end{pmatrix} + L_{1} p_{\text{rest}} = 0
+$$
+
+Which has a single solution iff $L_{1}$ is invertible, and since $L_{1}$ is a sub-laplacian and the all conductors in the circuit are connected, it is, (and if it weren't we would have started out from the laplacian of a connected component) so this is a sub-laplacian system with a *unique* solution which Is
+
+$$
+p_{\text{rest}} = -L_{1}^{-1}Q\begin{pmatrix} 0 \\ V \end{pmatrix}
+$$
+
+# Algebraic Drawings of a Graph
+
+In this section, we show how the algebraic treatment of graphs as vector spaces provides new ways to calculate the image of a planar drawing of a graph. We will see that these images can be found by solving a system of linear equations, and we will see that we can also find a linear planar embedding using this method for every planar graph.
+
+## Spectral Drawings
+
+Let $G$ be a graph with laplacian $L$. Assume we wanted to separate the vertices of $G$ into *clusters*. Informally, a *cluster* is a group of objects that are more similar to each other than to other groups (clusters). In the context of a graph, a cluster is a group of vertices which are more connected in the group than outside the group, i.e. there are more edges between vertices in the cluster than between a vertex in the cluster to a vertex outside the cluster. A good clustering is one which minimizes the number of edges coming out of the cluster. If $G$ is disconnected, then we can take its connected components as clusters, which by a previous result is easy to find algebraically as the non-trivial eigenvectors corresponding to the eigenvalue 0 of the laplacian. What about the case where $G$ is connected?
+
+Recall that the quadratic form of the laplacian with some vector $x \in \mathcal{V} \cong \mathbb{R}^{n}$ is equivalent to the sum of the squares of the differences between $x_{i}, x_{j}$ pairs such that $\{v_{i}, v_{j}\} \in E(G)$. This means that by minimizing this sum, we minimize the total difference between connected vertices. If we think of the vector $x$ as a vector of coordinates along the real line $\mathbb{R}$, then these squares are really the squared distance between two connected vertices on the real line, which means that this operation will, in general, group vertices which are connected closer together, which nicely corresponds to our notion of a cluster.
+
+Generally speaking, this is the least squares problem, but recall that we got this form by the quadratic form of the laplacian, which is symmetric positive semi-definite, so we can use a result presented in a separate discussion about viewing the quadratic form of a matrix as an optimization problem where we've seen that the solution to the minimization problem is the eigenvector corresponding to the smallest eigenvalue of the matrix, and that the minimal value is the eigenvalue itself. However, since $L$ is positive semi-definite, this eigenvalue is always 0, which means that all vertices will be clustered together, which is not what we want, so if we also add the constraint that the distance be non-zero we have that the second smallest eigenvalue $\lambda_{1}$ is the optimal value with the corresponding eigenvector $v_{\lambda_{1}}$ being the optimal solution, such that $v_{\lambda_{{1_i}}}$ corresponds to the coordinate of the $i$-th vertex on the real line in the clustering. We call this a **spectral clustering** (since we use the spectrum of $L$ to perform the clustering).
+
+How can we used this for drawings? Recall that a desirable property of a drawing is that it minimizes the number of crossings, and that we are mostly interested in planar drawings. We can take a spectral clustering based on two non-zero eigenvalues of the laplacian (normally the two smallest non-zero eigenvalues), which will give us projections of the vertices into two orthogonal lines (since the eigenvectors of a symmetric matrix are orthogonal), which is a space isomorphic to the plane $\mathbb{R}^{2}$. Since in a way this clustering clusters connected vertices together, we can expect that by considering a drawing where the vertices are projected onto a point whose coordinate pair is the pair of coordinates associated with the vector on each line will generally not have many crossings. This is a **spectral drawing**.
+
+More formally, a **spectral drawing** of a graph is realized by taking two eigenvectors $v_{\lambda_{1}}, v_{\lambda_{2}}$ of $L_{G}$, usually those associated with the two smallest positive eigenvalues of $L_{G}$, and defining a map $f: V(G) \to \mathbb{R}^{2}$ such that
+
+$$
+f(v_{i} \in V(G)) = (v_{\lambda_{{1}_i}}, v_{\lambda_{{2}_i}})
+$$
+
+A Spectral drawing algorithm is described in the following pseudocode (lines need to be added in later between connected pairs of vertices)
+
+```python
+def get_vertex_positions(g: Graph) -> List[Tuple[float, float]]:
+    L = laplacian(g)
+    eigvals, eigvecs = eig(L)
+    eigvecs = eigvecs[:, 1:3]
+    return [(x, y) for x, y in eigvecs]
+```
+
+Since eigenvectors are unit vectors the coordinates will be between -1 and 1, so we can scale them to fit the desired drawing size.
+
+## Tutte Embedding
+
+We start our discussion of tutte's embedding with a thought experiment. Consider a system of point masses in $\mathbb{R}^{2}$ connected with springs. Recall from classical mechanics that a system is in equilibrium if the sum of forces acting on each particle adds up to zero, in which case the system's velocity is constant and so from some inertial frame of reference the system is in static equilibrium (all particles have velocity zero).
+
+Now, recall that Hooke's law states that the restoring force exerted by the string on a mass pulling one of its ends is
+
+$$
+F_{s}=-k\Delta x
+$$
+
+Where $k$ is a non-zero constant characteristic of the spring material and $\Delta x$ is the displacement vector of the spring. Let the number of point masses in our system be $n$, and let $x_{0}, x_{1}, \dots, x_{n-1}$ be an ordered set of the position vector of the point masses at some time $t=0$, and let $m_{i} \sim m_{j}$ be a binary relation on the point masses defined by whether or not the two point masses are connected via a spring, then the sum of restoring forces acting on one point mass at position $x_{i}$ is given by
+
+$$
+\sum_{j} F_{s_{i}} = -k \sum_{m_{i} \sim m_{j}}(x_{j}-x_{i})
+$$
+
+In an equilibrium state, we have
+
+$$
+\sum_{j} F_{s_{i}} = 0 \overset{k \neq 0}{\implies} \sum_{m_{i} \sim m_{j}}{x_{j}-x_{i}} = 0
+$$
+
+And in general we have
+
+$$
+\sum_{i} \sum_{j} F_{s_{i}} = 0 \implies \sum_{i}\sum_{m_{i} \sim m_{j}}(x_{j}-x_{i}) = 0
+$$
+
+At any time $t$ we can view this system as a graph $G$ whose vertices are the point masses (while preserving the ordering) and the edges are the springs, and we can associate labels to the point masses correspong to their position at $t$ and then the edges are naturally asssigned the difference in position of their vertices. Let $L_{G}$ be the laplacian of this graph and let $x$ be the position vector. Recall that we have seen that
+
+$$
+[Lx]_{i} = \text{deg}(v_{i})x_{i} - \sum_{\{i, j\} \in E(G)} x_{j}
+$$
+
+Which can be rearranged as
+
+$$
+[Lx]_{i} = \sum_{\{i, j \} \in E}(x_{j}-x_{i})
+$$
+
+But this is exactly the expression which must be 0 for all $i$ if the system is in equilibrium, so we have
+
+$$
+\text{system in equilibrium} \iff Lx = 0
+$$
+
+Which is a laplacian system. As we know, this system does not necessarily have a solution other than the trivial solution where $X=0$, but in that case the system will "collapse" into a single point, which is not a very interesting equilibrium state. However, if we pin down some of the point masses (by applying a force external to the system such that they are held in place), we have that for these pinned masses the sum of spring forces acting on them internally does not have to add up to zero (because we apply an external force which keeps them in place). Consider an ordering where these point masses are the first $k$ point masses, and $x_{0}, \dots, x_{k-1}$ be the positions that these points are kept in (you can think of it as a set of position constraints on the system), then the system of equations for an equilibrium state becomes
+
+$$
+\left(\begin{array}{c|c}
+L_{1}^{T} & Q_{T} \\
+\hline
+Q & L_{1}
+\end{array}\right)
+\begin{pmatrix}
+x_{0} \\ \dots \\ x_{1} \\ \hline x_{k} \\ \dots \\ x_{n}
+\end{pmatrix}
+=
+\begin{pmatrix}
+\vert \\
+? \\
+\vert \\
+\hline
+\vert \\
+0 \\
+\vert
+\end{pmatrix}
+$$
+
+Which has a luplacian sub-system
+
+$$
+L_{1} \begin{pmatrix}x_{k} \\ \dots \\ x_{n} \end{pmatrix} = -Q \begin{pmatrix}x_{0} \\ \dots \\ x_{k-1} \end{pmatrix}
+$$
+
+With a unique solution
+
+$$
+\begin{pmatrix} x_{k} \\ \dots \\ x_{n} \end{pmatrix} = -L_{1}^{-1}Q \begin{pmatrix}x_{0} \\ \dots \\ x_{k-1} \end{pmatrix}
+$$
+
+Which means the the state can reach an equilibrium state. Note that the position "vector" is in fact an $n \times 2$ matrix since each entry $x_{i}$ consists of two coordinates in $\mathbb{R}^{2}$, so the solution is a planar linear drawing of the graph corresponding to the mass-spring system. In fact, we can take any graph and model it as a spring-mass system and solve the sub-laplacian system to get a drawing.
+
+Let $G$ be a 3-connected planar graph and let $C$ be a cycle in the graph which bounds its outer face, then the following algorithm produces a planar linear drawing of $G$ (by taking the positions and then adding line segments between vertices that are incident with the same edge)
+
+```python
+def get_vertex_positions(G: Graph, C: Graph) -> List[Tuple[float, float]]:
+    x_out = to_circle_points(len(C.vertices()))
+    inner_vertices = G.vertices().minus(C.vertices())
+
+    L = laplacian(G)
+    L1 = L[inner_vertices][:,inner_vertices]
+    Q = L[inner_vertices][:,C.vetices()]
+
+    L1_inverse = L1.inverse()
+    x_in = L1_inverse @ Q @ x_out
+
+    return [*x_out, *x_in]    
+```
+
+Where `to_circle_points` takes a number $k$ and returns $k$ distinct points on the boundary of a circle, and the subscript operators slice the matrix into sub-matrices. Here's an example of a planar linear drawing of a 3-connected planar graph drawn using this algorithm:
+
+![Tutte embedding](images/graph_theory/tutte_embedding.png)
+
+Clearly this is a linear embedding of this graph. Turns out that this is in fact always the case for 3-connected planar graphs (and if the graph weren't 3-connected we could complete it to a maximal planar graph and then remove all edges added to the graph to make it 3-connected). This is called a **Tutte embedding** or a **spring embedding**.
+
+**Theorem - Tutte's spring theorem**: The planar linear drawing we described always produces a planar linear *convex embedidng* for every planar 3-connected graph $G$.
+
+We will prove the theorem in the next section.
+
+### Tutte's Spring Theorem
+
+A **convex embedding** is an embedding where all faces are convex polygons.
+
+Let $G$ be a labeled graph. A **monotone path** is a path along which the labels of the edges in the path create a monotone sequence (i.e. if $\{x_{0}, x_{1}, \dots x_{n}\}$ is the ordered set of labels in the path, we have that the sign of $x_{n+1}-x_{n}$ is never reversed). This notion can be extended to vectors as well, in which case we say that a monotone sequence is a sequence which maintains the overall direction. In particular, we say that a sequence is monotone if there exists a direction vector $\vec{d}$ such that every vector orthogonal to $\vec{d}$ crosses the edges sequence at most once (overall).
+
+Now, let $G$ be planar 3-connected, and let the labels on the edges of $G$ be the difference in the labels of the vertices incident with the edges. Let $C$ be one induced cycle of the graph, and arbitrarily fix the labels of the vertices in $C$. We now have a sub-laplacian system corresponding to a spring-mass system where all strings are of the same material (so have the same spring constant $k$) which as we have shown has a unique solution. Pick the labels on the vertices not in $C$ to be the corresponding values in the solution vector of the system. Now we have a full correspondence between $G$ and the mass-spring system.
+
+Consider the image of the drawing created by the algorithm we described, denote the drawing $\phi$. We call the vertices of $C$ **extreme vertices** and their images under the drawing **extreme points**. Also note that this is a linear drawing since the edges are realized by vector differences. We call all vertices not in $V(C)$ **internal vertices** of $G$.
+
+**Lemma 1**: For every internal vertex of $G$ and direction $\vec{d}$ there exists a monotone path in the direction of $\vec{d}$ that ends in the extreme vertex of $G$ in that direction.
+
+**Proof**: Consider a vertex $v$ in $V(G) \setminus V(C)$ and some direction $\vec{d}$. Since $v$ is not one of the fixed vertices of the graph the values on the edges (which are vectors) add up to the zero vector. Assume that $v$ is not connected to any edge in the direction of $\vec{d}$, then if we take a vector orthogonal to $\vec{d}$ we have all edges incident with $v$ strictly on one side of $v$, but then all edge vectors cannot add up to zero, which is a contradiction. Perhpas a more convincing argument can be made using the correspondence to the spring-mass system: if no spring is in the direction of $\vec{d}$ then the sum of spring forces acting on $v$ is not zero, then it is not in equilibrium, but we know it is since we solved the sub-laplacian system. This argument applies to all vertices in $V(G) \setminus V(C)$. Since $G$ is connected we eventually reach a point in $V(C)$, but for those points we don't have the restriction on the sum of edge vectors, so this result does not apply to extreme vertices (if it did then we would have a laplacian system and not a sub-laplacian system which our solution does not hold for).
+
+**Corollary**: If $\phi$ is a planar embedding then $C$ is the outer face of the embedding.
+
+**Proof**: Follows immediately from Lemma 1.
+
+Now, consider some internal polygon $P$ in the linear drawing.
+
+**Lemma 2**: Every internal polygon $P$ of $G$ is convex.
+
+**Proof**: First, observe that since we have not yet shown that $\phi$ is an embedding, $P$ can also be non-simple, i.e. have a crossing, so we need to consider two cases:
+
+1. $P$ is not simple and has edges crossing.
+2. $P$ is simple but concave.
+
+We will use Lemma 1 to prove by contradiction that both cases are impossible so we are left with $P$ being convex.
+
+1. Let $P$ be non simple with a crossing. Consider one such crossing. Denote the edges crossing $cd$ and $ab$, and their crossing $p$. Then we can pass a line through $p$ such that on each side of the line we will have one end of each vertex, so we have $b$ and $d$ on one halfplane and $a$ and $c$ on the other, now consider the directions vectors $\vec{d}$ and $\vec{-d}$ such that they are orthogonal to the line through $p$, w.l.o.g let $d$ point outside the halfplane where $a$ and $c$ reside. By lemma 1, we have monotone paths from $a$ to some extreme vertex on that side and from $c$ to the same extreme vertex, and $b, d$ have monotone paths to the extreme vertex in direction $\vec{-d}$ that lie on the other halfplane. Since all extreme vertices belong to a cycle, then they are all connected and for each pair $b, d$ and $a, c$. Identify that this construction is a planar drawing of $K_{4}$ that is also an embdding such that all vertices of $K_{4}$ are on the outer face, but this is a contradiction since we know that $K_{4}$ is not outerplanar, so this case is impossible.
+
+![Faces are convex](images/graph_theory/38_faces_are_convex.svg)
+
+2. In this case we can also draw a line which puts each endpoint of two edges on different halfplanes and follow the same argument as 1, again arriving at a contradiction.
+
+Consider the image of some edge $e$ under $\phi$.
+
+**Lemma 3**: Each internal edge in the drawing divides the plane into two halfspaces such that exactly one polygon in the drawing is (entirely) in each halfspace.
+
+**Proof**: Suppose not, then take an edge $e$ such that two polygons of the drawing of the graph lie entirely on one side of $e$, then we take the two ends of the edge $a, c$ and find a path connecting them to the extreme vertex in the direction where these two polygons do not lie. Now, take two vertices $b$ and $d$ one from each polygon such that there exsits polygonal paths from both $b$ and $d$ to both $a$ and $c$. Again we identify that the resulting subgraph is a subdivision of $K_{4}$ that has all 4 vertices on the outer face, so again we get a contradiction.
+
+Consider some point $x$ in the drawing and let $\text{ply}(x): \mathbb{R}^{2} \to \mathbb{R}$ be the number of polygons in the drawing which contain $x$, such that if $x$ is not contained in any region bounded by a polygon we say that $x$ belongs to the unbounded "polygon" (unbounded face) and define $\text{ply}(x)$ to be $1$ in that case. We claim the following:
+
+**Lemma 4**: Let $x$ be some point in $\mathbb{R}^{2}$ such that $x$ is not in the image of an edge or a vertex in a planar 3-connected graph $G$ under the drawing $\phi$, then $\text{ply}(x)=1$.
+
+**Proof sketch**: If $x$ lies on the outer face then we have $\text{ply}(x)=1$ and we are done. Otherwise, let $\text{ply}(x)=a$ for some $a \in \mathbb{R}$ and consider a path from $x$ to a point on the outer face that does not cross any vertex. To do that, by the JCT we must cross the boundary of some polygons (since we assume that $x$ is not already on the outer face). Since we do not allow crossing vertices, each such crossing must be performed via crossing an edge and by Lemma 3 at the neighborhood of the crossing we leave one face and enter exactly one other face. Let $x'$ be the point along the path in a neighborhood of an edge on the halfplane in the direction of the point of the outer plane (i.e. the direction of the path), then we have $\text{ply}(x')=\text{ply}(x)-1+1=\text{ply}(x)$, so we have that $\text{ply}(x)$ is invariant throughout the path, but we know that eventually we get $\text{ply}(x_{\infty})=1$ because the end of the path is on the outer face, so we have $\text{ply}(x)=1$ everywhere, which completes the proof.
+
+Finally, we show that this planar linear drawing is in fact a convex planar linear embedding of the 3-connected planar graph $G$, which is the original statement of the theorem.
+
+**Proof of Tutte's spring theorem**: It suffices to show that Lemma 4 implies that $\phi$ is a planar embedding, then by Lemma 2 we can say that it is a convex linear planar embedding, which is the statement of Tutte's spring theorem. Suppose it is not a planar embedding, then there exists a crossing and so some point must belong to more than 1 polygon, but this contradicts Lemma 4, so it is a planar embedding. Another way to think of Lemma 4 is as a guarantee that polygons do not overlap except for on shared vertices and shared edges, and even then we can associate each side of the edge ("halfedge") to a single polygon, which guarantees that there are no crossings, which guarantees an embedding.
