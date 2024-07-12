@@ -2,7 +2,7 @@
   "name": "yuvatia",
   "type": "module",
   "version": "0.1.0",
-  "homepage": "https://yuvatia.github.io/",
+  "homepage": "https://yuvatia.io/",
   "private": true,
   "dependencies": {
     "@mdx-js/react": "^3.0.1",
