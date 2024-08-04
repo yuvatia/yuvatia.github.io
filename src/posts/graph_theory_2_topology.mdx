@@ -333,7 +333,7 @@ A **triangulation** is an embedding of a planar graph in which every face is bou
 
 **Theorem**: If a planar graph $G$ is maximal then its embedding is a triangulation.
 
-*Proof*: Assume that $G$ is a maximal planar graph with an embedding that is not a triangulation. A face is bound by a cycle, so if the embedding is not a triangulation at least one face has to be bound by at least 4 (images under an embedding of) edges. Consider such simple $n$-gonal face in $\mathbb{R}^{2}$, with $n \gt 3$. For every simple polygon in the plane, a triangulation exists (this is a geometric result which we prove in a different entry discussing the art gallery problem) by means of internal diagonals, which when viewed as a graph are edges that connect two vertices on the boundary of the polygon, but since the embedding is maximal we shouldn't be able to add such edges, which means that everty face is a triangle, which means that the embedding of a maximal planar graph is a triangulation.
+**Proof**: Assume that $G$ is a maximal planar graph with an embedding that is not a triangulation. A face is bound by a cycle, so if the embedding is not a triangulation at least one face has to be bound by at least 4 (images under an embedding of) edges. Consider such simple $n$-gonal face in $\mathbb{R}^{2}$, with $n \gt 3$. For every simple polygon in the plane, a triangulation exists (this is a geometric result which we prove in a different entry discussing the art gallery problem) by means of internal diagonals, which when viewed as a graph are edges that connect two vertices on the boundary of the polygon, but since the embedding is maximal we shouldn't be able to add such edges, which means that everty face is a triangle, which means that the embedding of a maximal planar graph is a triangulation.
 
 If an embedding of a graph is a triangulation, then every face consists of 3 edges, but since every edge is shared by two faces (which can also be the outer face), we have $\frac{2|E|}{3}$ faces for such graph, so a maximal planar graph has $\frac{2m}{3}$ faces, where $m$ is the number of edges of the graph. Now, by the Euler characteristic, we have:
 
@@ -380,7 +380,55 @@ We can also talk about the connectivity of a maximal planar graph $G$ with at le
 
 **Corollary**: If $G$ is a planar graph, then it must have at least 4 vertices with degree strictly less than 6.
 
-**Proof**: By the handshake lemma we have that the sum of degrees is $2m$. We also have $m \leq 3n-6$, which means that the sum of degrees cannot be greater than $6n-12$. By the last theorem, we have $G$ is 3-connected so by a previous result we have $\delta G \geq 3$, so the lower bound on the sum of vertices is $3n$. If $G$ has at most 3 vertices with degree 5 or less, then we have a lower bound on the sum of degrees of $6(n-3)+3 \delta 6 \geq 6(n-3) + 3 \cdot 3$, which is $6n-9$, which is greater than the upper bound of $6n-12$, which is a contradiction.
+**Proof**: By the handshake lemma we have that the sum of degrees is $2m$. We also have $m \leq 3n-6$, which means that the sum of degrees cannot be greater than $6n-12$. By the last theorem, we have $G$ is 3-connected so by a previous result we have $\delta G \geq 3$, so the lower bound on the sum of vertices is $3n$. If $G$ has at most 3 vertices with degree 5 or less, then we have a lower bound on the sum of degrees of $6(n-3)+3 \delta G \geq 6(n-3) + 3 \cdot 3$, which is $6n-9$, which is greater than the upper bound of $6n-12$, which is a contradiction.
+
+## Maximal Outerplanar Graphs
+
+Similarly, we define a **maximal outerplanar graph** as an outerplanar graph where any edge added to the graph will make it not outerplanar.
+
+**Theorem**: A maximal outerplanar graph has exactly $2n-3$ edges.
+
+**Proof**: Recall Euler's characteristic for connected planar graphs
+
+$$
+n - m + f = 2 \Rightarrow m = n + f - 2 \Rightarrow 2m = 2n + 2f - 4
+$$
+
+Our argument for the planar embedding of a maximal planar graphs being a triangulation applies to maximal outerplanar graphs as well, so we have that every internal face is bound by a 3-cycle, this means that when counting the sum of degrees on the vertices we have $3(f-1)$ from all the internal edges, and then we have the contribution of the outer face which is a cycle consisting of $n$ vertices (since the graph is outerplanar), which gives a sum of degrees of $3(f-1)+n$, which by the handshake lemma is $2m$, so we have
+
+$$
+2n + 2f - 4 = 3f - 3 + n \Rightarrow f = n - 1
+$$
+
+And finally
+
+$$
+m = n + f - 2 = n + n - 1 - 2 = 2n - 3
+$$
+
+Which completes the proof.
+
+**Corollary**: If $G$ is outerplanar, then it has at least 2 vertices with degree 2 or less.
+
+**Proof**: Observe that if $G$ is outerplanar then it must be connected. If $G$ is not maximal, then we can take the maximal outerplanar of the same order and if the corollary is true for that graph, then clearly it is true for any outerplanar graph of the same order since the vertices with degree 2 or less  are also vertices of degree 2 or less (2 or 1 since $G$ is connected) in those graph, so for the rest of the proof we assume that $G$ is maximal outerplanar.
+
+$$
+2m = 4n - 6
+$$
+
+Assume $G$ has less than 2 vertices with degree 2 or less, so it must have at most 1 vertex with degree 2,
+
+$$
+3n
+$$
+
+TODO
+
+**Theorem**: Let $G$ be outerplanar, then $G$ is 3-colorable.
+
+**Proof**: We prove the theorem of a maximal outerplanar graph, then we can apply the result for any outerplanar graph by considering the maximal outerplanar graph of the same order (i.e. with the same number of vertices) and applying its coloring to the original outerplanar graph. We follow a proof by induction, with $$ being maximal outerplanar.
+
+If $n \leq 3$, then the result is trivial. Next, for some $n$, we know by a previous result that a maximal outerplanar graph has a vertex with degree 2 or less, denote this vertex $v$, and consider $G-v$. By the induction hypothesis we have that $G-v$ is 3-colorable. Since $v$ has degree at most 2, it is connected to at most 2 vertices in $G$, so we can always assign a color not assigned to any of its neighbors anad add $v$ to the graph to produce a proper 3-coloring of $G$.
 
 # Planar Graphs
 
