@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, Route, RouterProvider, createHashRouter as createRouter, createRoutesFromElements, useLoaderData, useParams } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { isMobile } from 'react-device-detect';
@@ -111,6 +111,43 @@ const TocList = ({ items, activeId }) => (
 const Post = ({ post }) => {
     const { toc } = post;
     const [activeId, setActiveId] = useState();
+
+
+    const initialized = useRef(false)
+
+    useEffect(() => {
+        if (!initialized.current) {
+            initialized.current = true
+
+            // Add callout type to callout title
+            let index = 0;
+            document.querySelectorAll('[data-callout="true"]').forEach(callout => {
+                ++index;
+
+                const type = callout.getAttribute('data-callout-type');
+                const titleElement = callout.querySelector('[data-callout-title="true"]');
+
+                if (titleElement) {
+                    const typeId = `${type}-link-${index}`; // Unique ID for each type link
+                    const typeLink = `
+                    <div class="callout-type">
+                            ${type} ${index}
+                    </div>`;
+                    
+                    // Ugly hack for when title is just the type with first letter capitalized,
+                    // which is a mistake in the markdown to html generator,
+                    // in this case we just hide the title element
+                    if (titleElement.textContent.trim().toLowerCase() === type.toLowerCase()) {
+                        titleElement.style.display = 'none';
+                    }
+
+                    titleElement.insertAdjacentHTML('beforebegin', typeLink);
+                    // Add an id to the title element for referencing
+                    titleElement.setAttribute('id', typeId);
+                }
+            });
+        }
+    }, []);
 
     useEffect(() => {
         const observer = new IntersectionObserver(

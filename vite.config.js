@@ -5,10 +5,12 @@ import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import remarkFrontmatter from 'remark-frontmatter';
+import remarkCallout from '@r4ai/remark-callout';
 
 import withToc from "@stefanprobst/rehype-extract-toc"
 import withTocExport from "@stefanprobst/rehype-extract-toc/mdx"
 import withSlugs from "rehype-slugs"
+import remarkGfm from 'remark-gfm';
 
 
 export default defineConfig(() => {
@@ -22,7 +24,7 @@ export default defineConfig(() => {
             react(),
             mdx({
                 include: /\.mdx?$/, // Include both .md and .mdx files
-                remarkPlugins: [remarkMath, remarkFrontmatter],
+                remarkPlugins: [remarkMath, remarkFrontmatter, remarkCallout, remarkGfm],
                 rehypePlugins: [rehypeKatex, rehypeHighlight, withSlugs, withToc, withTocExport],
             }),
         ],
