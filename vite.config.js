@@ -12,6 +12,10 @@ import withTocExport from "@stefanprobst/rehype-extract-toc/mdx"
 import withSlugs from "rehype-slugs"
 import remarkGfm from 'remark-gfm';
 
+// plantuml
+import { remarkKroki } from 'remark-kroki';
+import rehypeRaw from 'rehype-raw';
+
 
 export default defineConfig(() => {
     return {
@@ -24,8 +28,37 @@ export default defineConfig(() => {
             react(),
             mdx({
                 include: /\.mdx?$/, // Include both .md and .mdx files
-                remarkPlugins: [remarkMath, remarkFrontmatter, remarkCallout, remarkGfm],
-                rehypePlugins: [rehypeKatex, rehypeHighlight, withSlugs, withToc, withTocExport],
+                remarkPlugins: [
+                    remarkMath, 
+                    remarkFrontmatter, 
+                    remarkCallout, 
+                    remarkGfm,
+                    [remarkKroki, {
+                        server: 'https://kroki.io',
+                        // server: 'http://localhost:8000',
+                        alias: ['plantuml'],
+                        target: 'mdx3',
+                        output: 'inline-svg'
+                    }] 
+                ],
+                rehypePlugins: [
+                    rehypeKatex, 
+                    rehypeHighlight, 
+                    withSlugs, 
+                    withToc, 
+                    withTocExport,
+                    [rehypeRaw,
+                        {
+                            passThrough: [
+                                'mdxFlowExpression',
+                                'mdxJsxFlowElement',
+                                'mdxJsxTextElement',
+                                'mdxTextExpression',
+                                'mdxjsEsm'
+                            ]
+                        }
+                    ]
+                ],
             }),
         ],
         server: {
