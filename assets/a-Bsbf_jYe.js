@@ -1,12 +1,12 @@
-import{j as n}from"./index-B6dAcaTv.js";const r=[{depth:1,value:"Taylor Series",id:"29695"},{depth:1,value:"Bernstein Polynomial",id:"b767d"},{depth:1,value:"Numerical analysis introduction",id:"da2a2"}],a={title:"Numerical Analysis, Part 1: Overview and Definitions",date:"2024-08-20",summary:"",wip:!0};function t(i){const e={h1:"h1",p:"p",...i.components};return n.jsxs(n.Fragment,{children:[n.jsx(e.p,{children:"TODO introduction"}),`
-`,n.jsx(e.h1,{id:"29695",children:"Taylor Series"}),`
+import{j as n}from"./index-CPCZmjww.js";const r=[{depth:1,value:"Taylor Series",id:"343ee"},{depth:1,value:"Bernstein Polynomial",id:"37911"},{depth:1,value:"Numerical analysis introduction",id:"21a40"}],a={title:"Numerical Analysis, Part 1: Overview and Definitions",date:"2024-08-20",summary:"",wip:!0};function t(i){const e={h1:"h1",p:"p",...i.components};return n.jsxs(n.Fragment,{children:[n.jsx(e.p,{children:"TODO introduction"}),`
+`,n.jsx(e.h1,{id:"343ee",children:"Taylor Series"}),`
 `,n.jsx(e.p,{children:`taylor polynomial, taylor's theorem
 Taylor series
 convergence of taylor series, holomoprhic functions
 error, remainder
 mclauren
 higher dimensions`}),`
-`,n.jsx(e.h1,{id:"b767d",children:"Bernstein Polynomial"}),`
+`,n.jsx(e.h1,{id:"37911",children:"Bernstein Polynomial"}),`
 `,n.jsx(e.p,{children:`binomial distribution probability mass function (PMF), then what happens if we don't restrict x to 0, 1
 Bernstein basis polynomials of degree n, bernstein polynomial definition
 prove that they form a basis of the vector space pi_n which is the polynomials of degree n, this can be done by expnading the expression then expressing in terms of monomial basis and showing that the matrix is diagonal so invertible so linearly indepdent so basis because it has rank n,
@@ -14,7 +14,7 @@ addition: inverse binomial transformation from statistics to show transformation
 some properties
 stone-weierstrass approximation show probabalistic and analytic proof that as n tends to infinity we have uniform convergence to the function approximated as a bernstein polynomial
 generalization to higher dimensions`}),`
-`,n.jsx(e.h1,{id:"da2a2",children:"Numerical analysis introduction"}),`
+`,n.jsx(e.h1,{id:"21a40",children:"Numerical analysis introduction"}),`
 `,n.jsx(e.p,{children:`analytical vs numerical
 accuracy, precision
 statistical error, systematic error
