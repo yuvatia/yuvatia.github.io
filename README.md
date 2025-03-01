@@ -9,3 +9,7 @@ FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memor
 
 A:
 `export NODE_OPTIONS="--max-old-space-size=8192"`
+
+Q: Why does my domain show "Page not found" error from github?
+
+A: Make sure `CNAME` exists in `gh-pages` branch
